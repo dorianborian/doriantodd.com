@@ -1,0 +1,73 @@
+.sketch-viewport { cursor: grab; touch-action: none; }
+  .sketch-viewport.is-panning { cursor: grabbing; }
+  .sketch-viewport:not([data-tool='select']) { cursor: crosshair; }
+  .sketch-viewport:not([data-tool='select']) .sk-entity { pointer-events: none; }
+  .sketch { position: absolute; inset: 0; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; }
+  .sketch text { font-family: var(--font); }
+  .sk-title { font-size: 84px; font-weight: 600; letter-spacing: 0.03em; fill: none; stroke: #c9d0da; stroke-width: 1.4; }
+  .sk-note { font-size: 19px; fill: var(--text-2); }
+  .sk-construction { fill: none; stroke: #596070; stroke-width: 1.2; stroke-dasharray: 9 7; }
+  .sk-line { fill: rgba(74, 155, 255, 0.025); stroke: #c9d0da; stroke-width: 2; transition: stroke 0.12s, fill 0.12s; }
+  .sk-pt { fill: #c9d0da; }
+  .sk-caption { font: 600 12px var(--mono); letter-spacing: 0.16em; fill: var(--text-3); }
+  .sk-value { font-size: 30px; font-weight: 600; fill: var(--text); }
+  .sk-icon { fill: none; stroke: #dfe3e8; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .sk-label { font-size: 16px; font-weight: 600; fill: var(--text); }
+  .sk-handle { font: 13px var(--mono); fill: var(--text-3); }
+  .sk-hit { fill: transparent; }
+  .sk-dim { color: #7f8da3; }
+  .sk-dim line { stroke: currentColor; stroke-width: 1.1; }
+  .sk-dim-text { font: 500 14px var(--mono); fill: #aab6c8; }
+  .sk-cons rect { fill: #22252a; stroke: #474c56; }
+  .sk-cons text { font: 600 12px var(--mono); fill: #9aa3b2; }
+  .sk-entity { cursor: pointer; outline: none; }
+  .sk-entity:hover .sk-line, .sk-entity.is-preselect .sk-line, .sk-entity:focus-visible .sk-line { stroke: var(--preselect); fill: rgba(242, 184, 75, 0.07); }
+  .sk-entity:hover .sk-icon, .sk-entity.is-preselect .sk-icon { stroke: var(--preselect); }
+  .sk-entity:hover .sk-pt, .sk-entity.is-preselect .sk-pt { fill: var(--preselect); }
+  .sk-entity.is-copied .sk-line { stroke: var(--accent); fill: rgba(74, 155, 255, 0.12); }
+  [data-hide] { display: none; }
+
+  /* visitor geometry, in Onshape's active-sketch blue */
+  .u-geom { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .u-geom.is-construction { stroke-dasharray: 8 6; stroke-width: 1.4; opacity: 0.9; }
+  .u-geom.is-selected { stroke: #9cc8ff; stroke-width: 3; }
+  .u-pt { fill: var(--accent); }
+  .u-hit { fill: none; stroke: transparent; stroke-width: 14; vector-effect: non-scaling-stroke; cursor: pointer; }
+  .u-hit:hover + .u-geom { stroke: var(--preselect); }
+  .u-dim { font: 500 13px var(--mono); fill: #9cc8ff; }
+  .u-infer rect { fill: #1b2230; stroke: var(--accent); }
+  .u-infer text { font: 600 11px var(--mono); fill: #9cc8ff; }
+  .u-snap { fill: none; stroke: var(--preselect); stroke-width: 2; vector-effect: non-scaling-stroke; }
+
+  .sketch.is-drawing .sk-draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: sk-draw 0.8s ease forwards; }
+  @keyframes sk-draw { to { stroke-dashoffset: 0; } }
+
+  .sketch-status { position: absolute; left: 14px; bottom: 14px; display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-3); pointer-events: none; }
+  .sketch-status .ok-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+  .sketch-status.is-under .ok-dot { background: var(--accent); }
+  .sketch-readout { position: absolute; right: 14px; bottom: 14px; padding: 4px 8px; font-size: 11px; color: var(--text-2); background: rgba(22, 23, 26, 0.85); border: 1px solid var(--line); border-radius: 3px; pointer-events: none; }
+  .tree-btn { width: 100%; background: none; border: 0; text-align: left; font: inherit; }
+  .sketch-help { padding: 6px 12px 12px 14px; font-size: 12px; line-height: 1.5; color: var(--text-3); list-style: none; }
+  .tool[disabled] { opacity: 0.4; pointer-events: none; }
+
+  .fdialog { margin: 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-2); overflow: hidden; }
+  .fdialog-head { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 10px; background: var(--raised); border-bottom: 1px solid var(--line); color: var(--text-2); }
+  .fdialog-name { font-weight: 600; color: var(--text); margin-right: auto; }
+  .fdialog-icon { width: 28px; height: 26px; display: grid; place-items: center; border-radius: 3px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; }
+  .fdialog-icon.ok { color: var(--ok); }
+  .fdialog-icon.cancel { color: var(--x); }
+  .fdialog-icon:hover { background: var(--hover); }
+  .fdialog-body { display: grid; gap: 14px; padding: 14px 12px; }
+  .fdialog-field { display: grid; gap: 6px; margin: 0; padding: 0; border: 0; min-width: 0; }
+  .fdialog-field > span, .fdialog-field legend { font-size: 12px; color: var(--text-2); padding: 0; margin-bottom: 6px; }
+  .fdialog-field em { font-style: normal; color: var(--text-3); }
+  .fdialog-field input, .fdialog-field textarea { width: 100%; font: 14px var(--font); color: var(--text); background: var(--app); border: 1px solid var(--line); border-radius: 3px; padding: 7px 9px; resize: vertical; }
+  .fdialog-field input:focus, .fdialog-field textarea:focus { outline: 0; border-color: var(--accent); }
+  .fdialog-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .fdialog-seg label { position: relative; }
+  .fdialog-seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; margin: 0; }
+  .fdialog-seg span { display: block; padding: 5px 10px; font-size: 12px; color: var(--text-2); border: 1px solid var(--line); border-radius: 999px; background: var(--panel); }
+  .fdialog-seg input:checked + span { background: var(--accent-soft); color: var(--accent); border-color: rgba(74, 155, 255, 0.5); }
+  .fdialog-seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .fdialog-note { margin: 0; font-size: 12px; color: var(--text-3); }
+  @media (max-width: 860px) { .sketch-viewport { position: relative; height: min(72vh, 78vw); } }

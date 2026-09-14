@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" font-family="Segoe UI, Inter, system-ui, sans-serif">
+  <defs>
+    <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#26282d" stroke-width="1"/></pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1 10 5 0 9z" fill="#8a94a6"/></marker>
+  </defs>
+  <rect width="1000" height="400" fill="#1b1c20"/>
+  <rect width="1000" height="400" fill="url(#g)"/>
+
+  <g font-size="11" font-family="Consolas, ui-monospace, monospace" fill="#6f7580" letter-spacing="1.5">
+    <text x="40" y="40">SOURCE</text><text x="300" y="40">REGULATION</text><text x="580" y="40">LOADS</text>
+  </g>
+
+  <!-- rail labels -->
+  <g font-family="Consolas, ui-monospace, monospace" font-size="12" font-weight="600">
+    <text x="40" y="78" fill="#4a9bff">LOGIC RAIL</text>
+    <text x="40" y="198" fill="#f2b84b">DRIVE RAIL</text>
+    <text x="40" y="318" fill="#57ab5a">SERVO RAIL</text>
+  </g>
+
+  <g fill="#202125" stroke-width="1.6">
+    <!-- logic -->
+    <rect x="40" y="90" width="200" height="60" rx="6" stroke="#4a9bff"/>
+    <rect x="300" y="90" width="220" height="60" rx="6" stroke="#4a9bff"/>
+    <rect x="580" y="96" width="120" height="54" rx="5" stroke="#3b3e45"/>
+    <rect x="710" y="96" width="120" height="54" rx="5" stroke="#3b3e45"/>
+    <rect x="840" y="96" width="120" height="54" rx="5" stroke="#3b3e45"/>
+    <!-- drive -->
+    <rect x="40" y="210" width="200" height="60" rx="6" stroke="#f2b84b"/>
+    <rect x="300" y="210" width="220" height="60" rx="6" stroke="#f2b84b"/>
+    <rect x="580" y="210" width="380" height="60" rx="6" stroke="#3b3e45"/>
+    <!-- servo -->
+    <rect x="300" y="330" width="220" height="50" rx="6" stroke="#57ab5a"/>
+    <rect x="580" y="330" width="380" height="50" rx="6" stroke="#3b3e45"/>
+  </g>
+
+  <g fill="#e4e6ea" font-size="15" font-weight="600">
+    <text x="58" y="117">2S LiPo</text>
+    <text x="318" y="117">Boost converter</text>
+    <text x="594" y="121">Jetson</text>
+    <text x="724" y="121">ODIN 1</text>
+    <text x="854" y="121">The fridge</text>
+    <text x="58" y="237">4S LiPo</text>
+    <text x="318" y="237">AM32 dual ESC</text>
+    <text x="598" y="237">2x Ultra Mk2 brushless gearmotors</text>
+    <text x="318" y="360">Buck converter</text>
+    <text x="598" y="360">Door servo</text>
+  </g>
+  <g fill="#9aa3b0" font-size="12.5">
+    <text x="58" y="137">voltage sags as it drains</text>
+    <text x="318" y="137">constant 12 V, any charge</text>
+    <text x="594" y="139">Orin Nano</text>
+    <text x="724" y="139">depth sensor</text>
+    <text x="854" y="139">12 V DC</text>
+    <text x="58" y="257">straight into the ESC</text>
+    <text x="318" y="257">nothing else on this rail</text>
+    <text x="598" y="257">tank treads, 9 in track width</text>
+    <text x="436" y="360" fill="#9aa3b0">about 6.5 V</text>
+  </g>
+
+  <g stroke="#8a94a6" stroke-width="1.6" fill="none">
+    <path d="M240 120 H296" marker-end="url(#a)"/>
+    <path d="M520 120 H550 V80 H900"/>
+    <path d="M640 80 V92" marker-end="url(#a)"/>
+    <path d="M770 80 V92" marker-end="url(#a)"/>
+    <path d="M900 80 V92" marker-end="url(#a)"/>
+    <path d="M240 240 H296" marker-end="url(#a)"/>
+    <path d="M520 240 H576" marker-end="url(#a)"/>
+    <path d="M520 355 H576" marker-end="url(#a)"/>
+  </g>
+</svg>

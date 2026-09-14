@@ -1,0 +1,76 @@
+---
+import { Image } from 'astro:assets';
+import Shell from '../../layouts/Shell.astro';
+import Icon from '../../components/Icon.astro';
+import { getProjects } from '../../lib/site';
+
+const projects = await getProjects();
+const tags = [...new Set(projects.flatMap((p) => p.entry.data.tags))].sort();
+---
+<Shell title="Projects" description="Every project by Dorian Todd: robots, tools, and open source hardware." leftTitle="Filter">
+  <Fragment slot="toolbar">
+    <a class="tool" href="/"><Icon name="assembly" />3D view</a>
+    <span class="tool-sep"></span>
+    <span class="tool mono" style="cursor:default">{projects.length} projects</span>
+  </Fragment>
+
+  <Fragment slot="left">
+    <label class="filter"><Icon name="search" size={13} /><input type="search" placeholder="Filter by name or tag" data-bom-filter aria-label="Filter projects" /></label>
+    {tags.length > 0 && (
+      <ul class="tree">
+        <li class="tree-group">Tags</li>
+        {tags.map((t) => <li><button class="tree-item" style="--depth:0;width:100%;background:none;border:0;text-align:left" data-tag={t}><Icon name="cube" size={14} /><span class="label">{t}</span></button></li>)}
+      </ul>
+    )}
+  </Fragment>
+
+  <div class="main-scroll">
+    <table class="bom">
+      <thead>
+        <tr><th class="bom-thumb"></th><th>Project</th><th class="hide-sm">No.</th><th class="hide-sm">Year</th><th class="hide-sm">Tags</th><th class="hide-sm">Status</th></tr>
+      </thead>
+      <tbody>
+        {projects.map((p) => (
+          <tr data-href={p.url} data-search={`${p.entry.data.title} ${p.entry.data.tags.join(' ')} ${p.entry.data.summary ?? ''}`.toLowerCase()}>
+            <td class="bom-thumb">{p.entry.data.cover && <Image src={p.entry.data.cover} alt="" width={152} height={96} fit="cover" />}</td>
+            <td>
+              <a class="bom-name" href={p.url}>{p.entry.data.title}</a>
+              {p.entry.data.summary && <div class="bom-summary">{p.entry.data.summary}</div>}
+            </td>
+            <td class="mono hide-sm">{p.no}</td>
+            <td class="mono hide-sm">{p.year ?? ''}</td>
+            <td class="hide-sm"><div class="chips">{p.entry.data.tags.map((t) => <span class="chip">{t}</span>)}</div></td>
+            <td class="hide-sm"><span class="status" data-status={p.entry.data.status}>{p.entry.data.status.replace('-', ' ')}</span></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <Fragment slot="right">
+    <div class="props">
+      <div>
+        <h1 class="prop-title">Projects</h1>
+        <p class="prop-sub">Robots, tools, and open source hardware. Select a row to open it.</p>
+      </div>
+      <a class="btn" href="/"><Icon name="assembly" />View in 3D</a>
+    </div>
+  </Fragment>
+</Shell>
+
+<script>
+  document.querySelectorAll<HTMLTableRowElement>('tr[data-href]').forEach((tr) =>
+    tr.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('a')) location.href = tr.dataset.href!;
+    }),
+  );
+  const input = document.querySelector<HTMLInputElement>('[data-bom-filter]')!;
+  const apply = () => {
+    const q = input.value.trim().toLowerCase();
+    document.querySelectorAll<HTMLElement>('tr[data-search]').forEach((tr) => (tr.hidden = !!q && !tr.dataset.search!.includes(q)));
+  };
+  input.addEventListener('input', apply);
+  document.querySelectorAll<HTMLElement>('[data-tag]').forEach((b) =>
+    b.addEventListener('click', () => { input.value = input.value === b.dataset.tag!.toLowerCase() ? '' : b.dataset.tag!.toLowerCase(); apply(); }),
+  );
+</script>

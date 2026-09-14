@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 360" width="1000" height="360" font-family="Segoe UI, Inter, system-ui, sans-serif">
+  <defs>
+    <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#26282d" stroke-width="1"/></pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1 10 5 0 9z" fill="#8a94a6"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1 10 5 0 9z" fill="#57ab5a"/></marker>
+  </defs>
+  <rect width="1000" height="360" fill="#1b1c20"/>
+  <rect width="1000" height="360" fill="url(#g)"/>
+  
+
+  <g stroke-width="1.6">
+    <rect x="40" y="70" width="160" height="70" rx="35" fill="#1c2a1e" stroke="#57ab5a"/>
+    <rect x="240" y="70" width="160" height="70" rx="35" fill="#202125" stroke="#4a9bff"/>
+    <rect x="440" y="70" width="160" height="70" rx="35" fill="#202125" stroke="#4a9bff"/>
+    <rect x="640" y="70" width="160" height="70" rx="35" fill="#202125" stroke="#f2b84b"/>
+    <rect x="840" y="70" width="120" height="70" rx="35" fill="#2a1d1d" stroke="#e5534b"/>
+  </g>
+  <g fill="#e4e6ea" font-size="15" font-weight="600" text-anchor="middle">
+    <text x="120" y="111">Tracking</text><text x="320" y="111">Coasting</text><text x="520" y="111">Searching</text><text x="720" y="111">Recovering</text><text x="900" y="111">Lost</text>
+  </g>
+
+  <g stroke="#8a94a6" stroke-width="1.6" fill="none" marker-end="url(#a)">
+    <path d="M200 105 H236"/><path d="M400 105 H436"/><path d="M600 105 H636"/><path d="M800 105 H836"/>
+  </g>
+  <g fill="#9aa3b0" font-size="12" text-anchor="middle">
+    <text x="218" y="162">detection</text><text x="218" y="178">drops out</text>
+    <text x="418" y="162">about half</text><text x="418" y="178">a second</text>
+    <text x="618" y="162">no reacquire</text>
+    <text x="818" y="162">gives up</text>
+  </g>
+  <path d="M520 68 C520 40 120 40 120 66" stroke="#57ab5a" stroke-width="1.6" fill="none" stroke-dasharray="6 5" marker-end="url(#b)"/>
+  <text x="320" y="36" fill="#57ab5a" font-size="12" text-anchor="middle">person seen again: back to tracking</text>
+
+  <g font-size="12.5" fill="#9aa3b0">
+    <text x="40" y="226" fill="#e4e6ea" font-weight="600" font-size="13">While coasting</text>
+    <text x="40" y="246">the filter keeps moving the estimate</text>
+    <text x="40" y="264">on its last velocity, with decaying</text>
+    <text x="40" y="282">confidence.</text>
+  </g>
+
+  <rect x="440" y="200" width="250" height="130" rx="6" fill="#202125" stroke="#3b3e45" stroke-width="1.5"/>
+  <rect x="710" y="200" width="250" height="130" rx="6" fill="#202125" stroke="#3b3e45" stroke-width="1.5"/>
+  <text x="456" y="226" fill="#4a9bff" font-size="11" font-family="Consolas, ui-monospace, monospace" letter-spacing="1.2">FOLLOW MODE</text>
+  <text x="726" y="226" fill="#f2b84b" font-size="11" font-family="Consolas, ui-monospace, monospace" letter-spacing="1.2">FLEE MODE</text>
+  <g font-size="13" fill="#d3d7dd">
+    <text x="456" y="252">Stop, turn toward the last</text>
+    <text x="456" y="272">known bearing, and scan.</text>
+    <text x="726" y="252">Keep going on the last heading</text>
+    <text x="726" y="272">while scanning. Never stop and</text>
+    <text x="726" y="292">turn around to look.</text>
+  </g>
+  <text x="726" y="316" fill="#6f7580" font-size="12">Backups: short, slow, costmap checked.</text>
+  <text x="40" y="340" fill="#6f7580" font-size="12">Ages and confidence use monotonic local time; header.stamp is only used for the transform lookup.</text>
+</svg>

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 520" width="1160" height="520" font-family="Segoe UI, Inter, system-ui, sans-serif">
+  <defs>
+    <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#26282d" stroke-width="1"/></pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1 10 5 0 9z" fill="#8a94a6"/></marker>
+  </defs>
+  <rect width="1160" height="520" fill="#1b1c20"/>
+  <rect width="1160" height="520" fill="url(#g)"/>
+
+  <g font-size="11" font-family="Consolas, ui-monospace, monospace" fill="#6f7580" letter-spacing="1.5">
+    <text x="20" y="36">SENSING</text><text x="250" y="36">TRACKING</text><text x="480" y="36">TARGET</text><text x="710" y="36">BEHAVIOR</text><text x="940" y="36">DRIVE</text>
+  </g>
+
+  <g fill="#202125" stroke="#3b3e45" stroke-width="1.5">
+    <rect x="20" y="54" width="200" height="72" rx="6"/>
+    <rect x="20" y="184" width="200" height="72" rx="6"/>
+    <rect x="250" y="54" width="200" height="72" rx="6"/>
+    <rect x="250" y="184" width="200" height="72" rx="6"/>
+    <rect x="480" y="119" width="200" height="72" rx="6" stroke="#4a9bff"/>
+    <rect x="480" y="249" width="200" height="72" rx="6"/>
+    <rect x="710" y="54" width="200" height="72" rx="6"/>
+    <rect x="710" y="184" width="200" height="72" rx="6"/>
+    <rect x="710" y="314" width="200" height="72" rx="6"/>
+    <rect x="940" y="54" width="200" height="72" rx="6"/>
+    <rect x="940" y="184" width="200" height="72" rx="6"/>
+    <rect x="940" y="314" width="200" height="72" rx="6" stroke="#f2b84b"/>
+    <rect x="940" y="424" width="200" height="72" rx="6"/>
+  </g>
+
+  <g fill="#e4e6ea" font-size="14.5" font-weight="600">
+    <text x="36" y="82">ODIN 1, front</text>
+    <text x="36" y="212">Rear webcam</text>
+    <text x="266" y="82">Front tracker</text>
+    <text x="266" y="212">Rear tracker</text>
+    <text x="496" y="147">Target selector</text>
+    <text x="496" y="277">Person estimator</text>
+    <text x="726" y="82">Follow</text>
+    <text x="726" y="212">Flee</text>
+    <text x="726" y="342">Steam Deck + web UI</text>
+    <text x="956" y="82">Drive mux</text>
+    <text x="956" y="212">ROS safety watchdog</text>
+    <text x="956" y="342">ESP32-S3</text>
+    <text x="956" y="452">AM32 ESC, 2 motors</text>
+  </g>
+  <g fill="#9aa3b0" font-size="12.5">
+    <text x="36" y="104">depth, RGB, IMU, SLAM</text>
+    <text x="36" y="234">RGB only, no depth</text>
+    <text x="266" y="104">YOLO11n, TensorRT FP16</text>
+    <text x="266" y="234">distance from box height</text>
+    <text x="496" y="169">one set of topics for both</text>
+    <text x="496" y="299">alpha-beta filter, odom frame</text>
+    <text x="726" y="104">front camera, Nav2 goal</text>
+    <text x="726" y="234">rear camera, PID</text>
+    <text x="726" y="364">gamepad over WebSocket</text>
+    <text x="956" y="104">manual, semi, or auto</text>
+    <text x="956" y="234">in addition to hardware</text>
+    <text x="956" y="364">500 ms hardware watchdog</text>
+    <text x="956" y="474">door servo via PCA9685</text>
+  </g>
+
+  <g stroke="#8a94a6" stroke-width="1.6" fill="none">
+    <path d="M220 90 H246" marker-end="url(#a)"/>
+    <path d="M220 220 H246" marker-end="url(#a)"/>
+    <path d="M450 90 H465 V145 H476" marker-end="url(#a)"/>
+    <path d="M450 220 H465 V165 H476" marker-end="url(#a)"/>
+    <path d="M580 191 V245" marker-end="url(#a)"/>
+    <path d="M680 285 H695 V90 H706" marker-end="url(#a)"/>
+    <path d="M695 220 H706" marker-end="url(#a)"/>
+    <path d="M910 90 H936" marker-end="url(#a)"/>
+    <path d="M910 220 H922 V100 H936" marker-end="url(#a)"/>
+    <path d="M910 350 H928 V110 H936" marker-end="url(#a)"/>
+    <path d="M1040 126 V180" marker-end="url(#a)"/>
+    <path d="M1040 256 V310" marker-end="url(#a)"/>
+    <path d="M1040 386 V420" marker-end="url(#a)"/>
+  </g>
+  <g fill="#6f7580" font-size="12">
+    <text x="20" y="300">Both trackers publish the same topic</text>
+    <text x="20" y="318">names the ArUco nodes used, so</text>
+    <text x="20" y="336">nothing downstream had to change.</text>
+  </g>
+</svg>

@@ -1,0 +1,656 @@
+{
+  "origin": "https://www.doriantodd.com",
+  "crawledAt": "2026-09-14T00:35:29.259Z",
+  "pages": [
+    {
+      "path": "/",
+      "file": "src/content/pages/home/index.md",
+      "title": "Newest Video",
+      "images": [
+        {
+          "file": "src/content/pages/home/img-e22ba6fb.png",
+          "bytes": 105410
+        },
+        {
+          "file": "src/content/pages/home/img-9f37be36.png",
+          "bytes": 1193496
+        }
+      ],
+      "words": 115
+    },
+    {
+      "path": "/about",
+      "file": "src/content/pages/about/index.md",
+      "title": "About",
+      "images": [
+        {
+          "file": "src/content/pages/about/img-c88092c5.png",
+          "bytes": 105534
+        }
+      ],
+      "words": 119
+    },
+    {
+      "path": "/sesame",
+      "file": "src/content/projects/sesame/index.md",
+      "title": "Sesame Robot Project",
+      "images": [
+        {
+          "file": "src/content/projects/sesame/img-51e64dea.png",
+          "bytes": 522897
+        },
+        {
+          "file": "src/content/projects/sesame/img-8650605f.gif",
+          "bytes": 4311462
+        },
+        {
+          "file": "src/content/projects/sesame/img-1edd9fb6.png",
+          "bytes": 564462
+        },
+        {
+          "file": "src/content/projects/sesame/img-d00f71c0.png",
+          "bytes": 941295
+        },
+        {
+          "file": "src/content/projects/sesame/img-f99b264c.png",
+          "bytes": 133402
+        },
+        {
+          "file": "src/content/projects/sesame/img-b2698904.gif",
+          "bytes": 7463169
+        },
+        {
+          "file": "src/content/projects/sesame/img-ad07ff84.png",
+          "bytes": 890081
+        }
+      ],
+      "words": 1344
+    },
+    {
+      "path": "/sesame/kit",
+      "file": "src/content/pages/sesame-kit/index.md",
+      "title": "Sesame Robot Kit",
+      "images": [],
+      "words": 54
+    },
+    {
+      "path": "/FCE",
+      "file": "src/content/projects/fce/index.md",
+      "title": "Full Contact Engineering",
+      "images": [
+        {
+          "file": "src/content/projects/fce/img-d0ccbaf5.jpg",
+          "bytes": 334753
+        },
+        {
+          "file": "src/content/projects/fce/img-48b0f927.png",
+          "bytes": 2362186
+        },
+        {
+          "file": "src/content/projects/fce/img-176e065e.png",
+          "bytes": 1719631
+        },
+        {
+          "file": "src/content/projects/fce/img-1d6a0910.png",
+          "bytes": 2231684
+        },
+        {
+          "file": "src/content/projects/fce/img-20a758ba.jpg",
+          "bytes": 558519
+        },
+        {
+          "file": "src/content/projects/fce/img-fd4791fa.png",
+          "bytes": 1691611
+        },
+        {
+          "file": "src/content/projects/fce/img-5b736fd7.jpg",
+          "bytes": 584312
+        },
+        {
+          "file": "src/content/projects/fce/img-05e7ee34.jpg",
+          "bytes": 250348
+        },
+        {
+          "file": "src/content/projects/fce/img-37be3c23.png",
+          "bytes": 2128421
+        },
+        {
+          "file": "src/content/projects/fce/img-9b657b05.png",
+          "bytes": 1365858
+        },
+        {
+          "file": "src/content/projects/fce/img-7820fb43.png",
+          "bytes": 2176795
+        },
+        {
+          "file": "src/content/projects/fce/img-3d95d8ae.png",
+          "bytes": 1284666
+        },
+        {
+          "file": "src/content/projects/fce/img-c7f7ba68.png",
+          "bytes": 1843221
+        }
+      ],
+      "words": 166
+    },
+    {
+      "path": "/projects/auto-producer",
+      "file": "src/content/projects/auto-producer/index.md",
+      "title": "Live Robot Soccer!",
+      "images": [
+        {
+          "file": "src/content/projects/auto-producer/img-81ea4579.png",
+          "bytes": 43234
+        },
+        {
+          "file": "src/content/projects/auto-producer/img-1c51b1bc.png",
+          "bytes": 989598
+        },
+        {
+          "file": "src/content/projects/auto-producer/img-96fb4d95.gif",
+          "bytes": 7128256
+        },
+        {
+          "file": "src/content/projects/auto-producer/img-bd565d2d.gif",
+          "bytes": 3329811
+        },
+        {
+          "file": "src/content/projects/auto-producer/img-051f1d38.gif",
+          "bytes": 5037699
+        },
+        {
+          "file": "src/content/projects/auto-producer/img-b03247c5.png",
+          "bytes": 1219759
+        }
+      ],
+      "words": 1639
+    },
+    {
+      "path": "/projects/fridge-tank",
+      "file": "src/content/projects/fridge-tank/index.md",
+      "title": "Autonomous Fridge Tank",
+      "images": [
+        {
+          "file": "src/content/projects/fridge-tank/img-8d478ece.png",
+          "bytes": 370894
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-7e601417.png",
+          "bytes": 287176
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-de057f27.png",
+          "bytes": 207289
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-bf483eec.png",
+          "bytes": 592719
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-27b0021d.png",
+          "bytes": 763932
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-831df504.png",
+          "bytes": 732621
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-30e5cf66.png",
+          "bytes": 586367
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-d181bc66.png",
+          "bytes": 544994
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-d75ccdc4.png",
+          "bytes": 143090
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-cfb29c52.png",
+          "bytes": 314849
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-0eff1faf.png",
+          "bytes": 604693
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-4b0067ce.png",
+          "bytes": 1117138
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-0c200a41.png",
+          "bytes": 1244939
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-9df1da89.png",
+          "bytes": 626788
+        },
+        {
+          "file": "src/content/projects/fridge-tank/img-97e0f3e0.png",
+          "bytes": 128512
+        }
+      ],
+      "words": 4417
+    },
+    {
+      "path": "/projects/penbot-mini",
+      "file": "src/content/projects/penbot-mini/index.md",
+      "title": "PenBot Mini",
+      "images": [
+        {
+          "file": "src/content/projects/penbot-mini/img-bc35755a.png",
+          "bytes": 688032
+        },
+        {
+          "file": "src/content/projects/penbot-mini/img-7467f754.png",
+          "bytes": 1297209
+        },
+        {
+          "file": "src/content/projects/penbot-mini/img-95f25ade.png",
+          "bytes": 509530
+        },
+        {
+          "file": "src/content/projects/penbot-mini/img-1cfee257.png",
+          "bytes": 79992
+        },
+        {
+          "file": "src/content/projects/penbot-mini/img-e0629fe3.png",
+          "bytes": 805818
+        },
+        {
+          "file": "src/content/projects/penbot-mini/img-2b9048aa.png",
+          "bytes": 289448
+        },
+        {
+          "file": "src/content/projects/penbot-mini/img-0e50f422.png",
+          "bytes": 866921
+        },
+        {
+          "file": "src/content/projects/penbot-mini/img-9a0e3861.gif",
+          "bytes": 17714209
+        }
+      ],
+      "words": 877
+    },
+    {
+      "path": "/projects/hex-vision",
+      "file": "src/content/projects/hex-vision/index.md",
+      "title": "HEX-VISION",
+      "images": [
+        {
+          "file": "src/content/projects/hex-vision/img-2d9af7f1.png",
+          "bytes": 27542
+        },
+        {
+          "file": "src/content/projects/hex-vision/img-66d19fca.png",
+          "bytes": 2203241
+        },
+        {
+          "file": "src/content/projects/hex-vision/img-d686298f.png",
+          "bytes": 440967
+        },
+        {
+          "file": "src/content/projects/hex-vision/img-10cd077e.gif",
+          "bytes": 6695274
+        },
+        {
+          "file": "src/content/projects/hex-vision/img-a9736d77.png",
+          "bytes": 841633
+        },
+        {
+          "file": "src/content/projects/hex-vision/img-6abb7761.gif",
+          "bytes": 10976276
+        }
+      ],
+      "words": 628
+    },
+    {
+      "path": "/projects/redhex",
+      "file": "src/content/projects/redhex/index.md",
+      "title": "red.HEX Hexapod",
+      "images": [
+        {
+          "file": "src/content/projects/redhex/img-9ecd8c9d.png",
+          "bytes": 1241637
+        },
+        {
+          "file": "src/content/projects/redhex/img-ff812664.png",
+          "bytes": 2111819
+        },
+        {
+          "file": "src/content/projects/redhex/img-d087971f.png",
+          "bytes": 2664999
+        },
+        {
+          "file": "src/content/projects/redhex/img-5ee17f95.png",
+          "bytes": 2891770
+        },
+        {
+          "file": "src/content/projects/redhex/img-5d42491d.png",
+          "bytes": 971210
+        },
+        {
+          "file": "src/content/projects/redhex/img-0059785a.png",
+          "bytes": 983608
+        },
+        {
+          "file": "src/content/projects/redhex/img-3a7758ff.png",
+          "bytes": 2046120
+        },
+        {
+          "file": "src/content/projects/redhex/img-4cbe4b9c.png",
+          "bytes": 1677128
+        }
+      ],
+      "words": 750
+    },
+    {
+      "path": "/projects/penbot",
+      "file": "src/content/projects/penbot/index.md",
+      "title": "PenBot Linkage Plotter",
+      "images": [
+        {
+          "file": "src/content/projects/penbot/img-63fd1d4b.png",
+          "bytes": 1230093
+        },
+        {
+          "file": "src/content/projects/penbot/img-56d6c043.png",
+          "bytes": 2134642
+        },
+        {
+          "file": "src/content/projects/penbot/img-f07fde2d.png",
+          "bytes": 119522
+        },
+        {
+          "file": "src/content/projects/penbot/img-3db824f6.png",
+          "bytes": 2129400
+        },
+        {
+          "file": "src/content/projects/penbot/img-2b05ee42.gif",
+          "bytes": 8321172
+        },
+        {
+          "file": "src/content/projects/penbot/img-1a8cb7e1.png",
+          "bytes": 1172683
+        }
+      ],
+      "words": 852
+    },
+    {
+      "path": "/executioner",
+      "file": "src/content/projects/executioner/index.md",
+      "title": "Combat Robotics",
+      "images": [
+        {
+          "file": "src/content/projects/executioner/img-6421526a.jpg",
+          "bytes": 171056
+        },
+        {
+          "file": "src/content/projects/executioner/img-313e9cfc.jpg",
+          "bytes": 125039
+        },
+        {
+          "file": "src/content/projects/executioner/img-26adc3f0.jpg",
+          "bytes": 80076
+        },
+        {
+          "file": "src/content/projects/executioner/img-5b5ae35d.jpg",
+          "bytes": 207553
+        },
+        {
+          "file": "src/content/projects/executioner/img-57f5c00a.jpg",
+          "bytes": 102466
+        },
+        {
+          "file": "src/content/projects/executioner/img-30f2cbfa.jpg",
+          "bytes": 291772
+        },
+        {
+          "file": "src/content/projects/executioner/img-b20f2ac3.jpg",
+          "bytes": 158478
+        }
+      ],
+      "words": 548
+    },
+    {
+      "path": "/projects/matrix-game-board",
+      "file": "src/content/projects/matrix-game-board/index.md",
+      "title": "Matrix Game Board",
+      "images": [
+        {
+          "file": "src/content/projects/matrix-game-board/img-18cbcec8.gif",
+          "bytes": 16351628
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-019712fc.png",
+          "bytes": 1239436
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-1c955c89.png",
+          "bytes": 71397
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-74be2d86.png",
+          "bytes": 522907
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-87a2932a.png",
+          "bytes": 2134056
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-a9508706.png",
+          "bytes": 707780
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-0e4e2dc1.png",
+          "bytes": 1368021
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-89d221a4.png",
+          "bytes": 363008
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-640f98c3.png",
+          "bytes": 84490
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-571fe9c4.png",
+          "bytes": 149287
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-9ef7fa2c.png",
+          "bytes": 1201651
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-ee06dcc2.png",
+          "bytes": 114124
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-e7b4b699.png",
+          "bytes": 1445649
+        },
+        {
+          "file": "src/content/projects/matrix-game-board/img-ea1f909c.jpg",
+          "bytes": 42317
+        }
+      ],
+      "words": 1098
+    },
+    {
+      "path": "/projects/digital-mosaic",
+      "file": "src/content/projects/digital-mosaic/index.md",
+      "title": "LED Digital Mosaic",
+      "images": [
+        {
+          "file": "src/content/projects/digital-mosaic/img-caebe029.jpg",
+          "bytes": 375058
+        },
+        {
+          "file": "src/content/projects/digital-mosaic/img-f316a760.gif",
+          "bytes": 2446471
+        },
+        {
+          "file": "src/content/projects/digital-mosaic/img-fd46ffc6.gif",
+          "bytes": 17343449
+        },
+        {
+          "file": "src/content/projects/digital-mosaic/img-97dd1cac.jpg",
+          "bytes": 376124
+        },
+        {
+          "file": "src/content/projects/digital-mosaic/img-5a9d7fb4.jpg",
+          "bytes": 112931
+        },
+        {
+          "file": "src/content/projects/digital-mosaic/img-3d937028.gif",
+          "bytes": 27077152
+        },
+        {
+          "file": "src/content/projects/digital-mosaic/img-bbf05ab1.png",
+          "bytes": 479227
+        }
+      ],
+      "words": 367
+    },
+    {
+      "path": "/contact",
+      "file": "src/content/pages/contact/index.md",
+      "title": "Contact Me",
+      "images": [],
+      "words": 14
+    }
+  ],
+  "embeds": [
+    {
+      "page": "/",
+      "type": "youtube",
+      "id": "_FpqlkK-Nx8",
+      "label": "I Built a Robot Mini Fridge That Runs Away From You!"
+    },
+    {
+      "page": "/",
+      "type": "youtube",
+      "id": "pL0wKQ6DZD0",
+      "label": "This Pocket Sized Robot Can Draw Any Image!"
+    },
+    {
+      "page": "/sesame",
+      "type": "youtube",
+      "id": "1UDsWkcQZhc",
+      "label": "How I Made This Tiny Walking Robot From Scratch"
+    },
+    {
+      "page": "/FCE",
+      "type": "youtube",
+      "id": "rEQlkDJpYmw",
+      "label": "The OpenSauce 2025 Exhibitor Experience | Full Contact Engineering"
+    },
+    {
+      "page": "/FCE",
+      "type": "youtube",
+      "id": "rqZHC8fp-dQ",
+      "label": "Exhibiting at Maker Faire Bay Area 2024 in a Nutshell"
+    },
+    {
+      "page": "/FCE",
+      "type": "youtube",
+      "id": "ZYcpfUuVX1c",
+      "label": "OpenSauce 2024 in a Nutshell"
+    },
+    {
+      "page": "/projects/auto-producer",
+      "type": "youtube",
+      "id": "EnNQ4rIJpO0",
+      "label": "I Taught my Tiny Walking Robots How to Play Soccer!"
+    },
+    {
+      "page": "/projects/fridge-tank",
+      "type": "youtube",
+      "id": "_FpqlkK-Nx8",
+      "label": "I Built a Robot Mini Fridge That Runs Away From You!"
+    },
+    {
+      "page": "/projects/fridge-tank",
+      "type": "youtube",
+      "id": "5Y21THNFZWg",
+      "label": "50,000 people came to my science fair"
+    },
+    {
+      "page": "/projects/penbot-mini",
+      "type": "youtube",
+      "id": "pL0wKQ6DZD0",
+      "label": "I Built a Pocket Sized Robot that Copies Anything You Draw!"
+    },
+    {
+      "page": "/projects/hex-vision",
+      "type": "youtube",
+      "id": "2j9Mnt1yF1U",
+      "label": "I Taught my Spider Robot to Chase People... for Science!"
+    },
+    {
+      "page": "/projects/penbot",
+      "type": "url",
+      "src": "https://www.desmos.com/calculator/yp5hnid8xg"
+    },
+    {
+      "page": "/executioner",
+      "type": "youtube",
+      "id": "kG9CeR6zm20",
+      "label": "This Robot was Designed to Destroy | NRL Nats 2025"
+    },
+    {
+      "page": "/executioner",
+      "type": "youtube",
+      "id": "DZ6EpWjpJHM",
+      "label": "Executioner Goes to Sac Bot Battles 2024"
+    },
+    {
+      "page": "/executioner",
+      "type": "youtube",
+      "id": "XNexpGfW4VQ",
+      "label": "Executioner Goes to BattleBots Metal Mayhem at SXSW 2024"
+    },
+    {
+      "page": "/projects/digital-mosaic",
+      "type": "youtube",
+      "id": "WTFL9O1J2mQ",
+      "label": "LED Mosaic Demonstration & Explanation."
+    }
+  ],
+  "customEmbeds": [
+    {
+      "page": "/sesame/kit",
+      "file": "embed-1.html"
+    },
+    {
+      "page": "/projects/fridge-tank",
+      "file": "embed-2.html"
+    }
+  ],
+  "externalLinks": [
+    "http://www.fullcontactengineering.com",
+    "https://docs.google.com/document/d/1Iou0bSaU1I2zKiboLKdsBulBcHZG9Ty9QONq5J3xViQ/edit?usp=sharing",
+    "https://github.com/Starphee/Matrix-Game-Board",
+    "https://github.com/dorianborian",
+    "https://github.com/dorianborian/autonomous-tank-system",
+    "https://github.com/dorianborian/hex-vison",
+    "https://github.com/dorianborian/penbot-mini",
+    "https://github.com/dorianborian/sesame-robot/",
+    "https://github.com/techninja",
+    "https://github.com/techninja/mosaic-screen",
+    "https://makerfaire.com/maker/entry/71367/",
+    "https://twitter.com/Dorian_Todd_",
+    "https://www.facebook.com/profile.php?id=100089832347915&mibextid=ZbWKwL",
+    "https://www.hackster.io/news/the-best-of-open-sauce-2025-our-top-9-picks-0d1e72723245",
+    "https://www.hackster.io/news/the-credit-card-sized-drawing-robot-1bf616eea071",
+    "https://www.instagram.com/dorian.borian/",
+    "https://www.instagram.com/starphee/",
+    "https://www.line-us.com/",
+    "https://www.linkedin.com/in/doriantodd/",
+    "https://www.makeyourpet.com/",
+    "https://www.youtube.com/channel/UC72YiYkvqzR1wqClJKtISnQ",
+    "https://www.youtube.com/watch?v=WTFL9O1J2mQ",
+    "https://www.youtube.com/watch?v=pL0wKQ6DZD0"
+  ]
+}

@@ -1,0 +1,110 @@
+---
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import { SITE, NAV, getProjects } from '../lib/site';
+import { getCollection } from 'astro:content';
+import gear from '../assets/gear.png';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  leftTitle?: string;
+  rightTitle?: string;
+}
+
+const { title, description = `${SITE.name}: ${SITE.tagline}.`, ogImage, leftTitle = 'Features', rightTitle = 'Properties' } = Astro.props;
+const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} | ${SITE.tagline}`;
+const here = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (href: string) => (href === '/' ? here === '/' : here === href);
+
+const projects = await getProjects();
+const pages = (await getCollection('pages')).filter((p) => p.data.path !== '/');
+const searchIndex = [
+  ...NAV.map((n) => ({ t: n.label, u: n.href, k: 'page' })),
+  ...projects.map((p) => ({ t: p.entry.data.title, u: p.url, k: p.no, s: p.entry.data.tags.join(' ') + ' ' + (p.entry.data.summary ?? '') })),
+  ...pages.filter((p) => !NAV.some((n) => n.href === p.data.path)).map((p) => ({ t: p.data.title, u: p.data.path, k: 'page' })),
+].filter((it, i, all) => all.findIndex((o) => o.u === it.u) === i);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#202125" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.site)} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <slot name="head" />
+  </head>
+  <body>
+    <div class="shell" id="shell">
+      <header class="topbar">
+        <button class="icon-btn nav-toggle" data-action="drawer" aria-label="Open menu"><Icon name="menu" /></button>
+        <a class="brand" href="/">
+          <span class="brand-mark">
+            <img src={gear.src} width="20" height="20" alt="" />
+          </span>
+          <span class="brand-doc">
+            <strong>{SITE.name}</strong>
+            <span>{SITE.tagline}</span>
+          </span>
+        </a>
+        <nav class="topnav" aria-label="Primary">
+          {NAV.map((n) => <a href={n.href} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
+        </nav>
+        <div class="top-right">
+          <button class="search-btn" data-action="palette" aria-label="Search">
+            <Icon name="search" size={14} /><span class="search-label">Search projects</span><kbd class="hide-mobile">Ctrl K</kbd>
+          </button>
+          <a class="icon-btn hide-mobile" href="https://github.com/dorianborian" aria-label="GitHub" rel="me noopener"><Icon name="github" /></a>
+          <button class="icon-btn hide-mobile" data-action="toggle-left" aria-pressed="true" aria-label="Toggle left panel"><Icon name="panelLeft" /></button>
+          <button class="icon-btn hide-mobile" data-action="toggle-right" aria-pressed="true" aria-label="Toggle right panel"><Icon name="panelRight" /></button>
+        </div>
+      </header>
+
+      <div class="toolbar" role="toolbar" aria-label="Tools">
+        <slot name="toolbar" />
+      </div>
+
+      <aside class="panel panel-left" aria-label={leftTitle}>
+        <nav class="drawer-nav" aria-label="Pages">
+          {NAV.map((n) => <a class="tree-item" href={n.href} aria-current={isCurrent(n.href) ? 'true' : undefined}>{n.label}</a>)}
+        </nav>
+        <div class="panel-head"><Icon name="extrude" size={13} />{leftTitle}
+          <button class="icon-btn only-mobile" data-action="drawer" aria-label="Close"><Icon name="close" size={14} /></button>
+        </div>
+        <div class="panel-body"><slot name="left" /></div>
+      </aside>
+
+      <main class="main" id="main">
+        <slot />
+      </main>
+
+      <aside class="panel panel-right" aria-label={rightTitle}>
+        <div class="panel-head"><Icon name="info" size={13} />{rightTitle}</div>
+        <div class="panel-body"><slot name="right" /></div>
+      </aside>
+    </div>
+
+    <div class="palette" id="palette" hidden>
+      <div class="palette-box" role="dialog" aria-modal="true" aria-label="Search">
+        <div class="palette-input"><Icon name="search" /><input type="text" placeholder="Search projects and pages" aria-label="Search" autocomplete="off" spellcheck="false" /><kbd>Esc</kbd></div>
+        <ul class="palette-list" role="listbox"></ul>
+      </div>
+    </div>
+    <script type="application/json" id="search-index" set:html={JSON.stringify(searchIndex)} />
+
+    <script>
+      import '../scripts/shell';
+    </script>
+  </body>
+</html>

@@ -1,0 +1,149 @@
+---
+import { getEntry, render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import Shell from '../layouts/Shell.astro';
+import Icon from '../components/Icon.astro';
+import SketchTools from '../components/SketchTools.astro';
+import { SITE } from '../lib/site';
+import '../styles/sketch.css';
+
+const page = (await getEntry('pages', 'about'))!;
+const { Content } = await render(page);
+const portrait = page.data.cover ? await getImage({ src: page.data.cover, width: 900, format: 'webp' }) : null;
+
+// Sketch layout (SVG user units), same grid as the contact sketch
+const W = 1200, H = 800;
+const pic = { x: 700, y: 110, w: 420, h: 315 };
+const bio = { x: 80, y: 222, w: 560, h: 440 };
+const focus = ['Mechanical design', 'Systems integration', 'Open source hardware'];
+const focusY = (i: number) => 500 + i * 48;
+const rowY = 712;
+const pill = { w: 200, h: 56, pitch: 250 };
+const links = [
+  { id: 'projects', label: 'Projects', url: '/projects' },
+  { id: 'contact', label: 'Contact', url: '/contact' },
+  { id: 'github', label: 'GitHub', url: SITE.social.find((s) => s.label === 'GitHub')!.url },
+  { id: 'youtube', label: 'YouTube', url: SITE.social.find((s) => s.label === 'YouTube')!.url },
+].map((l, i, all) => ({ ...l, cx: W / 2 + (i - (all.length - 1) / 2) * pill.pitch }));
+const ext = (url: string) => (url.startsWith('http') ? { target: '_blank', rel: 'me noopener' } : {});
+---
+<Shell title="About" description={`About ${SITE.name}: ${page.data.summary}`} leftTitle="Sketch 1" rightTitle="Properties">
+  <Fragment slot="toolbar">
+    <SketchTools />
+  </Fragment>
+
+  <Fragment slot="left">
+    <ul class="tree">
+      <li class="tree-group">About</li>
+      <li><span class="tree-item" data-entity="bio" style="--depth:0"><Icon name="file" size={14} /><span class="label">Bio</span></span></li>
+      <li><span class="tree-item" data-entity="portrait" style="--depth:0"><Icon name="plane" size={14} /><span class="label">Portrait</span><span class="meta">{pic.w} x {pic.h}</span></span></li>
+      <li class="tree-group">Links</li>
+      {links.map((l) => (
+        <li><a class="tree-item" href={l.url} data-entity={l.id} style="--depth:0" {...ext(l.url)}><Icon name={l.id === 'github' ? 'github' : l.id === 'youtube' ? 'video' : 'link'} size={14} /><span class="label">{l.label}</span></a></li>
+      ))}
+      <li class="tree-group">Your sketch</li>
+      <li><span class="tree-item" style="--depth:0"><Icon name="sketch" size={14} /><span class="label" data-count>No entities yet</span></span></li>
+      <li class="sketch-help">Pick a tool, then drag on the canvas. Hold Shift to snap to 15 degree angles. Delete removes the selected entity.</li>
+    </ul>
+  </Fragment>
+
+  <div class="viewport sketch-viewport" id="sketch" tabindex="0" data-tool="select" data-store="about-sketch-v1">
+    <svg class="sketch" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label={`About ${SITE.name}`}>
+      <defs>
+        <pattern id="grid-minor" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#25272c" stroke-width="1" /></pattern>
+        <pattern id="grid-major" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="url(#grid-minor)" /><path d="M100 0H0V100" fill="none" stroke="#30333a" stroke-width="1" /></pattern>
+        <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 1.5 10 5 0 8.5z" fill="currentColor" /></marker>
+        <clipPath id="pic-clip"><rect x={pic.x} y={pic.y} width={pic.w} height={pic.h} rx="10" /></clipPath>
+      </defs>
+      <g data-view>
+        <rect x="-4000" y="-4000" width="9200" height="8800" fill="url(#grid-major)" />
+        <g class="sk-origin" transform="translate(60 780)">
+          <line x2="60" stroke="var(--x)" stroke-width="2" />
+          <line y2="-60" stroke="var(--y)" stroke-width="2" />
+          <rect x="-4" y="-4" width="8" height="8" fill="#c9d0da" />
+        </g>
+
+        <text class="sk-title" x="80" y="150">ABOUT</text>
+        <text class="sk-note" x="84" y="192">{SITE.name} · {SITE.tagline}</text>
+
+        <!-- bio, as a text block with its bounding rectangle -->
+        <g class="sk-entity" data-entity="bio">
+          <rect class="sk-construction" x={bio.x - 14} y={bio.y - 14} width={bio.w + 28} height={bio.h + 28} />
+          <foreignObject x={bio.x} y={bio.y} width={bio.w} height={bio.h}>
+            <div class="about-bio prose"><Content /></div>
+          </foreignObject>
+        </g>
+
+        <!-- portrait -->
+        <g class="sk-entity" data-entity="portrait">
+          {portrait && <image href={portrait.src} x={pic.x} y={pic.y} width={pic.w} height={pic.h} preserveAspectRatio="xMidYMid slice" clip-path="url(#pic-clip)" />}
+          <rect class="sk-line sk-draw about-frame" x={pic.x} y={pic.y} width={pic.w} height={pic.h} rx="10" pathLength="1" />
+          {[[pic.x, pic.y], [pic.x + pic.w, pic.y], [pic.x, pic.y + pic.h], [pic.x + pic.w, pic.y + pic.h]].map(([x, y]) => <rect class="sk-pt" x={x - 4} y={y - 4} width="8" height="8" />)}
+        </g>
+        <g class="sk-dim" data-group="dims">
+          <line x1={pic.x} y1={pic.y - 10} x2={pic.x} y2={pic.y - 46} />
+          <line x1={pic.x + pic.w} y1={pic.y - 10} x2={pic.x + pic.w} y2={pic.y - 46} />
+          <line x1={pic.x + 2} y1={pic.y - 36} x2={pic.x + pic.w / 2 - 26} y2={pic.y - 36} marker-start="url(#arrow)" />
+          <line x1={pic.x + pic.w / 2 + 26} y1={pic.y - 36} x2={pic.x + pic.w - 2} y2={pic.y - 36} marker-end="url(#arrow)" />
+          <text x={pic.x + pic.w / 2} y={pic.y - 31} text-anchor="middle" class="sk-dim-text">{pic.w}</text>
+          <line x1={pic.x + pic.w + 10} y1={pic.y} x2={pic.x + pic.w + 46} y2={pic.y} />
+          <line x1={pic.x + pic.w + 10} y1={pic.y + pic.h} x2={pic.x + pic.w + 46} y2={pic.y + pic.h} />
+          <line x1={pic.x + pic.w + 36} y1={pic.y + 2} x2={pic.x + pic.w + 36} y2={pic.y + pic.h / 2 - 20} marker-start="url(#arrow)" />
+          <line x1={pic.x + pic.w + 36} y1={pic.y + pic.h / 2 + 20} x2={pic.x + pic.w + 36} y2={pic.y + pic.h - 2} marker-end="url(#arrow)" />
+          <text x={pic.x + pic.w + 36} y={pic.y + pic.h / 2 + 5} text-anchor="middle" class="sk-dim-text">{pic.h}</text>
+        </g>
+
+        <!-- focus areas: points on a vertical construction line under the portrait -->
+        <line class="sk-construction" x1={pic.x + 20} y1={pic.y + pic.h + 20} x2={pic.x + 20} y2={focusY(focus.length - 1) + 30} />
+        {focus.map((f, i) => (
+          <g>
+            <circle class="sk-line" cx={pic.x + 20} cy={focusY(i)} r="7" />
+            <text class="sk-label" x={pic.x + 44} y={focusY(i) + 6}>{f}</text>
+          </g>
+        ))}
+        <g class="sk-cons" data-group="dims">
+          <g transform={`translate(${pic.x + 30} ${pic.y + pic.h + 26})`}><rect width="18" height="18" rx="3" /><text x="9" y="13" text-anchor="middle">V</text></g>
+        </g>
+
+        <!-- links row -->
+        <line class="sk-construction" x1={links[0].cx - pill.w / 2 - 40} y1={rowY} x2={links[links.length - 1].cx + pill.w / 2 + 40} y2={rowY} />
+        {links.map((l) => (
+          <a href={l.url} class="sk-entity" data-entity={l.id} {...ext(l.url)}>
+            <rect class="sk-line sk-draw" x={l.cx - pill.w / 2} y={rowY - pill.h / 2} width={pill.w} height={pill.h} rx={pill.h / 2} pathLength="1" />
+            <text class="sk-label" x={l.cx} y={rowY + 6} text-anchor="middle">{l.label}</text>
+          </a>
+        ))}
+        <g class="sk-cons" data-group="dims">
+          <g transform={`translate(${links[0].cx - pill.w / 2 - 70} ${rowY - 26})`}><rect width="18" height="18" rx="3" /><text x="9" y="13" text-anchor="middle">H</text></g>
+          {links.map((l) => <g transform={`translate(${l.cx + pill.w / 2 - 12} ${rowY - pill.h / 2 - 22})`}><rect width="18" height="18" rx="3" /><text x="9" y="13" text-anchor="middle">=</text></g>)}
+        </g>
+
+        <g data-user></g>
+        <g data-preview></g>
+      </g>
+    </svg>
+    <div class="sketch-status mono" aria-live="polite"><span class="ok-dot"></span><span data-status>Fully defined</span></div>
+    <div class="sketch-readout mono" data-readout hidden></div>
+  </div>
+
+  <Fragment slot="right">
+    <div class="props">
+      <h1 class="sr-only">About {SITE.name}</h1>
+      <table class="prop-table">
+        <tr><th>Focus</th><td>{SITE.tagline}</td></tr>
+        {SITE.social.map((s) => <tr><th>{s.label}</th><td><a href={s.url} rel="me noopener" target="_blank">{s.handle}</a></td></tr>)}
+      </table>
+      <div class="btn-row"><a class="btn btn-primary" href="/contact"><Icon name="mail" />Contact</a><a class="btn" href="/projects">Projects</a></div>
+    </div>
+  </Fragment>
+</Shell>
+
+<script>
+  import '../scripts/contact-sketch';
+</script>
+
+<style is:global>
+  .about-bio { font-size: 17.5px; line-height: 1.6; color: var(--text-2); }
+  .about-bio p { margin: 0 0 0.9em; }
+  .about-frame { fill: none; }
+</style>

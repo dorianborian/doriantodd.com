@@ -1,0 +1,149 @@
+---
+// Every project and Markdown page. URLs come from `path` in front matter (kept from Google Sites)
+// or default to /projects/<slug>.
+import { getCollection, render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Shell from '../layouts/Shell.astro';
+import Icon from '../components/Icon.astro';
+import { SITE, CUSTOM_ROUTES, getProjects, type Project, type Page } from '../lib/site';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  const pages = (await getCollection('pages')).filter((p) => !CUSTOM_ROUTES.has(p.data.path));
+  return [
+    ...projects.map((p, i) => ({
+      params: { path: p.url.replace(/^\//, '') },
+      props: { kind: 'project' as const, entry: p.entry, no: p.no, year: p.year, modelUrl: p.modelUrl, model: p.model, prev: projects[i - 1] ?? null, next: projects[i + 1] ?? null },
+    })),
+    ...pages.map((entry) => ({
+      params: { path: entry.data.path.replace(/^\//, '') },
+      props: { kind: 'page' as const, entry, no: null, year: null, modelUrl: null, model: null, prev: null, next: null },
+    })),
+  ];
+}
+
+type Neighbor = { entry: Project; url: string; no: string } | null;
+interface Props { kind: 'project' | 'page'; entry: Project | Page; no: string | null; year: number | null; modelUrl: string | null; model: { url: string; up: string; rotation: number[] } | null; prev: Neighbor; next: Neighbor }
+
+const { kind, entry, no, year, modelUrl, model, prev, next } = Astro.props;
+const { Content, headings } = await render(entry);
+const d = entry.data as Project['data'] & Page['data'];
+const isProject = kind === 'project';
+const outline = headings.filter((h) => h.depth <= 3);
+const og = d.cover ? await getImage({ src: d.cover, width: 1200, format: 'jpg' }) : null;
+const words = entry.body?.split(/\s+/).length ?? 0;
+const readMin = Math.max(1, Math.round(words / 230));
+const allProjects = isProject ? await getProjects() : [];
+const icon = (depth: number) => (depth === 1 ? 'extrude' : depth === 2 ? 'sketch' : 'plane');
+---
+<Shell
+  title={d.title}
+  description={d.summary ?? `${d.title}, by ${SITE.name}.`}
+  ogImage={og?.src}
+  leftTitle="Contents"
+>
+  <Fragment slot="toolbar">
+    <a class="tool" href={isProject ? '/projects' : '/'}><Icon name="arrowLeft" /><span>{isProject ? 'All projects' : 'Home'}</span></a>
+    {isProject && <span class="tool-sep"></span>}
+    {prev && <a class="tool" href={prev.url} title={prev.entry.data.title}><Icon name="arrowLeft" /><span class="hide-mobile">Previous</span></a>}
+    {next && <a class="tool" href={next.url} title={next.entry.data.title}><span class="hide-mobile">Next</span><Icon name="arrowRight" /></a>}
+    {isProject && d.repo && <><span class="tool-sep hide-mobile"></span><a class="tool hide-mobile" href={`https://github.com/${d.repo}`} rel="noopener"><Icon name="github" />Repository</a></>}
+    {d.links.map((l) => <><span class="tool-sep hide-mobile"></span><a class="tool hide-mobile" href={l.url} rel="noopener"><Icon name="link" />{l.label}</a></>)}
+  </Fragment>
+
+  <Fragment slot="left">
+    <ul class="tree" data-outline>
+      {outline.map((h) => (
+        <li><a class="tree-item" href={`#${h.slug}`} style={`--depth:${Math.max(0, h.depth - (outline[0]?.depth ?? 1))}`}><Icon name={icon(h.depth)} size={14} /><span class="label">{h.text}</span></a></li>
+      ))}
+      {isProject && (
+        <>
+          <li class="tree-group">Other projects</li>
+          {allProjects.map((p) => (
+            <li><a class="tree-item" href={p.url} aria-current={p.entry.id === entry.id ? 'true' : undefined} style="--depth:0"><Icon name={p.modelUrl ? 'cube' : 'part'} size={14} /><span class="label">{p.entry.data.title}</span></a></li>
+          ))}
+        </>
+      )}
+    </ul>
+  </Fragment>
+
+  <div class="main-scroll">
+    <article class="doc" id="top">
+      <div class="sheet">
+        {(modelUrl || d.cover) && (
+          <div class="sheet-view">
+            {modelUrl ? (
+              <cad-viewer src={modelUrl} name={d.title} up={model?.up} rotation={model?.rotation.join(',')}></cad-viewer>
+            ) : (
+              d.cover && <Image src={d.cover} alt="" widths={[640, 960, 1600]} sizes="(max-width: 860px) 100vw, 880px" loading="eager" fetchpriority="high" />
+            )}
+            <span class="sheet-corner tl"></span><span class="sheet-corner tr"></span><span class="sheet-corner bl"></span><span class="sheet-corner br"></span>
+          </div>
+        )}
+        <div class="titleblock">
+          <div class="tb-title"><label>{isProject ? 'Project' : 'Page'}</label><h1>{d.title}</h1></div>
+          {isProject && <div><label>No.</label><div class="val">{no}</div></div>}
+          {isProject && year && <div><label>Year</label><div class="val">{year}</div></div>}
+          {isProject && <div><label>Status</label><div class="val">{d.status.replace('-', ' ')}</div></div>}
+          <div><label>Read</label><div class="val">{readMin} min</div></div>
+        </div>
+      </div>
+
+      {d.summary && isProject && <p class="lede">{d.summary}</p>}
+
+      {isProject && d.repo && (
+        <a class="repo-card" href={`https://github.com/${d.repo}`} rel="noopener">
+          <Icon name="github" size={22} />
+          <span><strong>{d.repo}</strong><small>{d.repoNote ?? 'Source code on GitHub'}</small></span>
+          <span class="repo-go">View repository</span>
+        </a>
+      )}
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      {(prev || next) && (
+        <nav class="pager" aria-label="More projects">
+          {prev && <a href={prev.url}><small>Previous</small>{prev.entry.data.title}</a>}
+          {next && <a class="next" href={next.url}><small>Next</small>{next.entry.data.title}</a>}
+        </nav>
+      )}
+    </article>
+  </div>
+
+  <Fragment slot="right">
+    <div class="props">
+      <div>
+        <h2 class="prop-title">{d.title}</h2>
+        {d.summary && <p class="prop-sub">{d.summary}</p>}
+      </div>
+      {isProject && (
+        <table class="prop-table">
+          {year && <tr><th>Year</th><td class="mono">{year}</td></tr>}
+          <tr><th>Status</th><td><span class="status" data-status={d.status}>{d.status.replace('-', ' ')}</span></td></tr>
+          {d.date && <tr><th>Updated</th><td class="mono">{d.date.toISOString().slice(0, 10)}</td></tr>}
+          {d.tags.length > 0 && <tr><th>Tags</th><td><div class="chips">{d.tags.map((t) => <span class="chip">{t}</span>)}</div></td></tr>}
+        </table>
+      )}
+      {isProject && d.repo && (
+        <div>
+          <p class="prop-section">Repository</p>
+          <ul class="link-list"><li><a href={`https://github.com/${d.repo}`} rel="noopener"><span class="mono">{d.repo}</span><Icon name="github" size={13} /></a></li></ul>
+        </div>
+      )}
+      {d.links.length > 0 && (
+        <div>
+          <p class="prop-section">Links</p>
+          <ul class="link-list">{d.links.map((l) => <li><a href={l.url} rel="noopener">{l.label}<Icon name="open" size={13} /></a></li>)}</ul>
+        </div>
+      )}
+      <a class="btn" href="/contact"><Icon name="mail" />Get in touch</a>
+    </div>
+  </Fragment>
+</Shell>
+
+<script>
+  // Tiny: defines <cad-viewer> and only downloads three.js if one is on the page.
+  import '../scripts/cad-viewer';
+</script>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 340" width="1000" height="340" font-family="Segoe UI, Inter, system-ui, sans-serif">
+  <defs>
+    <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#26282d" stroke-width="1"/></pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1 10 5 0 9z" fill="#8a94a6"/></marker>
+  </defs>
+  <rect width="1000" height="340" fill="#1b1c20"/>
+  <rect width="1000" height="340" fill="url(#g)"/>
+
+  <g fill="#202125" stroke="#3b3e45" stroke-width="1.6">
+    <rect x="30" y="120" width="170" height="92" rx="6"/>
+    <rect x="240" y="120" width="160" height="92" rx="6"/>
+    <rect x="440" y="40" width="200" height="92" rx="6" stroke="#38e1ff"/>
+    <rect x="440" y="200" width="200" height="92" rx="6" stroke="#38e1ff"/>
+    <rect x="680" y="120" width="140" height="92" rx="6" stroke="#4a9bff"/>
+    <rect x="850" y="120" width="120" height="92" rx="6"/>
+  </g>
+
+  <g fill="#e4e6ea" font-size="15" font-weight="600">
+    <text x="46" y="148">Revopoint</text>
+    <text x="46" y="166">Inspire 2</text>
+    <text x="256" y="148">Screen capture</text>
+    <text x="456" y="68">RGB feed</text>
+    <text x="456" y="228">Depth feed</text>
+    <text x="696" y="148">Zones</text>
+    <text x="866" y="148">red.HEX</text>
+  </g>
+  <g fill="#9aa3b0" font-size="12.5">
+    <text x="46" y="188">RGB + depth, on</text>
+    <text x="46" y="204">the robot's head</text>
+    <text x="256" y="170">of the Revopoint</text>
+    <text x="256" y="186">scan app, in Python</text>
+    <text x="456" y="90">YOLOv8, person class</text>
+    <text x="456" y="108">only, tuned thresholds</text>
+    <text x="456" y="250">map brightness</text>
+    <text x="456" y="268">gives proximity</text>
+    <text x="696" y="170">left, center,</text>
+    <text x="696" y="186">right</text>
+    <text x="866" y="170">turn, approach,</text>
+    <text x="866" y="186">stop short</text>
+  </g>
+
+  <g stroke="#8a94a6" stroke-width="1.6" fill="none" marker-end="url(#a)">
+    <path d="M200 166 H236"/>
+    <path d="M400 150 H420 V86 H436"/>
+    <path d="M400 182 H420 V246 H436"/>
+    <path d="M640 86 H660 V150 H676"/>
+    <path d="M640 246 H660 V182 H676"/>
+    <path d="M820 166 H846"/>
+  </g>
+  <text x="680" y="238" fill="#6f7580" font-size="12">turn speed clamped to 50%,</text>
+  <text x="680" y="254" fill="#6f7580" font-size="12">movement vectors smoothed</text>
+</svg>

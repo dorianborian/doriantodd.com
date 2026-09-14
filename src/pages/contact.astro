@@ -1,0 +1,173 @@
+---
+import { getEntry } from 'astro:content';
+import Shell from '../layouts/Shell.astro';
+import Icon from '../components/Icon.astro';
+import SketchTools from '../components/SketchTools.astro';
+import { SITE } from '../lib/site';
+import '../styles/sketch.css';
+
+const page = await getEntry('pages', 'contact');
+const intro = page?.data.summary ?? 'Business inquiries, collaborations, and events.';
+
+// Sketch layout (SVG user units). Everything sits on a clean grid so nothing overlaps.
+const W = 1200, H = 800;
+const slot = { cx: 600, cy: 360, w: 540, h: 124 };
+const rowY = 575;
+const pitch = 160;
+const R = 44;
+const socials = SITE.social.map((s, i) => ({ ...s, id: s.label.toLowerCase(), cx: slot.cx + (i - (SITE.social.length - 1) / 2) * pitch }));
+const first = socials[0].cx, last = socials[socials.length - 1].cx;
+
+// Stroke icons drawn inside the circles, centred on 0,0
+const icons: Record<string, string> = {
+  youtube: '<rect x="-18" y="-13" width="36" height="26" rx="7"/><path d="M-5 -7 L8 0 L-5 7 Z"/>',
+  github: '<path transform="translate(-19 -19) scale(2.4)" d="M6 13.5c-3 .9-3-1.5-4.2-1.8m8.4 3.3v-2.3c0-.7.1-1.2-.3-1.6 1.9-.2 3.9-.9 3.9-4.2 0-.9-.3-1.7-.9-2.3.1-.3.4-1.1-.1-2.3 0 0-.7-.2-2.3.9a8 8 0 0 0-4.1 0C4.7 2.1 4 2.3 4 2.3c-.5 1.2-.2 2-.1 2.3-.6.6-.9 1.4-.9 2.3 0 3.3 2 4 3.9 4.2-.4.4-.4.8-.3 1.6V15"/>',
+  linkedin: '<rect x="-17" y="-17" width="34" height="34" rx="6"/><path d="M-9 -2 V10 M-9 -8 V-7 M-2 10 V-2 M-2 3 C-2 -3 9 -4 9 3 V10"/>',
+  instagram: '<rect x="-17" y="-17" width="34" height="34" rx="10"/><circle r="8"/><path d="M10 -10 L10.5 -10"/>',
+  x: '<path d="M-14 -14 L14 14 M14 -14 L-14 14"/>',
+};
+---
+<Shell title="Contact" description={`Contact ${SITE.name}: ${SITE.email}`} leftTitle="Sketch 1" rightTitle="Message">
+  <Fragment slot="toolbar">
+    <SketchTools />
+  </Fragment>
+
+  <Fragment slot="left">
+    <ul class="tree">
+      <li class="tree-group">Contact</li>
+      <li><a class="tree-item" href={`mailto:${SITE.email}`} data-entity="email" style="--depth:0"><Icon name="mail" size={14} /><span class="label">{SITE.email}</span></a></li>
+      <li><button class="tree-item tree-btn" data-copy style="--depth:0"><Icon name="link" size={14} /><span class="label" data-copy-label>Copy email address</span></button></li>
+      <li class="tree-group">Elsewhere</li>
+      {socials.map((s) => (
+        <li><a class="tree-item" href={s.url} rel="me noopener" target="_blank" data-entity={s.id} style="--depth:0"><Icon name={s.id === 'github' ? 'github' : s.id === 'youtube' ? 'video' : 'link'} size={14} /><span class="label">{s.label}</span><span class="meta">{s.handle}</span></a></li>
+      ))}
+      <li class="tree-group">Your sketch</li>
+      <li><span class="tree-item" style="--depth:0"><Icon name="sketch" size={14} /><span class="label" data-count>No entities yet</span></span></li>
+      <li class="sketch-help">Pick a tool, then drag on the canvas. Hold Shift to snap to 15 degree angles. Delete removes the selected entity.</li>
+    </ul>
+  </Fragment>
+
+  <div class="viewport sketch-viewport" id="sketch" tabindex="0" data-tool="select" data-store="contact-sketch-v1">
+    <svg class="sketch" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label={`Contact sketch with email ${SITE.email} and links to ${SITE.social.map((s) => s.label).join(', ')}`}>
+      <defs>
+        <pattern id="grid-minor" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#25272c" stroke-width="1" /></pattern>
+        <pattern id="grid-major" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="url(#grid-minor)" /><path d="M100 0H0V100" fill="none" stroke="#30333a" stroke-width="1" /></pattern>
+        <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 1.5 10 5 0 8.5z" fill="currentColor" /></marker>
+      </defs>
+      <g data-view>
+        <rect x="-4000" y="-4000" width="9200" height="8800" fill="url(#grid-major)" />
+
+        <g class="sk-origin" transform="translate(60 740)">
+          <line x2="60" stroke="var(--x)" stroke-width="2" />
+          <line y2="-60" stroke="var(--y)" stroke-width="2" />
+          <rect x="-4" y="-4" width="8" height="8" fill="#c9d0da" />
+        </g>
+
+        <text class="sk-title" x="80" y="150">CONTACT</text>
+        <text class="sk-note" x="84" y="192">{intro}</text>
+
+        <!-- construction: centre line from slot to the row, and the row baseline -->
+        <g class="sk-construction-group">
+          <line class="sk-construction" x1={slot.cx} y1={slot.cy + slot.h / 2} x2={slot.cx} y2={rowY - R} />
+          <line class="sk-construction" x1={first - 90} y1={rowY} x2={last + 90} y2={rowY} />
+        </g>
+
+        <!-- email slot -->
+        <a href={`mailto:${SITE.email}`} class="sk-entity" data-entity="email" data-copy-on-click>
+          <rect class="sk-line sk-draw" x={slot.cx - slot.w / 2} y={slot.cy - slot.h / 2} width={slot.w} height={slot.h} rx={slot.h / 2} pathLength="1" />
+          <text class="sk-caption" x={slot.cx} y={slot.cy - 22} text-anchor="middle">EMAIL</text>
+          <text class="sk-value" x={slot.cx} y={slot.cy + 20} text-anchor="middle">{SITE.email}</text>
+          <rect class="sk-pt" x={slot.cx - slot.w / 2 + slot.h / 2 - 4} y={slot.cy - 4} width="8" height="8" />
+          <rect class="sk-pt" x={slot.cx + slot.w / 2 - slot.h / 2 - 4} y={slot.cy - 4} width="8" height="8" />
+        </a>
+
+        <!-- dimension: slot width -->
+        <g class="sk-dim" data-group="dims">
+          <line x1={slot.cx - slot.w / 2} y1={slot.cy - slot.h / 2 - 10} x2={slot.cx - slot.w / 2} y2={slot.cy - slot.h / 2 - 62} />
+          <line x1={slot.cx + slot.w / 2} y1={slot.cy - slot.h / 2 - 10} x2={slot.cx + slot.w / 2} y2={slot.cy - slot.h / 2 - 62} />
+          <line x1={slot.cx - slot.w / 2 + 2} y1={slot.cy - slot.h / 2 - 50} x2={slot.cx - 44} y2={slot.cy - slot.h / 2 - 50} marker-start="url(#arrow)" />
+          <line x1={slot.cx + 44} y1={slot.cy - slot.h / 2 - 50} x2={slot.cx + slot.w / 2 - 2} y2={slot.cy - slot.h / 2 - 50} marker-end="url(#arrow)" />
+          <text x={slot.cx} y={slot.cy - slot.h / 2 - 44} text-anchor="middle" class="sk-dim-text">{slot.w}</text>
+        </g>
+
+        <!-- social circles -->
+        {socials.map((s) => (
+          <a href={s.url} class="sk-entity" data-entity={s.id} rel="me noopener" target="_blank">
+            <circle class="sk-hit" cx={s.cx} cy={rowY} r={R + 26} />
+            <circle class="sk-line sk-draw" cx={s.cx} cy={rowY} r={R} pathLength="1" />
+            <g class="sk-icon" transform={`translate(${s.cx} ${rowY})`} set:html={icons[s.id] ?? ''} />
+            <text class="sk-label" x={s.cx} y={rowY + R + 34} text-anchor="middle">{s.label}</text>
+            <text class="sk-handle" x={s.cx} y={rowY + R + 54} text-anchor="middle">{s.handle}</text>
+          </a>
+        ))}
+
+        <!-- dimensions: equal spacing along the row -->
+        <g class="sk-dim" data-group="dims">
+          {socials.slice(1).map((s, i) => {
+            const a = socials[i].cx, b = s.cx, y = rowY + R + 96;
+            return (
+              <g>
+                <line x1={a} y1={rowY + R + 66} x2={a} y2={y + 8} />
+                <line x1={a + 2} y1={y} x2={(a + b) / 2 - 22} y2={y} marker-start="url(#arrow)" />
+                <line x1={(a + b) / 2 + 22} y1={y} x2={b - 2} y2={y} marker-end="url(#arrow)" />
+                <text x={(a + b) / 2} y={y + 5} text-anchor="middle" class="sk-dim-text">{pitch}</text>
+              </g>
+            );
+          })}
+          <line x1={last} y1={rowY + R + 66} x2={last} y2={rowY + R + 104} />
+        </g>
+
+        <!-- constraints -->
+        <g class="sk-cons" data-group="dims">
+          {socials.map((s) => (
+            <g transform={`translate(${s.cx + R * 0.7 + 2} ${rowY - R * 0.7 - 20})`}><rect width="18" height="18" rx="3" /><text x="9" y="13" text-anchor="middle">=</text></g>
+          ))}
+          <g transform={`translate(${first - 88} ${rowY - 26})`}><rect width="18" height="18" rx="3" /><text x="9" y="13" text-anchor="middle">H</text></g>
+          <g transform={`translate(${slot.cx + 10} ${(slot.cy + slot.h / 2 + rowY - R) / 2 - 9})`}><rect width="18" height="18" rx="3" /><text x="9" y="13" text-anchor="middle">V</text></g>
+        </g>
+
+        <!-- visitor's sketch goes here -->
+        <g data-user></g>
+        <g data-preview></g>
+      </g>
+    </svg>
+    <div class="sketch-status mono" aria-live="polite"><span class="ok-dot"></span><span data-status>Fully defined</span></div>
+    <div class="sketch-readout mono" data-readout hidden></div>
+  </div>
+
+  <Fragment slot="right">
+    <form class="fdialog" id="message-form">
+      <div class="fdialog-head">
+        <Icon name="mail" size={14} />
+        <span class="fdialog-name">Message 1</span>
+        <button type="submit" class="fdialog-icon ok" title="Compose email" aria-label="Compose email">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 8.5 3.2 3L13 4.5" /></svg>
+        </button>
+        <button type="reset" class="fdialog-icon cancel" title="Clear" aria-label="Clear form">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" /></svg>
+        </button>
+      </div>
+      <div class="fdialog-body">
+        <fieldset class="fdialog-field">
+          <legend>Topic</legend>
+          <div class="fdialog-seg">
+            {['Collaboration', 'Sponsorship', 'Events', 'Sesame kit', 'Other'].map((t, i) => (
+              <label><input type="radio" name="topic" value={t} checked={i === 0} /><span>{t}</span></label>
+            ))}
+          </div>
+        </fieldset>
+        <label class="fdialog-field"><span>Name</span><input name="name" autocomplete="name" required /></label>
+        <label class="fdialog-field"><span>Subject <em>optional</em></span><input name="subject" /></label>
+        <label class="fdialog-field"><span>Message</span><textarea name="message" rows="7" required></textarea></label>
+        <button class="btn btn-primary" type="submit"><Icon name="mail" />Compose email</button>
+        <p class="fdialog-note">Opens your email app with the message addressed to {SITE.email}.</p>
+      </div>
+    </form>
+  </Fragment>
+</Shell>
+
+<script>
+  import '../scripts/contact-sketch';
+</script>
+
+

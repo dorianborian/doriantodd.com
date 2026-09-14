@@ -1,0 +1,35 @@
+---
+import Shell from '../layouts/Shell.astro';
+import Icon from '../components/Icon.astro';
+---
+<Shell title="Not found" leftTitle="Contents">
+  <Fragment slot="toolbar">
+    <a class="tool" href="/"><Icon name="assembly" />Home</a>
+    <a class="tool" href="/projects"><Icon name="bom" />Projects</a>
+  </Fragment>
+  <Fragment slot="left">
+    
+  </Fragment>
+  <div class="main-scroll">
+    <div class="doc">
+      <div class="sheet" style="padding:28px">
+        <p class="mono" style="color:var(--x);margin:0 0 8px">Error: reference not found</p>
+        <h1 style="margin:0 0 10px;font-size:24px">This feature failed to regenerate.</h1>
+        <p class="dim" style="margin:0 0 20px">The page you asked for isn't in this document. It may have moved when the site left Google Sites.</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="/">Back home</a>
+          <button class="btn" data-action="palette"><Icon name="search" />Search</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <Fragment slot="right"><div class="props"><p class="prop-sub">Nothing selected.</p></div></Fragment>
+</Shell>
+
+<script>
+  // Case-insensitive rescue: /fce -> /FCE, /Projects/PenBot -> /projects/penbot
+  const index: { u: string }[] = JSON.parse(document.getElementById('search-index')?.textContent || '[]');
+  const want = location.pathname.replace(/\/+$/, '').toLowerCase();
+  const match = index.find((i) => i.u.toLowerCase() === want && i.u !== location.pathname.replace(/\/+$/, ''));
+  if (match) location.replace(match.u + location.search + location.hash);
+</script>

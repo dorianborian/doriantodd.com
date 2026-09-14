@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+migration/originals/
+migration/last-run.log
+.DS_Store
+Thumbs.db
+models-src/
+shots/

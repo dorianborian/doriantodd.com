@@ -1,0 +1,160 @@
+---
+import { getEntry, render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import Shell from '../layouts/Shell.astro';
+import Icon from '../components/Icon.astro';
+import { SITE, getProjects, slugOf } from '../lib/site';
+import logo from '../assets/logo-sketch.png';
+
+const home = (await getEntry('pages', 'home'))!;
+const { Content } = await render(home);
+const projects = await getProjects();
+
+const items = await Promise.all(
+  projects.map(async ({ entry, url, no, year, model }) => {
+    const cover = entry.data.cover;
+    const thumb = cover ? await getImage({ src: cover, width: 768, format: 'webp', quality: 78 }) : null;
+    return {
+      slug: slugOf(entry.id),
+      title: entry.data.title,
+      summary: entry.data.summary ?? '',
+      tags: entry.data.tags,
+      status: entry.data.status,
+      url,
+      no,
+      year,
+      modelScale: entry.data.modelScale,
+      thumb: thumb?.src ?? null,
+      aspect: cover ? cover.width / cover.height : 1.6,
+      // the lighter mesh on the home page; the project page viewer uses the full one
+      model: model ? { ...model, url: model.url.replace(/model\.glb$/, 'model-lite.glb') } : null,
+      effect: entry.data.effect ?? null,
+    };
+  }),
+);
+// Extra models the effects need (the soccer robots are the Sesame model)
+const sesame = projects.find((p) => p.slug === 'sesame')?.model;
+// Photos for the FCE scene: small WebP copies of the images on that page
+const fceImages = import.meta.glob<{ default: ImageMetadata }>('/src/content/projects/fce/*.{png,jpg,jpeg,webp}', { eager: true });
+const photos = await Promise.all(Object.values(fceImages).map(async (m) => (await getImage({ src: m.default, width: 512, format: 'webp', quality: 72 })).src));
+const assets = {
+  robot: sesame ? { ...sesame, url: sesame.url.replace(/model\.glb$/, 'model-lite.glb') } : null,
+  photos,
+};
+const logoImg = await getImage({ src: logo, width: 1600, format: 'png' });
+const portrait = home.data.cover ? await getImage({ src: home.data.cover, width: 560, format: 'webp' }) : null;
+---
+<Shell description={`${SITE.name}: ${SITE.tagline}. ${home.data.summary}`} leftTitle="Projects">
+  <Fragment slot="toolbar">
+    <span class="tool-group-label hide-mobile">View</span>
+    <button class="tool" data-view="iso" title="Isometric (0)"><Icon name="iso" /><span class="hide-mobile">Iso</span></button>
+    <button class="tool" data-view="top" title="Top (1)"><Icon name="top" /><span class="hide-mobile">Top</span></button>
+    <button class="tool" data-view="front" title="Front (2)"><Icon name="front" /><span class="hide-mobile">Front</span></button>
+    <button class="tool" data-view="fit" title="Zoom to fit (F)"><Icon name="fit" /><span class="hide-mobile">Fit</span></button>
+    <span class="tool-sep"></span>
+    <button class="tool" data-mode="shaded" aria-pressed="true" title="Shaded"><Icon name="shaded" /><span class="hide-mobile">Shaded</span></button>
+    <button class="tool" data-mode="wire" aria-pressed="false" title="Wireframe"><Icon name="wire" /><span class="hide-mobile">Wireframe</span></button>
+    <span class="tool-sep"></span>
+    <label class="tool-range" title="Explode"><Icon name="explode" /><span class="hide-mobile">Explode</span><input type="range" min="0" max="100" value="0" data-explode aria-label="Explode" /></label>
+    <span class="tool-sep hide-mobile"></span>
+    <a class="tool hide-mobile" href="/projects"><Icon name="bom" />All projects</a>
+  </Fragment>
+
+  <Fragment slot="left">
+    <label class="filter"><Icon name="search" size={13} /><input type="search" placeholder="Filter projects" data-filter aria-label="Filter projects" /></label>
+    <ul class="tree">
+      {items.map((p, i) => (
+        <li>
+          <a class="tree-item" href={p.url} data-part={i} data-title={p.title.toLowerCase()} style="--depth:0">
+            <Icon name={p.model ? 'cube' : 'part'} size={14} /><span class="label">{p.title}</span><span class="meta">{p.no}{p.year ? ` · ${p.year}` : ''}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </Fragment>
+
+  <div class="viewport home-viewport" id="viewport" tabindex="0" aria-label="3D view of projects. Use arrow keys to select a project and Enter to open it.">
+    <div class="viewcube" aria-hidden="true">
+      <div class="viewcube-inner">
+        <div class="viewcube-face" data-face="front">FRONT</div>
+        <div class="viewcube-face" data-face="back">BACK</div>
+        <div class="viewcube-face" data-face="right">RIGHT</div>
+        <div class="viewcube-face" data-face="left">LEFT</div>
+        <div class="viewcube-face" data-face="top">TOP</div>
+        <div class="viewcube-face" data-face="bottom">BOTTOM</div>
+      </div>
+    </div>
+    <svg class="triad" viewBox="-32 -32 64 64" aria-hidden="true">
+      <line data-axis="x" x1="0" y1="0" x2="20" y2="0" stroke="var(--x)" stroke-width="2" />
+      <line data-axis="y" x1="0" y1="0" x2="0" y2="-20" stroke="var(--y)" stroke-width="2" />
+      <line data-axis="z" x1="0" y1="0" x2="10" y2="10" stroke="var(--z)" stroke-width="2" />
+      <text data-label="x" fill="var(--x)">X</text><text data-label="y" fill="var(--y)">Y</text><text data-label="z" fill="var(--z)">Z</text>
+    </svg>
+    <div class="vp-tip" hidden></div>
+    <div class="vp-hint hide-mobile"><span><b>Click</b> select</span><span><b>Double-click</b> open</span><span><b>Drag</b> rotate</span><span><b>Right-drag</b> pan</span><span><b>Scroll</b> zoom</span></div>
+    <noscript>
+      <div class="cards" style="position:absolute;inset:0;overflow:auto">
+        {items.map((p) => <a class="card" href={p.url}>{p.thumb && <img src={p.thumb} alt="" loading="lazy" />}<div><small>{p.no}</small><br />{p.title}</div></a>)}
+      </div>
+    </noscript>
+  </div>
+
+  <Fragment slot="right">
+    <div class="props" id="props-default">
+      <div>
+        {portrait && <div class="prop-thumb" style="aspect-ratio:4/3;margin-bottom:12px"><img src={portrait.src} alt="Dorian Todd" width="560" height="420" /></div>}
+        <h1 class="prop-title">{home.data.title}</h1>
+        <p class="prop-sub">{home.data.tagline}. {home.data.summary}</p>
+      </div>
+      <div class="btn-row"><a class="btn btn-primary" href="/projects"><Icon name="bom" />All projects</a><a class="btn" href="/contact">Contact</a></div>
+      <div class="prose" style="font-size:13.5px"><Content /></div>
+    </div>
+
+    <div class="props" id="props-part" hidden>
+      <div class="prop-thumb"><img alt="" data-bind="thumb" /></div>
+      <div>
+        <div class="mono dim" style="font-size:11px"><span data-bind="no"></span> <span data-bind="year"></span></div>
+        <h2 class="prop-title" data-bind="title"></h2>
+      </div>
+      <p class="prop-sub" data-bind="summary" style="margin:0"></p>
+      <table class="prop-table">
+        <tr><th>Status</th><td><span class="status" data-bind="status"></span></td></tr>
+        <tr data-row="tags"><th>Tags</th><td><div class="chips" data-bind="tags"></div></td></tr>
+      </table>
+      <div class="btn-row">
+        <a class="btn btn-primary" data-bind="url"><Icon name="open" />Open project</a>
+        <button class="btn" data-action="deselect">Clear</button>
+      </div>
+    </div>
+  </Fragment>
+</Shell>
+
+<script type="application/json" id="parts-data" set:html={JSON.stringify({ parts: items, logo: { src: logoImg.src, aspect: logo.width / logo.height }, assets })} />
+
+<style is:global>
+  .vp-tip {
+    position: absolute; z-index: 2; pointer-events: none;
+    padding: 4px 8px; font-size: 12px; white-space: nowrap;
+    background: rgba(22, 23, 26, 0.92); border: 1px solid var(--preselect); border-radius: 3px; color: var(--text);
+  }
+  .vp-tip small { font-family: var(--mono); color: var(--text-3); margin-left: 6px; }
+</style>
+
+<script is:inline>
+  // ?debug prints script errors on the page (used by scripts/shot.mjs checks)
+  if (new URLSearchParams(location.search).has('debug')) {
+    const box = document.createElement('pre');
+    box.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99;max-width:60vw;white-space:pre-wrap;font:12px monospace;color:#ff8080;background:rgba(0,0,0,.8);padding:6px;margin:0';
+    const log = (m) => { box.textContent += m + '\n'; if (!box.isConnected) document.body.append(box); };
+    addEventListener('error', (e) => log('error: ' + e.message));
+    addEventListener('unhandledrejection', (e) => log('rejection: ' + (e.reason && (e.reason.stack || e.reason.message) || e.reason)));
+    for (const k of ['warn', 'error']) { const o = console[k]; console[k] = (...a) => { log(k + ': ' + a.map(String).join(' ')); o.apply(console, a); }; }
+  }
+</script>
+
+<script>
+  import { mountAssembly } from '../scripts/assembly';
+  const el = document.getElementById('viewport')!;
+  const data = JSON.parse(document.getElementById('parts-data')!.textContent!);
+  mountAssembly(el, data);
+</script>

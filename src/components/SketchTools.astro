@@ -1,0 +1,17 @@
+---
+// Sketch toolbar shared by the contact and about workspaces (driven by scripts/contact-sketch.ts)
+import Icon from './Icon.astro';
+---
+<span class="tool-group-label hide-mobile">Sketch</span>
+    <button class="tool" data-tool="select" aria-pressed="true" title="Select and pan (V)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 2.5 12 8.2l-3.8.8L10.5 13l-1.8.9-2.2-4-3 2.6z"/></svg><span class="hide-mobile">Select</span></button>
+    <button class="tool" data-tool="line" aria-pressed="false" title="Line (L)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M3 13 13 3"/><rect x="1.5" y="11.5" width="3" height="3"/><rect x="11.5" y="1.5" width="3" height="3"/></svg><span class="hide-mobile">Line</span></button>
+    <button class="tool" data-tool="rect" aria-pressed="false" title="Rectangle (R)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2.5" y="4" width="11" height="8"/></svg><span class="hide-mobile">Rectangle</span></button>
+    <button class="tool" data-tool="circle" aria-pressed="false" title="Circle (C)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M8 8h5.5"/></svg><span class="hide-mobile">Circle</span></button>
+    <button class="tool" data-construction aria-pressed="false" title="Construction geometry (Q)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 1.6" aria-hidden="true"><path d="M2 14 14 2"/></svg><span class="hide-mobile">Construction</span></button>
+    <span class="tool-sep"></span>
+    <button class="tool" data-undo title="Undo (Ctrl+Z)" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><path d="M6 4 3 7l3 3M3 7h6.5a3.5 3.5 0 0 1 0 7H8"/></svg></button>
+    <button class="tool" data-redo title="Redo (Ctrl+Y)" disabled><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true"><path d="m10 4 3 3-3 3M13 7H6.5a3.5 3.5 0 0 0 0 7H8"/></svg></button>
+    <button class="tool" data-clear title="Clear your sketch"><Icon name="close" /><span class="hide-mobile">Clear</span></button>
+    <span class="tool-sep"></span>
+    <button class="tool" data-fit title="Zoom to fit (F)"><Icon name="fit" /><span class="hide-mobile">Fit</span></button>
+    <button class="tool" data-layer="dims" aria-pressed="true" title="Show dimensions"><Icon name="section" /><span class="hide-mobile">Dimensions</span></button>

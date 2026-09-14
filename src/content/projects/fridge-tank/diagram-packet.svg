@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 330" width="1000" height="330" font-family="Segoe UI, Inter, system-ui, sans-serif">
+  <defs>
+    <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#26282d" stroke-width="1"/></pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1 10 5 0 9z" fill="#8a94a6"/></marker>
+  </defs>
+  <rect width="1000" height="330" fill="#1b1c20"/>
+  <rect width="1000" height="330" fill="url(#g)"/>
+
+  <text x="40" y="42" fill="#6f7580" font-size="11" font-family="Consolas, ui-monospace, monospace" letter-spacing="1.5">SERIAL PACKET, JETSON TO ESP32-S3, 4 BYTES</text>
+
+  <g font-family="Consolas, ui-monospace, monospace">
+    <rect x="40" y="64" width="150" height="70" rx="6" fill="#1e2530" stroke="#4a9bff" stroke-width="1.6"/>
+    <rect x="200" y="64" width="210" height="70" rx="6" fill="#202125" stroke="#3b3e45" stroke-width="1.6"/>
+    <rect x="420" y="64" width="210" height="70" rx="6" fill="#202125" stroke="#3b3e45" stroke-width="1.6"/>
+    <rect x="640" y="64" width="150" height="70" rx="6" fill="#202125" stroke="#3b3e45" stroke-width="1.6"/>
+    <g font-size="22" font-weight="700" fill="#e4e6ea" text-anchor="middle">
+      <text x="115" y="108">0xFF</text><text x="305" y="108">LEFT</text><text x="525" y="108">RIGHT</text><text x="715" y="108">DOOR</text>
+    </g>
+    <g font-size="11" fill="#6f7580" text-anchor="middle">
+      <text x="115" y="152">byte 0</text><text x="305" y="152">byte 1</text><text x="525" y="152">byte 2</text><text x="715" y="152">byte 3</text>
+    </g>
+  </g>
+  <g font-size="13" fill="#9aa3b0" text-anchor="middle">
+    <text x="115" y="176">sync, always first</text>
+    <text x="305" y="176">0 reverse, 100 stop,</text><text x="305" y="194">200 forward</text>
+    <text x="525" y="176">0 reverse, 100 stop,</text><text x="525" y="194">200 forward</text>
+    <text x="715" y="176">0 close, 1 open,</text><text x="715" y="194">2 no change</text>
+  </g>
+
+  <!-- timing -->
+  <g font-size="13">
+    <rect x="820" y="64" width="150" height="160" rx="6" fill="#202125" stroke="#3b3e45" stroke-width="1.6"/>
+    <text x="836" y="90" fill="#e4e6ea" font-weight="600" font-size="14">Heartbeat</text>
+    <text x="836" y="112" fill="#9aa3b0">last command</text>
+    <text x="836" y="130" fill="#9aa3b0">resent at 20 Hz</text>
+    <text x="836" y="160" fill="#e4e6ea" font-weight="600" font-size="14">Watchdog</text>
+    <text x="836" y="182" fill="#9aa3b0">500 ms silence:</text>
+  </g>
+  <text x="836" y="202" fill="#f2b84b" font-size="13">motors to neutral</text>
+
+  <g stroke="#8a94a6" stroke-width="1.4" fill="none">
+    <path d="M40 250 H960"/>
+    <g stroke="#4a9bff" stroke-width="2">
+      <path d="M60 238 V262"/><path d="M146 238 V262"/><path d="M232 238 V262"/><path d="M318 238 V262"/><path d="M404 238 V262"/><path d="M490 238 V262"/>
+    </g>
+    <path d="M490 274 H820" stroke="#f2b84b" stroke-dasharray="6 5" marker-end="url(#a)"/>
+  </g>
+  <g font-size="12" fill="#6f7580" font-family="Consolas, ui-monospace, monospace">
+    <text x="60" y="292">packets every 50 ms, even when /cmd_vel is quiet</text>
+    <text x="520" y="298" fill="#f2b84b">if packets stop for 500 ms, the ESP32 stops the drive</text>
+  </g>
+  <text x="40" y="316" fill="#6f7580" font-size="12">A dropped or corrupted byte is harmless: the parser discards input until the next 0xFF and resyncs.</text>
+</svg>
