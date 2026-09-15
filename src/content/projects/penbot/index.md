@@ -1,5 +1,6 @@
 ---
 modelUp: z
+modelScale: 0.78
 model: "./model.glb"
 title: "PenBot Linkage Plotter"
 summary: "PenBot is a over-engineered solution to compact pen plotting for vector drawing. It utilizes a uncommon same-axis dual motor linkage that requires extra math, and has minimal benefits. It is inspired by the Line-Us robot, and was originally created to sign yearbooks in my senior year of high school. During OS25 It drew over 50+ portraits of people using my python face-to-vector converter and a coordinate interpreter."

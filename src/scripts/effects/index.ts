@@ -9,6 +9,7 @@ const loaders: Record<string, () => Promise<{ default: EffectFactory }>> = {
   playpen: () => import('./sesame'),
   arena: () => import('./arena'),
   photos: () => import('./photos'),
+  flybrain: () => import('./flybrain'),
 };
 
 export async function loadEffect(name: string): Promise<EffectFactory | null> {

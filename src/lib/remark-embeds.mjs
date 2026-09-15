@@ -2,6 +2,8 @@
 //
 //   https://www.youtube.com/watch?v=ID     on its own line  -> click-to-load YouTube player
 //   https://www.desmos.com/calculator/ID   on its own line  -> embedded calculator
+//   ![right: caption](./photo.jpg)  or left:                -> figure the text wraps around on desktop
+//   <div class="widget" data-widget="name"></div>          -> interactive widget (src/scripts/widgets)
 //   ![caption](./clip.mp4)                                  -> looping muted video
 //   ![caption](./part.stl)  or .glb / .gltf / .obj          -> interactive 3D viewer
 //   [datasheet](./file.pdf)                                  -> link to a file stored next to the post
@@ -88,7 +90,10 @@ export default function remarkEmbeds() {
             const src = assetUrl(file, img.url);
             const posterRel = img.url.replace(VIDEO, '.poster.jpg');
             const poster = fs.existsSync(path.resolve(path.dirname(file), posterRel)) ? ` poster="${esc(assetUrl(file, posterRel))}"` : '';
-            return { type: 'html', value: `<figure class="media"><video src="${esc(src)}" ${poster} autoplay muted loop playsinline preload="metadata"></video>${img.alt ? `<figcaption>${esc(img.alt)}</figcaption>` : ''}</figure>` };
+            const side = /^(left|right)\s*:\s*/i.exec(img.alt ?? '');
+            const alt = side ? img.alt.slice(side[0].length) : img.alt;
+            const cls = side ? ` float-${side[1].toLowerCase()}` : '';
+            return { type: 'html', value: `<figure class="media${cls}"><video src="${esc(src)}" ${poster} autoplay muted loop playsinline preload="metadata"></video>${alt ? `<figcaption>${esc(alt)}</figcaption>` : ''}</figure>` };
           }
           if (file && isRelative(img.url) && MODEL.test(img.url)) {
             return { type: 'html', value: `<figure class="media"><cad-viewer src="${esc(assetUrl(file, img.url))}" name="${esc(img.alt || path.basename(img.url))}"></cad-viewer>${img.alt ? `<figcaption>${esc(img.alt)}</figcaption>` : ''}</figure>` };
@@ -109,6 +114,7 @@ export default function remarkEmbeds() {
 
 const text = (node) => (node.value ?? '') + (node.children ?? []).map(text).join('');
 const isImagePara = (n) => n.type === 'paragraph' && n.children.length === 1 && n.children[0].type === 'image';
+const isFloat = (n) => isImagePara(n) && /^(left|right)\s*:/i.test(n.children[0].alt ?? '');
 const isClip = (n) => n.type === 'html' && n.value.startsWith('<figure class="media"><video');
 
 /**
@@ -170,16 +176,23 @@ function galleries(tree) {
     if (special) { out.push(...special); continue; }
     if (!isImagePara(n) && !isClip(n)) { out.push(n); continue; }
 
+    // a floated figure always stands alone and ends a gallery run
     const run = [];
-    while (i < kids.length && (isImagePara(kids[i]) || isClip(kids[i]))) run.push(kids[i++]);
-    i--;
+    if (isFloat(n)) run.push(n);
+    else {
+      while (i < kids.length && !isFloat(kids[i]) && (isImagePara(kids[i]) || isClip(kids[i]))) run.push(kids[i++]);
+      i--;
+    }
     const item = (m) => {
       if (!isImagePara(m)) return [m];
       const img = m.children[0];
+      const side = /^(left|right)\s*:\s*/i.exec(img.alt ?? '');
+      if (side) img.alt = img.alt.slice(side[0].length);
       const caption = img.alt?.trim();
       if (!caption) img.alt = heading ? `${heading}` : '';
-      return caption
-        ? [{ type: 'html', value: '<figure class="media">' }, m, { type: 'html', value: `<figcaption>${esc(caption)}</figcaption></figure>` }]
+      const cls = side && run.length === 1 ? ` float-${side[1].toLowerCase()}` : '';
+      return caption || cls
+        ? [{ type: 'html', value: `<figure class="media${cls}">` }, m, { type: 'html', value: `${caption ? `<figcaption>${esc(caption)}</figcaption>` : ''}</figure>` }]
         : [m];
     };
     if (run.length === 1) { out.push(...item(run[0])); continue; }

@@ -1,5 +1,7 @@
 ---
 modelUp: z
+modelScale: 0.78
+modelRotation: [0, 180, 0]
 model: "./model.glb"
 title: "Matrix Game Board"
 summary: "The Matrix Game Board is an original engineering project I made for a design competition. The whole idea was designing and building an interactive Tic-Tac-Toe game that pushed the limits of the game. The project is using nine separate 8x8 LED matrix displays to serve as both the visual game board and the player input mechanism."

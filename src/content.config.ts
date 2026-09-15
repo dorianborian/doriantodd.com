@@ -32,13 +32,15 @@ const projects = defineCollection({
       /** Extra scale for the model on the home page (1 = fills the cell). */
       modelScale: z.number().default(1),
       /** Home page scene (see src/scripts/effects/). */
-      effect: z.enum(['led-mosaic', 'scanner', 'soccer', 'chase', 'playpen', 'arena', 'photos']).optional(),
+      effect: z.enum(['led-mosaic', 'scanner', 'soccer', 'chase', 'playpen', 'arena', 'photos', 'flybrain']).optional(),
       /** GitHub repository as owner/name. Shown as a card at the top of the article and in the sidebar. */
       repo: z.string().optional(),
       /** One line under the repository name, e.g. what's in it. */
       repoNote: z.string().optional(),
       links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
       status: z.enum(['released', 'in-progress', 'archived']).default('released'),
+      /** Interactive header in place of the model viewer (see src/scripts/widgets). */
+      hero: z.string().optional(),
       draft: z.boolean().default(false),
       migratedFrom: z.string().optional(),
     }),

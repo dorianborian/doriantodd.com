@@ -70,9 +70,11 @@ const icon = (depth: number) => (depth === 1 ? 'extrude' : depth === 2 ? 'sketch
   <div class="main-scroll">
     <article class="doc" id="top">
       <div class="sheet">
-        {(modelUrl || d.cover) && (
+        {(modelUrl || d.cover || (isProject && d.hero)) && (
           <div class="sheet-view">
-            {modelUrl ? (
+            {isProject && d.hero ? (
+              <div class="widget widget-hero" data-widget={d.hero}></div>
+            ) : modelUrl ? (
               <cad-viewer src={modelUrl} name={d.title} up={model?.up} rotation={model?.rotation.join(',')}></cad-viewer>
             ) : (
               d.cover && <Image src={d.cover} alt="" widths={[640, 960, 1600]} sizes="(max-width: 860px) 100vw, 880px" loading="eager" fetchpriority="high" />
@@ -146,4 +148,5 @@ const icon = (depth: number) => (depth === 1 ? 'extrude' : depth === 2 ? 'sketch
 <script>
   // Tiny: defines <cad-viewer> and only downloads three.js if one is on the page.
   import '../scripts/cad-viewer';
+  import '../scripts/widgets';
 </script>

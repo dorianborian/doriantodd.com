@@ -23,13 +23,13 @@ This is the long version. If you want the code, it is all up at [autonomous-tank
 
 ![](./img-7e601417.png)
 
-## Why a fridge
+## Choosing a mini fridge as the chassis
 
 The honest answer is that the chassis was the joke and everything else was the engineering. A Frigidaire retro mini fridge is the right size, it is thermoelectric so it runs on 12V DC instead of needing a compressor and mains power, and it has a door. That last part mattered more than I expected. A robot that drives around is a robot. A robot that drives around and opens its own door to hand you a drink is a character.
 
 It also gave me a hard constraint that made every other decision easier. The fridge body is the chassis. Everything has to fit under it, on it, or inside it. No sprawling breadboard, no "I will find somewhere for this later."
 
-## How I structured the build
+## Build phases and gates
 
 I have burned enough weekends on projects that collapsed under their own integration debt that I now refuse to start with the fun part. I broke this into eight phases, bottom up, with a hard gate at the end of each one. A gate is a specific observable thing that has to be true before I move on. Not "the code compiles." Something I can see.
 
@@ -81,7 +81,7 @@ Keeping drive power fully isolated from logic power is not optional with brushle
 
 ![](./img-831df504.png)
 
-## Why there is a separate microcontroller
+## Separate ESP32 motor controller
 
 An obvious question came up partway through the build: the Jetson has GPIO pins. Why bother with an ESP32-S3 in the middle?
 
@@ -93,7 +93,7 @@ If I drove the ESCs directly from Jetson GPIO, the failure mode is: Jetson kerne
 
 There is also a real-time argument. Generating clean, jitter-free 50Hz PWM from userspace on a general purpose OS is harder and less reliable than doing it on bare metal. But the watchdog is the argument that actually settles it.
 
-### The ESC would not arm
+### Debugging an ESC that would not arm
 
 The ESCs beeped their "no signal" pattern forever. The instant I powered the ESP32, the beeping stopped, which meant they were seeing *something*. But they never reached the happy arm tone.
 
@@ -107,7 +107,7 @@ I am including this because it is the most honest thing in this whole article. I
 
 ![](./img-d181bc66.png)
 
-### Three servos, two timers
+### Door servo failing from ESP32 PWM timer limits
 
 Once motors worked, I added the door servo on a direct GPIO pin. It did nothing.
 
@@ -135,7 +135,7 @@ Two design decisions in there that I would repeat:
 
 I also kept a text command protocol alongside the binary one for bench debugging. You can type `L50 R-30` into a serial monitor and drive the motors directly, or `TL-2` to trim one side, or `DB5` to adjust the deadband. The parser checks for `0xFF` first and falls through to text parsing otherwise, so both coexist on the same port with no ambiguity. This paid for itself many times over.
 
-## The compute side, and a version rabbit hole
+## Jetson setup on JetPack 7.2 and ROS 2 Jazzy
 
 Jetson Orin Nano Super, running JetPack 7.2 on Ubuntu 24.04.
 
@@ -149,7 +149,7 @@ If you are on a recent JetPack, expect this. Your OpenCV will be a different ver
 
 ![](./img-cfb29c52.png)
 
-## The ODIN 1, and a firmware gate that stopped everything
+## ODIN 1 driver blocked by a firmware version check
 
 The ODIN 1 from Manifold Tech is the front sensor. SPAD dToF depth, RGB camera, IMU, and onboard SLAM that runs on the module itself rather than eating my Jetson's CPU. It connects over USB-C, which was itself a correction: I had built my whole mounting plan around Ethernet based on older documentation before checking the actual hardware in front of me.
 
@@ -192,7 +192,7 @@ That turned out to be right. Manifold's fix was a two step update: 0.8.1 to 0.11
 
 ![](./img-0eff1faf.png)
 
-## An aside on a bug that was not a bug
+## Point cloud not showing in rviz2 (camera pointed at empty space)
 
 Once the driver worked, the point cloud would not render in rviz2. Odometry showed up. The camera image showed up. The point cloud, nothing.
 
@@ -230,7 +230,7 @@ Around that sit a handful of nodes: a target selector that unifies both trackers
 
 ![How the ROS 2 nodes fit together, from sensors to motors](./diagram-nodes.svg)
 
-### The QoS bug that could have been genuinely bad
+### QoS mismatch on mode topics
 
 Mode state topics are published with `transient_local` QoS so that late joining nodes inherit the current mode. But at least one consumer was subscribing with `volatile`.
 
@@ -242,7 +242,7 @@ It was fixed by applying a shared latched QoS profile across every consumer. But
 
 ![](./img-0c200a41.png)
 
-## The bug that was making everything weird
+## Debugging a follow goal that moved with the robot
 
 Once everything worked technically, it did not work well. Follow mode would set a goal, start driving, and then along the way it would lose track of me and give up. Sometimes it would spin in slow circles. Flee mode was worse: some reasonable initial movement, then random turning, then wide arcs that put me out of frame entirely, ending with the robot stopped and facing me. Not ideal for something supposedly running away.
 
@@ -272,7 +272,7 @@ I also built a persistence and recovery state machine on top: tracking, coasting
 
 Recovery from being stuck has a real constraint: the ODIN faces forward and the rear camera has no depth. Backing up is semi-blind. The saving grace is that the rolling local costmap retains recently observed obstacles even after they leave the field of view, so a backup maneuver can be checked against the map. Backups are short, slow, and costmap verified.
 
-## Two point three hertz
+## Debugging perception running at 2.3 Hz
 
 The perception pipeline was publishing detections at 2.3Hz. The target was 30.
 
@@ -300,7 +300,7 @@ Three things I took from this:
 
 ![](./img-9df1da89.png)
 
-## Control: a Steam Deck and a hotspot
+## Manual control with a Steam Deck
 
 The control interface is a web page served from the Jetson, designed to fill a 1080x720 screen with no scrolling. Live feeds from both cameras with YOLO bounding boxes and the PID deadzone drawn as overlays, a full ROS node status grid, an event log, mode buttons, door status, and a large e-stop.
 
@@ -312,7 +312,7 @@ Since I film in places without WiFi, the Jetson broadcasts its own network with 
 
 ![](./img-97e0f3e0.png)
 
-## What is still broken
+## Known issues
 
 I would rather list these than pretend the project is finished.
 
@@ -326,7 +326,7 @@ I would rather list these than pretend the project is finished.
 
 -   **Flee mode still needs work.** The plan is making Nav2 conditional rather than always-on. Baseline flee should be direct servoing (PID on rear bearing, drive forward) with Nav2 engaging only when an obstacle actually blocks the escape heading, then handing back once clear. Handing a "run away from that person" problem to a goal-based path planner was asking the wrong tool to solve it, and the wide arcs were the symptom.
 
-### What I would tell myself at the start
+### Lessons learned
 
 **Bottom up, with real gates.** Every time I jumped ahead I paid for it in debugging time. The gate at the end of each phase has to be something observable, not "it compiles."
 

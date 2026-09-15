@@ -15,7 +15,7 @@ tags: ["Python","Computer vision","ESP32","Autonomy"]
 
 ![](./img-81ea4579.png)
 
-## Nobody is operating these cameras
+## Why automate the cameras
 
 I built a robot soccer field. Then I discovered the boring truth about robot soccer: the matches are fun to *be at* and nearly unwatchable on video. One fixed camera in the corner of the room turns a fast, scrappy game into eight indistinguishable dots milling around a beige rectangle. The interesting thing is always happening somewhere the camera isn't pointed.
 
@@ -32,7 +32,7 @@ So I wrote Auto Producer: a single Python process that watches the field, physic
 
 ![](./img-96fb4d95.mp4)
 
-## The shape of it
+## System architecture
 
 There are three inputs. A fixed overhead camera looks straight down at the field and does two jobs: ArUco marker tracking for the robots (each bot wears a marker; the roster maps marker IDs to bots, teams, and colors) and ball detection. Two pan-tilt rigs, which I call CamBots, sit at field level and each run their own independent ball tracking on their own camera feed. The field itself is 121.92 by 60.96 cm, which is a very precise way of saying 48 by 24 inches.
 
@@ -50,7 +50,7 @@ The single most useful architectural decision was making every backend independe
 
 ![](./img-051f1d38.mp4)
 
-## The ball is the hard part
+## Ball tracking
 
 Everything downstream, including where to aim, when to cut, and whether that was a kick, depends on knowing where the ball is. I assumed this was solved. It's 2026; you point YOLO at it and move on.
 
@@ -62,7 +62,7 @@ So the hybrid detector runs HSV *first*, every frame, and only gives YOLO a shot
 
 The HSV path did need one non-obvious fix. A matte ball never reads as one uniform color once it's lit, because there's a shadowed side and a bright highlight, and a fixed brightness floor is wrong in both directions: too strict on a dim frame, and on a bright one it lets in background glare. The floor is now Otsu's threshold computed per frame over the low-saturation pixels, clamped to stay inside the range that was calibrated as plausible. The camera's own exposure drift stops mattering.
 
-## Teleporting robots
+## Debugging robots jumping across the field
 
 For a while, robots and the ball would appear to jump across the field between frames. Worse, the event system was watching for speed spikes to detect kicks, so these jumps registered as absurd kick events and the director would cut cameras for a kick that never happened.
 
@@ -74,7 +74,7 @@ While I was in there I added a check for the failure mode that had cost me the m
 
 ![](./img-b03247c5.png)
 
-## The math was right, the servos weren't
+## CamBot aiming: servo error vs the math
 
 Aiming the CamBots is the one part of this that's a real control problem, and it's where I most enjoyed being precise and most enjoyed being wrong.
 
@@ -88,7 +88,7 @@ I want to be clear that the derivation isn't wrong, and I wrote its own limits i
 
 There's a related decision I like more than the control law. There are no ultrasonic sensors in the goals. I tried to spec them and couldn't find a way to make one distinguish a ball sitting in the goal mouth from a robot parked there. Goals are detected from the ball's tracked field position instead. Sometimes the sensor you don't add is the design.
 
-## What I'd fix
+## Known issues
 
 Two things are honestly wrong with it. The OBS scene switch happens synchronously inside the tick, while holding the engine lock, which means a hung OBS connection stalls the whole 30 Hz loop. It should be queued to its own thread. And there is no automated test suite at all: every file with "test" in the name is an interactive calibration panel or a hardware bring-up script. For a system where I can't reproduce most failures without the physical rig, the simulation mode is doing a lot of load-bearing work that a handful of actual unit tests should be doing instead.
 

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 380" width="1000" height="380" font-family="Segoe UI, Inter, system-ui, sans-serif">
+  <defs>
+    <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#26282d" stroke-width="1"/></pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1 10 5 0 9z" fill="#8a94a6"/></marker>
+  </defs>
+  <rect width="1000" height="380" fill="#1b1c20"/>
+  <rect width="1000" height="380" fill="url(#g)"/>
+  <text x="30" y="36" fill="#6f7580" font-size="11" font-family="Consolas, ui-monospace, monospace" letter-spacing="1.5">JOINT MODE: THE FLY'S LEG MOTOR NEURONS DRIVE SESAME'S EIGHT SERVOS</text>
+
+  <!-- motor pools grid -->
+  <g transform="translate(30 60)">
+    <rect width="250" height="250" rx="6" fill="#202125" stroke="#3b3e45" stroke-width="1.5"/>
+    <text x="16" y="28" fill="#e4e6ea" font-size="14.5" font-weight="600">36 motor neuron pools</text>
+    <text x="16" y="48" fill="#9aa3b0" font-size="12">3 legs x 2 sides x 6 functions</text>
+    <g transform="translate(16 64)">
+      <g fill="#2a9d8f">
+        <rect x="0" y="0" width="30" height="22" rx="3" opacity="0.9"/><rect x="36" y="0" width="30" height="22" rx="3" opacity="0.35"/><rect x="72" y="0" width="30" height="22" rx="3" opacity="0.6"/><rect x="108" y="0" width="30" height="22" rx="3" opacity="0.2"/><rect x="144" y="0" width="30" height="22" rx="3" opacity="0.8"/><rect x="180" y="0" width="30" height="22" rx="3" opacity="0.4"/>
+        <rect x="0" y="28" width="30" height="22" rx="3" opacity="0.3"/><rect x="36" y="28" width="30" height="22" rx="3" opacity="0.7"/><rect x="72" y="28" width="30" height="22" rx="3" opacity="0.25"/><rect x="108" y="28" width="30" height="22" rx="3" opacity="0.9"/><rect x="144" y="28" width="30" height="22" rx="3" opacity="0.3"/><rect x="180" y="28" width="30" height="22" rx="3" opacity="0.55"/>
+        <rect x="0" y="56" width="30" height="22" rx="3" opacity="0.6"/><rect x="36" y="56" width="30" height="22" rx="3" opacity="0.2"/><rect x="72" y="56" width="30" height="22" rx="3" opacity="0.85"/><rect x="108" y="56" width="30" height="22" rx="3" opacity="0.4"/><rect x="144" y="56" width="30" height="22" rx="3" opacity="0.2"/><rect x="180" y="56" width="30" height="22" rx="3" opacity="0.7"/>
+        <rect x="0" y="84" width="30" height="22" rx="3" opacity="0.2"/><rect x="36" y="84" width="30" height="22" rx="3" opacity="0.5"/><rect x="72" y="84" width="30" height="22" rx="3" opacity="0.3"/><rect x="108" y="84" width="30" height="22" rx="3" opacity="0.75"/><rect x="144" y="84" width="30" height="22" rx="3" opacity="0.6"/><rect x="180" y="84" width="30" height="22" rx="3" opacity="0.25"/>
+        <rect x="0" y="112" width="30" height="22" rx="3" opacity="0.8"/><rect x="36" y="112" width="30" height="22" rx="3" opacity="0.3"/><rect x="72" y="112" width="30" height="22" rx="3" opacity="0.5"/><rect x="108" y="112" width="30" height="22" rx="3" opacity="0.2"/><rect x="144" y="112" width="30" height="22" rx="3" opacity="0.9"/><rect x="180" y="112" width="30" height="22" rx="3" opacity="0.45"/>
+        <rect x="0" y="140" width="30" height="22" rx="3" opacity="0.4"/><rect x="36" y="140" width="30" height="22" rx="3" opacity="0.65"/><rect x="72" y="140" width="30" height="22" rx="3" opacity="0.2"/><rect x="108" y="140" width="30" height="22" rx="3" opacity="0.5"/><rect x="144" y="140" width="30" height="22" rx="3" opacity="0.3"/><rect x="180" y="140" width="30" height="22" rx="3" opacity="0.8"/>
+      </g>
+    </g>
+    <text x="16" y="238" fill="#6f7580" font-size="11.5">tonic firing, no stepping rhythm</text>
+  </g>
+
+  <!-- interface -->
+  <g transform="translate(340 60)">
+    <rect width="330" height="250" rx="6" fill="#1e2530" stroke="#4a9bff" stroke-width="1.6"/>
+    <text x="16" y="28" fill="#e4e6ea" font-size="14.5" font-weight="600">Learned body interface</text>
+    <text x="16" y="48" fill="#9aa3b0" font-size="12">485 parameters, connectome untouched</text>
+    <g font-family="Consolas, ui-monospace, monospace" font-size="12.5" fill="#d3d7dd">
+      <text x="16" y="84">u      rates / 30 Hz, smoothed</text>
+      <text x="16" y="110">f      step frequency, up to 3 Hz</text>
+      <text x="16" y="136">gate   does each leg step</text>
+      <text x="16" y="162">stride forward or backward</text>
+      <text x="16" y="188">offset hip posture</text>
+    </g>
+    <path d="M40 222 q18 -26 36 0 t36 0 t36 0 t36 0 t36 0 t36 0 t36 0" fill="none" stroke="#4a9bff" stroke-width="2"/>
+    <text x="314" y="202" fill="#6f7580" font-size="11.5" text-anchor="end">oscillator</text>
+  </g>
+
+  <!-- output -->
+  <g transform="translate(730 60)">
+    <rect width="240" height="116" rx="6" fill="#202125" stroke="#3b3e45" stroke-width="1.5"/>
+    <text x="16" y="28" fill="#e4e6ea" font-size="14.5" font-weight="600">8 servo angles at 50 Hz</text>
+    <text x="16" y="50" fill="#9aa3b0" font-size="12">hips and feet, per leg</text>
+    <text x="16" y="72" fill="#9aa3b0" font-size="12">MuJoCo Sesame, or UDP to</text>
+    <text x="16" y="92" fill="#9aa3b0" font-size="12">the real robot</text>
+  </g>
+  <g transform="translate(730 194)">
+    <rect width="240" height="116" rx="6" fill="#202125" stroke="#3b3e45" stroke-width="1.5"/>
+    <text x="16" y="28" fill="#e4e6ea" font-size="14.5" font-weight="600">Evolution strategy</text>
+    <text x="16" y="50" fill="#9aa3b0" font-size="12">64 candidates per generation</text>
+    <text x="16" y="72" fill="#9aa3b0" font-size="12">1,500 generations, ~1.7 h</text>
+    <text x="16" y="92" fill="#57ab5a" font-size="12">best at generation 1045</text>
+  </g>
+  <g stroke="#8a94a6" stroke-width="1.6" fill="none">
+    <path d="M280 185 H336" marker-end="url(#a)"/>
+    <path d="M670 118 H726" marker-end="url(#a)"/>
+    <path d="M726 252 H690 V200 H674" marker-end="url(#a)" stroke="#57ab5a" stroke-dasharray="5 4"/>
+  </g>
+  <text x="30" y="350" fill="#6f7580" font-size="12">The fly supplies the command, the interface supplies the gait. Rewards: forward for walking drives, backward for MDN, yaw for DNa02, stillness for no command.</text>
+</svg>

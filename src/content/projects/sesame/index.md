@@ -17,7 +17,7 @@ tags: ["ESP32","Quadruped","Servos","3D printing","Fusion 360","Open source"]
 
 https://www.youtube.com/watch?v=1UDsWkcQZhc
 
-## Greetings, from your new best friend
+## Overview
 
 Sesame is an open-source walking robot for makers and engineers of every skill level. It's small, it's expressive, and it's cheap enough that building one is a weekend project rather than a financial decision: about $50 to $60 in parts, a 3D printer, some basic soldering, and the Arduino IDE.
 
@@ -53,7 +53,7 @@ It walks, turns, waves, dances, points, rests, does push-ups and the worm, and j
 
 ![](./img-8650605f.mp4)
 
-## Designing the hardware, and failing a few times
+## Hardware design iterations
 
 Designing a robot that walks is tricky. Designing one that's small, cheap and easy to print is a different headache.
 
@@ -65,7 +65,7 @@ Along the way I got in touch with Petoi, who make excellent robot dogs. They sen
 
 ![](./img-1edd9fb6.png)
 
-## Electronics, and the spaghetti problem
+## Electronics and the distro board
 
 The first working Sesame used an ESP32-S2 Mini on perfboard. It worked, but the inside was a bird's nest of silicone wire, and asking other people to replicate that felt cruel. So I designed the Sesame Distro Board, a PCB that breaks out all eight servo channels, the I2C bus for the OLED, and power distribution.
 
@@ -103,7 +103,7 @@ The face is a big part of Sesame's personality. Every emote has matching frames 
 
 Writing robot animations by hand is painful: set servo 3 to 45 degrees, no, 60. I got tired of guessing and wrote Sesame Studio, a desktop app with a schematic of the robot. You pose the legs visually, capture frames, sequence them into an animation, and it generates the C++ servo angles for the firmware. It turns animation into a stop-motion workflow, and it lives in `software/sesame-studio` in the repository.
 
-## A growing ecosystem
+## Community projects
 
 Sesame has grown an ecosystem around it, and the parts other people built are the ones I'm proudest of:
 

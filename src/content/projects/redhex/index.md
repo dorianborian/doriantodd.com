@@ -38,7 +38,7 @@ A hexapod is a six-legged robot where each leg is controlled independently. In t
 
 With 3 joints per leg, the robot utilizes 18 high-torque servos for locomotion. The inverse kinematics—the complex calculations that translate desired movements into specific joint angles—are run on a connected Android phone using the open-source Chica software.
 
-## The build: from digital to physical
+## Build
 
 The construction of red.HEX was a multi-stage process involving advanced manufacturing, intricate electronics, and meticulous assembly.
 

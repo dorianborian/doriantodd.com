@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 470" width="1160" height="470" font-family="Segoe UI, Inter, system-ui, sans-serif">
+  <defs>
+    <pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#26282d" stroke-width="1"/></pattern>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 1 10 5 0 9z" fill="#8a94a6"/></marker>
+  </defs>
+  <rect width="1160" height="470" fill="#1b1c20"/>
+  <rect width="1160" height="470" fill="url(#g)"/>
+
+  <g font-size="11" font-family="Consolas, ui-monospace, monospace" fill="#6f7580" letter-spacing="1.5">
+    <text x="20" y="36">INPUT</text><text x="250" y="36">CONNECTOME SIMULATION</text><text x="560" y="36">READOUT</text><text x="810" y="36">BODY</text>
+  </g>
+
+  <g fill="#202125" stroke="#3b3e45" stroke-width="1.5">
+    <rect x="20" y="56" width="200" height="76" rx="6"/>
+    <rect x="20" y="170" width="200" height="76" rx="6"/>
+    <rect x="250" y="56" width="270" height="190" rx="6" stroke="#8b5cf6"/>
+    <rect x="560" y="56" width="210" height="190" rx="6" stroke="#ff9f1c"/>
+    <rect x="810" y="56" width="330" height="76" rx="6"/>
+    <rect x="810" y="170" width="330" height="76" rx="6"/>
+    <rect x="810" y="300" width="330" height="76" rx="6" stroke="#4a9bff"/>
+    <rect x="250" y="300" width="520" height="76" rx="6"/>
+  </g>
+
+  <g fill="#e4e6ea" font-size="14.5" font-weight="600">
+    <text x="36" y="84">Click a neuron group</text>
+    <text x="36" y="198">Webcam senses</text>
+    <text x="266" y="84">Whole CNS, 166,700 LIF neurons</text>
+    <text x="576" y="84">Command neurons</text>
+    <text x="826" y="84">Behavior mode</text>
+    <text x="826" y="198">Joint mode</text>
+    <text x="826" y="328">Sesame</text>
+    <text x="266" y="328">Browser, 30 frames per second</text>
+  </g>
+  <g fill="#9aa3b0" font-size="12.5">
+    <text x="36" y="106">Poisson input at 150 Hz</text>
+    <text x="36" y="220">food bearing and distance</text>
+    <text x="266" y="106">25.6M signed connections</text>
+    <text x="266" y="126">0.1 ms steps, numba, 32 threads</text>
+    <text x="266" y="146">parallel in 1.8 ms synaptic blocks</text>
+    <text x="266" y="176">faster than real time on an</text>
+    <text x="266" y="196">i9-13900KF, CPU only</text>
+    <text x="576" y="106">Giant Fiber, MDN, MN9</text>
+    <text x="576" y="126">aDN1/aDN2, pIP10</text>
+    <text x="576" y="146">P9/BDN2/oDN1, DNa02</text>
+    <text x="576" y="176">Hz per neuron,</text>
+    <text x="576" y="196">smoothed over 0.25 s</text>
+    <text x="826" y="106">strongest drive picks walk, turn, feed, escape</text>
+    <text x="826" y="220">36 leg motor pools into a learned gait, 8 servos</text>
+    <text x="826" y="350">HTTP JSON commands, UDP joints and OLED frames</text>
+    <text x="266" y="350">3D brain, raster, circuit diagram, 3D Sesame, meters</text>
+  </g>
+
+  <g stroke="#8a94a6" stroke-width="1.6" fill="none">
+    <path d="M220 94 H246" marker-end="url(#a)"/>
+    <path d="M220 208 H235 V160 H246" marker-end="url(#a)"/>
+    <path d="M520 150 H556" marker-end="url(#a)"/>
+    <path d="M770 120 H790 V94 H806" marker-end="url(#a)"/>
+    <path d="M770 190 H790 V208 H806" marker-end="url(#a)"/>
+    <path d="M975 132 V160" marker-end="url(#a)"/>
+    <path d="M975 246 V296" marker-end="url(#a)"/>
+    <path d="M385 246 V296" marker-end="url(#a)"/>
+    <path d="M665 246 V296" marker-end="url(#a)"/>
+  </g>
+  <path d="M1140 338 H1150 V440 H120 V250" stroke="#57ab5a" stroke-width="1.4" fill="none" stroke-dasharray="6 5"/><path d="M114 258 120 248 126 258z" fill="#57ab5a"/>
+  <text x="140" y="432" fill="#57ab5a" font-size="12">foraging loop: webcam tracks Sesame and food markers, senses feed back into the fly's visual and taste neurons</text>
+</svg>

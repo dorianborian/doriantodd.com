@@ -25,6 +25,7 @@ export {
   PointLight,
   ShaderMaterial,
   SphereGeometry,
+  BufferAttribute,
   IcosahedronGeometry,
   CapsuleGeometry,
   BoxGeometry,

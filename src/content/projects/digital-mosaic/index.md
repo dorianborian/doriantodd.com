@@ -1,6 +1,7 @@
 ---
 effect: led-mosaic
 modelRotation: [-90, 180, 0]
+modelScale: 0.78
 model: "./model.glb"
 title: "LED Digital Mosaic"
 summary: "A digital mosaic is a low fidelity screen, ex; 15x15 pixels which is made up of small shards to give the effect of a mosaic. A mosiac is simply colored peices of glass, tile, ect. which make up an image. With this, you can make each tile an individual color and display images or videos."
@@ -43,7 +44,7 @@ Then we started development on the LED display. Using a Teensy and a Raspberry P
 
 ![](./img-3d937028.mp4)
 
-## What now?
+## Future plans
 
 The dynamic mosaic project is continuously evolving, and it would greatly benefit from your contribution! The entire codebase is open source and accessible on GitHub, granting you the freedom to explore and personalize it as you see fit. Moreover, the mosaic itself has seamlessly settled into my living space, now serving as an elegant and captivating room clock.
 

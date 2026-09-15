@@ -24,7 +24,7 @@ The goal of Project Hex-Vision was to transform this dormant machine into an aut
 
 ![](./img-d686298f.png)
 
-## Hardware: a new set of eyes
+## Camera hardware
 
 The catalyst for this project was the Revopoint Inspire 2. While traditionally marketed as a high-precision 3D scanner for engineering, I saw a different utility for it. It is a lightweight, dual-feed sensor capable of providing both RGB and Depth data.
 
@@ -40,7 +40,7 @@ The software stack is built in Python, using OpenCV and the YOLOv8 model. Instea
 
 ![How HEX-VISION turns a 3D scanner feed into movement](./diagram-pipeline.svg)
 
-### Spatial intelligence
+### Left, center and right zones
 
 The program divides the visual field into three distinct zones: Left, Center, and Right.
 
@@ -54,7 +54,7 @@ By combining these, the robot knows exactly where a person is in 3D space relati
 
 ![](./img-a9736d77.png)
 
-## Engineering challenges and iteration
+## Engineering challenges
 
 The transition from theory to autonomy was fraught with traditional robotics hurdles.
 
@@ -64,7 +64,7 @@ The transition from theory to autonomy was fraught with traditional robotics hur
 
 -   **Mechanical Resilience:** To test the limits of the chassis, I took Red Hex to a skating rink for a side project called Robots on Ice. The experiment proved that the six-legged design is inherently superior for low-friction environments. It maintained balance where bipeds would have failed.
 
-## Results: autonomous engagement
+## Results
 
 After weeks of debugging the feedback loops and optimizing the Python engine, the result was a robot that felt truly alive. In the final field tests, Red Hex demonstrated the ability to scan and acquire a target, maintain its stance in real-time, and close the distance while stopping at a predetermined safety threshold.
 

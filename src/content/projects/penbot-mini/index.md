@@ -16,7 +16,7 @@ tags: ["ESP32","Linkage","Servos","Python","3D printing","Open source"]
 
 Most drawing robots lean on the same playbook: Cartesian rigs borrowed straight from 3D printers and CNC machines. PenBot never played by those rules. What started as a simple, kind of absurd goal (build a robot to sign a senior yearbook) eventually grew into a toaster-sized portrait artist, and then got shrunk all the way down to the size of a credit card. This is the story of that shrink, the math it forced, and the lessons that came with it.
 
-## From yearbook signatures to Open Sauce
+## PenBot history
 
 PenBot didn't start as a clean, finished machine. It took four or five major revisions to get anywhere close to working right. The inspiration came from a couple of places: the commercial Line-us robot, and a bit of family history. My dad helped invent the WaterColorBot, which was famously demoed to former President Barack Obama. PenBot picked up that torch with a two-link planar mechanism and coaxial motors, trading Cartesian precision for a much weirder linkage-based approach.
 
@@ -26,7 +26,7 @@ By Open Sauce 2025, PenBot MK4.5 had drawn over 50 vector portraits of attendees
 
 ![](./img-95f25ade.png)
 
-## The micro engineering of PenBot Mini
+## Mechanical design at credit card scale
 
 If the original PenBot was about proving the concept could work at all, PenBot Mini is about seeing how far the miniaturization can go. Getting down to credit-card size meant ditching the Ender 3 stepper motors and the Raspberry Pi entirely. In their place: a Seeed Studio XIAO ESP32-C6 board, talking over real-time USB-C to a custom Python desktop app.
 
@@ -41,13 +41,13 @@ At this scale, precision stops being a nice-to-have and becomes the whole game. 
 
 ![](./img-2b9048aa.png)
 
-## Software that does the heavy lifting
+## Software
 
 Here's the catch with the mechanical design: the pen tip sits 3/4 of an inch past the final pivot point. That offset sounds small, but it introduces a serious amount of math. To handle it, the ESP32-C6 firmware runs an iterative solver that refines the joint angles up to five times per coordinate just to land the pen where it's supposed to be.
 
 The desktop app isn't just forwarding raw mouse movement either. It resamples every curve into evenly spaced chunks and runs a "ghost simulation" first, checking that the linkage arms won't collide with each other or twist past their limits before a single command gets sent. A 200-command queue buffers everything coming in, and commands execute with a 30-millisecond rate limit so the pen doesn't snag and tear the paper mid-line.
 
-## The paradox of scaling down
+## Problems caused by scaling down
 
 Building both versions of PenBot exposed a pattern that shows up a lot in robotics: making something smaller doesn't make the engineering easier, it makes every physical flaw louder. The original PenBot could lean on beefy stepper motors and generous coordinate transforms to paper over its inaccuracies. PenBot Mini doesn't get that luxury. At this size, there's nowhere to hide, and the mechanical build has to be right.
 
