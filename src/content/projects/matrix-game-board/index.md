@@ -1,4 +1,5 @@
 ---
+effect: matrix
 modelUp: z
 modelScale: 0.78
 modelRotation: [0, 180, 0]

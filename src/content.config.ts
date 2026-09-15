@@ -32,7 +32,7 @@ const projects = defineCollection({
       /** Extra scale for the model on the home page (1 = fills the cell). */
       modelScale: z.number().default(1),
       /** Home page scene (see src/scripts/effects/). */
-      effect: z.enum(['led-mosaic', 'scanner', 'soccer', 'chase', 'playpen', 'arena', 'photos', 'flybrain']).optional(),
+      effect: z.enum(['led-mosaic', 'scanner', 'soccer', 'chase', 'playpen', 'arena', 'photos', 'flybrain', 'matrix']).optional(),
       /** GitHub repository as owner/name. Shown as a card at the top of the article and in the sidebar. */
       repo: z.string().optional(),
       /** One line under the repository name, e.g. what's in it. */
