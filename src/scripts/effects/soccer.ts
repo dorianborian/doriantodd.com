@@ -102,11 +102,111 @@ export default async function soccer(ctx: EffectContext): Promise<Effect> {
   const tmp = new THREE.Vector2();
   let replay = 0;
 
+  // ---- goal lines: the field model has its own goals; a strip in the defending team's colour marks each mouth
+  const mouth = halfZ * 0.35;
+  const postH = ballR * 4.2;
+  const teamHex = [0xe5484d, 0x3e8bff];
+  for (const side of [1, -1] as const) {
+    const defend = side > 0 ? 1 : 0; // team 1 defends +x
+    const line = new THREE.Mesh(
+      new THREE.PlaneGeometry(ballR * 0.5, mouth * 2).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ color: teamHex[defend], transparent: true, opacity: 0.75, toneMapped: false, depthWrite: false }),
+    );
+    line.position.set(cx + side * halfX, surface + 0.004, cz);
+    ctx.body.add(line);
+  }
+
+  // ---- ball shadow
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(ballR * 1.1, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false }));
+  ctx.body.add(shadow);
+
+  // ---- scoreboard floating over the far sideline
+  const board = document.createElement('canvas');
+  board.width = 512; board.height = 160;
+  const boardTex = new THREE.CanvasTexture(board);
+  boardTex.colorSpace = THREE.SRGBColorSpace;
+  const boardW = fsize.x * 0.42;
+  const boardMesh = new THREE.Mesh(new THREE.PlaneGeometry(boardW, boardW * 160 / 512), new THREE.MeshBasicMaterial({ map: boardTex, transparent: true, toneMapped: false }));
+  boardMesh.position.set(cx, surface + fsize.x * 0.22, cz - fsize.z / 2 - 0.35);
+  ctx.body.add(boardMesh);
+  const score = [0, 0];
+  let clock = 0, banner = '', bannerT = 0, drawnKey = '';
+  const drawBoard = () => {
+    const key = `${score}|${Math.floor(clock)}|${banner}|${Math.floor(bannerT * 4) % 2}`;
+    if (key === drawnKey) return;
+    drawnKey = key;
+    const g = board.getContext('2d')!;
+    g.clearRect(0, 0, 512, 160);
+    g.fillStyle = 'rgba(16,17,20,0.92)';
+    g.beginPath(); g.roundRect(4, 4, 504, 152, 14); g.fill();
+    g.strokeStyle = '#3b3e45'; g.lineWidth = 3; g.stroke();
+    g.textAlign = 'center';
+    g.font = '600 22px Consolas, monospace';
+    g.fillStyle = '#9aa3b0';
+    const mm = String(Math.floor(clock / 60)).padStart(2, '0'), ss = String(Math.floor(clock % 60)).padStart(2, '0');
+    g.fillText(`${mm}:${ss}`, 256, 38);
+    g.font = '700 70px Segoe UI, Arial, sans-serif';
+    g.fillStyle = '#e5484d'; g.fillText(String(score[0]), 150, 112);
+    g.fillStyle = '#3e8bff'; g.fillText(String(score[1]), 362, 112);
+    g.fillStyle = '#e4e6ea'; g.fillText(':', 256, 108);
+    g.font = '600 20px Segoe UI, Arial, sans-serif';
+    g.fillStyle = '#e5484d'; g.fillText('RED', 150, 145);
+    g.fillStyle = '#3e8bff'; g.fillText('BLUE', 362, 145);
+    if (banner && Math.floor(bannerT * 4) % 2 === 0) {
+      g.fillStyle = 'rgba(16,17,20,0.94)';
+      g.fillRect(96, 52, 320, 70);
+      g.font = '800 46px Segoe UI, Arial, sans-serif';
+      g.fillStyle = '#ffd166';
+      g.fillText(banner, 256, 104);
+    }
+    boardTex.needsUpdate = true;
+  };
+
+  // ---- confetti
+  const CONF = 220;
+  const cPos = new Float32Array(CONF * 3), cVel = new Float32Array(CONF * 3), cCol = new Float32Array(CONF * 3), cLife = new Float32Array(CONF);
+  for (let i = 0; i < CONF; i++) cPos[i * 3 + 1] = -50;
+  const cGeo = new THREE.BufferGeometry();
+  const cPosAttr = new THREE.Float32BufferAttribute(cPos, 3); cPosAttr.setUsage(THREE.DynamicDrawUsage);
+  const cColAttr = new THREE.Float32BufferAttribute(cCol, 3);
+  cGeo.setAttribute('position', cPosAttr);
+  cGeo.setAttribute('color', cColAttr);
+  const confetti = new THREE.Points(cGeo, new THREE.PointsMaterial({ size: ballR * 0.55, vertexColors: true, toneMapped: false }));
+  confetti.frustumCulled = false;
+  ctx.body.add(confetti);
+  let cCursor = 0;
+  const confettiBurst = (x: number, z: number, team: number) => {
+    const base = new THREE.Color(teamHex[team]);
+    for (let k = 0; k < 90; k++) {
+      const i = cCursor++ % CONF;
+      cPos.set([cx + x, surface + postH, cz + z], i * 3);
+      cVel.set([rand(-1, 1) * fsize.x * 0.12, rand(0.6, 1.4) * fsize.x * 0.18, rand(-1, 1) * fsize.x * 0.12], i * 3);
+      const c = Math.random() < 0.3 ? new THREE.Color(0xffd166) : Math.random() < 0.5 ? new THREE.Color(0xffffff) : base;
+      cCol.set([c.r, c.g, c.b], i * 3);
+      cLife[i] = rand(1.4, 2.4);
+    }
+    cColAttr.needsUpdate = true;
+  };
+
+  // ---- referee: stuck ball, stalled robots, first to three
+  let still = 0, stall = 0, cornered = 0, celebrate2 = { team: -1, t: 0 };
+  const WIN = 3;
+  const kickoff = (serveTo: number) => {
+    bpos.set(0, 0);
+    bvel.set(0, 0);
+    for (const b of bots) { b.pos.copy(b.home); b.vel.set(0, 0); b.yaw = b.team ? -Math.PI / 2 : Math.PI / 2; }
+    // a gentle roll toward the team that conceded
+    bvel.set((serveTo === 0 ? -1 : 1) * maxSpeed * 0.6, rand(-0.4, 0.4) * maxSpeed);
+  };
+  const flash = (text: string, t = 1.8) => { banner = text; bannerT = t; };
+
   const place = () => {
     ball.position.set(cx + bpos.x, surface + ballR, cz + bpos.y);
+    shadow.position.set(cx + bpos.x + ballR * 0.25, surface + 0.002, cz + bpos.y + ballR * 0.2);
     for (const bot of bots) {
       const bob = Math.abs(Math.sin(bot.phase * 2)) * botLength * 0.035;
-      bot.obj.position.set(cx + bot.pos.x, surface + bob, cz + bot.pos.y);
+      const hop = celebrate2.team === bot.team ? Math.abs(Math.sin(bot.phase * 1.5)) * botLength * 0.25 : 0;
+      bot.obj.position.set(cx + bot.pos.x, surface + bob + hop, cz + bot.pos.y);
       bot.obj.rotation.set(0, bot.yaw, Math.sin(bot.phase * 2) * 0.05);
     }
   };
@@ -115,17 +215,35 @@ export default async function soccer(ctx: EffectContext): Promise<Effect> {
   return {
     update(_t, dt) {
       dt = Math.min(dt, 1 / 20);
+      clock += dt;
+      bannerT = Math.max(0, bannerT - dt);
+      if (!bannerT) banner = '';
       if (replay > 0) {
         replay -= dt;
-        if (replay <= 0) { bpos.set(0, 0); bvel.set(rand(-1, 1) * maxSpeed, rand(-1, 1) * maxSpeed * 0.5); for (const b of bots) b.pos.copy(b.home); }
+        if (replay <= 0) {
+          const loser = celebrate2.team >= 0 ? 1 - celebrate2.team : Math.random() < 0.5 ? 0 : 1;
+          if (score[0] >= WIN || score[1] >= WIN) { score[0] = score[1] = 0; clock = 0; }
+          celebrate2.team = -1;
+          kickoff(loser);
+          flash('KICK OFF', 1.1);
+        }
       } else {
         bpos.addScaledVector(bvel, dt);
         bvel.multiplyScalar(Math.pow(0.8, dt)); // light ball, rolls far
         if (Math.abs(bpos.y) > halfZ) { bpos.y = Math.sign(bpos.y) * halfZ; bvel.y *= -0.8; }
         if (Math.abs(bpos.x) > halfX) {
-          if (Math.abs(bpos.y) < halfZ * 0.35) {
-            celebrate(1); // goal
-            replay = 1.6;
+          if (Math.abs(bpos.y) < mouth) {
+            // red attacks +x, blue attacks -x
+            const scorer = bpos.x > 0 ? 0 : 1;
+            score[scorer]++;
+            celebrate(1);
+            confettiBurst(Math.sign(bpos.x) * halfX, 0, scorer);
+            celebrate2 = { team: scorer, t: 0 };
+            const won = score[scorer] >= WIN;
+            flash(won ? (scorer ? 'BLUE WINS' : 'RED WINS') : 'GOAL', won ? 3.4 : 2.2);
+            replay = won ? 3.6 : 2.4;
+            bpos.x = Math.sign(bpos.x) * (halfX + ballR * 1.5);
+            bvel.set(0, 0);
           } else {
             bpos.x = Math.sign(bpos.x) * halfX;
             bvel.x *= -0.8;
@@ -187,6 +305,46 @@ export default async function soccer(ctx: EffectContext): Promise<Effect> {
           b.vel.addScaledVector(gap, maxSpeed * 0.5);
         }
       }
+
+      // referee: a ball that stops, gets wedged in a corner, or robots that stall out get a drop ball
+      if (replay <= 0) {
+        const ballSpeed = bvel.length();
+        const near = bots.some((b) => b.pos.distanceTo(bpos) < botLength * 0.9 + ballR);
+        still = ballSpeed < maxSpeed * 0.04 && !near ? still + dt : 0;
+        const botsSlow = bots.every((b) => b.vel.length() < maxSpeed * 0.08);
+        stall = botsSlow ? stall + dt : 0;
+        cornered = Math.abs(bpos.x) > halfX * 0.88 && Math.abs(bpos.y) > halfZ * 0.8 ? cornered + dt : 0;
+        if (still > 2.5 || stall > 3 || cornered > 3.5) {
+          const toward = new THREE.Vector2(-bpos.x, -bpos.y).normalize();
+          bpos.multiplyScalar(0.55);
+          bvel.copy(toward.multiplyScalar(maxSpeed * 0.9)).add(new THREE.Vector2(rand(-0.3, 0.3), rand(-0.3, 0.3)).multiplyScalar(maxSpeed));
+          for (const b of bots) b.vel.add(new THREE.Vector2(rand(-1, 1), rand(-1, 1)).multiplyScalar(maxSpeed * 0.6));
+          still = stall = cornered = 0;
+          flash('DROP BALL', 1.2);
+        }
+      }
+      // scorer does a victory spin and hops, the other robot slumps
+      if (celebrate2.team >= 0) {
+        celebrate2.t += dt;
+        for (const b of bots) {
+          if (b.team === celebrate2.team) { b.yaw += dt * 9; b.phase += dt * 14; }
+          else b.vel.multiplyScalar(0.9);
+        }
+      }
+      // confetti falls and flutters
+      for (let i = 0; i < CONF; i++) {
+        if (cLife[i] <= 0) continue;
+        cLife[i] -= dt;
+        const j = i * 3;
+        cVel[j + 1] -= fsize.x * 0.35 * dt;
+        cVel[j] *= 0.985; cVel[j + 2] *= 0.985;
+        cPos[j] += (cVel[j] + Math.sin(clock * 9 + i) * fsize.x * 0.02) * dt;
+        cPos[j + 1] = Math.max(surface, cPos[j + 1] + cVel[j + 1] * dt);
+        cPos[j + 2] += cVel[j + 2] * dt;
+        if (cLife[i] <= 0) cPos[j + 1] = -50;
+      }
+      cPosAttr.needsUpdate = true;
+      drawBoard();
 
       // fans: cheer after goals, lean in when the ball comes to their side
       for (const f of fans) {
