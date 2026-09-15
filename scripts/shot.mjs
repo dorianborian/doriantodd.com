@@ -32,7 +32,7 @@ function shot(urlPath, file) {
       '--headless=new', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--hide-scrollbars',
       `--window-size=${w},${h}`, '--virtual-time-budget=30000', `--user-data-dir=${profile}`, `--screenshot=${out}`, url,
     ], { timeout: 180000 }, (err) => {
-      fs.rmSync(profile, { recursive: true, force: true });
+      try { fs.rmSync(profile, { recursive: true, force: true }); } catch {}
       console.log(err ? `FAILED ${file}: ${err.message.split('\n')[0]}` : out);
       resolve();
     });
