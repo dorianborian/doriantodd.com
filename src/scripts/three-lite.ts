@@ -29,6 +29,7 @@ export {
   BufferAttribute,
   IcosahedronGeometry,
   CapsuleGeometry,
+  ConeGeometry,
   BoxGeometry,
   Box3,
   BufferGeometry,

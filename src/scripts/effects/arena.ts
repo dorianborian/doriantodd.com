@@ -4,7 +4,7 @@
 
 import * as THREE from '../three-lite';
 import { makeBody, step, type Body, type World } from './physics';
-import { damp, rand, turnToward, wrapAngle } from './shared';
+import { damp, glowMaterial, rand, turnToward, wrapAngle } from './shared';
 import type { EffectContext, Effect } from './types';
 
 /** Executioner's weapon side faces -z in the model, so the drive heading is flipped. */
@@ -38,8 +38,9 @@ type Piece = {
   body: Body | null;
 };
 
-type Kind = 'washer' | 'stove' | 'fridge' | 'microwave' | 'miku';
-const LINEUP: Kind[] = ['washer', 'stove', 'fridge', 'microwave', 'miku'];
+type Kind = 'washer' | 'stove' | 'fridge' | 'microwave' | 'miku' | 'toaster' | 'crt' | 'trash' | 'heater' | 'arcade' | 'duck' | 'cone' | 'gnome' | 'tower' | 'vending' | 'lamp' | 'tank' | 'printer';
+// appliances first, with the easter eggs mixed in between
+const LINEUP: Kind[] = ['washer', 'toaster', 'stove', 'duck', 'crt', 'fridge', 'cone', 'microwave', 'tower', 'gnome', 'heater', 'arcade', 'trash', 'tank', 'printer', 'vending', 'lamp', 'miku'];
 
 /** Appliances built from separate parts so they can come apart. The last part stays with the chassis. */
 function appliance(kind: Kind) {
@@ -115,6 +116,147 @@ function appliance(kind: Kind) {
     box(w * 0.3, h - t, t, grey, [w * 0.35, 0, d / 2 - t / 2]);
     add(new THREE.Mesh(new THREE.CylinderGeometry(w * 0.3, w * 0.3, 0.008, 24), std(0xdde6ee, 0.05, 0.1)), [0, -h / 2 + t * 2.5, 0]);
     base(w, d, h, black);
+  } else if (kind === 'toaster') {
+    w = 0.26; h = 0.18; d = 0.16;
+    const chrome = std(0xd9dde2, 0.18, 0.9), black = std(0x1b1c1f, 0.6);
+    shell(w, h, d, chrome);
+    const slots = pieces[0].mesh;
+    for (const z of [-0.035, 0.035]) { const slot = new THREE.Mesh(new THREE.BoxGeometry(w * 0.7, 0.004, 0.018), black); slot.position.set(0, t / 2 + 0.002, z); slots.add(slot); }
+    box(w - t * 2, h - t, t, chrome, [0, 0, d / 2 - t / 2]);
+    add(new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.025, 0.03), black), [w / 2 + 0.015, h * 0.2, 0]); // lever
+    for (const z of [-0.035, 0.035]) add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.6, 0.09, 0.012), std(0xc98b4a, 0.9)), [0, h / 2 + 0.03, z]); // toast
+    base(w, d, h, black);
+  } else if (kind === 'crt') {
+    w = 0.3; h = 0.26; d = 0.28;
+    const beige = std(0xd8cfb8, 0.7), glass = std(0x1d2a2a, 0.08, 0.3), dark = std(0x2a2a2a, 0.6);
+    shell(w, h, d, beige);
+    const screen = box(w - t * 2, h - t * 2, t, beige, [0, 0, d / 2 - t / 2]);
+    const tube = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.72, h * 0.62), glass);
+    tube.position.z = t / 2 + 0.002; tube.position.y = h * 0.06;
+    screen.add(tube);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.012, 10).rotateX(Math.PI / 2), dark), [w * 0.32, -h * 0.36, d / 2 + 0.006]);
+    add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.7, h * 0.7, d * 0.6), dark), [0, 0, -d * 0.1]); // the tube inside
+    base(w, d, h, beige);
+  } else if (kind === 'trash') {
+    w = 0.22; h = 0.34; d = 0.22;
+    const green = std(0x3f6b4a, 0.55, 0.3), lid = std(0x2f5238, 0.5, 0.3);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.1, 0.02, 20), lid), [0, h / 2 - 0.01, 0]);
+    for (let k = 0; k < 4; k++) {
+      const a = (k / 4) * Math.PI * 2;
+      add(new THREE.Mesh(new THREE.BoxGeometry(0.15, h * 0.9, 0.012), green), [Math.sin(a) * 0.1, 0, Math.cos(a) * 0.1], new THREE.Euler(0, a, 0));
+    }
+    add(new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), std(0xe9e4d8, 0.9)), [0, h * 0.1, 0]); // paper ball
+    base(w, d, h, lid);
+  } else if (kind === 'heater') {
+    w = 0.22; h = 0.55; d = 0.22;
+    const white = std(0xeef0f2, 0.4), copper = std(0xb87333, 0.35, 0.8);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.03, 20), white), [0, h / 2 - 0.015, 0]);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, h * 0.8, 20, 1, true), white), [0, 0, 0]);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, h * 0.7, 16), std(0x7d8691, 0.35, 0.7)), [0, 0, 0]);
+    for (const x of [-0.04, 0.04]) add(new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.12, 8), copper), [x, h / 2 + 0.05, 0]);
+    base(w, d, h, white);
+  } else if (kind === 'arcade') {
+    w = 0.26; h = 0.6; d = 0.28;
+    const purple = std(0x3b1f6b, 0.5), black = std(0x111214, 0.6), neon = new THREE.MeshBasicMaterial({ color: 0x29f0ff, toneMapped: false });
+    shell(w, h, d, purple);
+    const bezel = box(w - t * 2, h * 0.3, t, black, [0, h * 0.14, d / 2 - t / 2]);
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.66, h * 0.22), new THREE.MeshBasicMaterial({ color: 0x6b2cff, toneMapped: false }));
+    screen.position.z = t / 2 + 0.002;
+    bezel.add(screen);
+    const marquee = box(w, h * 0.1, t * 1.5, black, [0, h * 0.42, d / 2 - t]);
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.8, h * 0.05), neon);
+    sign.position.z = t;
+    marquee.add(sign);
+    const panel = box(w, 0.03, 0.12, black, [0, -h * 0.05, d / 2 + 0.03]);
+    const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.05, 6), black);
+    stick.position.set(-0.05, 0.035, 0);
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.016, 10, 8), std(0xe5484d, 0.4));
+    ball.position.set(-0.05, 0.06, 0);
+    panel.add(stick, ball);
+    for (const x of [0.02, 0.06, 0.1]) { const b = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.01, 12), std(x > 0.05 ? 0xffd166 : 0x4a9bff, 0.4)); b.position.set(x - 0.02, 0.018, 0); panel.add(b); }
+    base(w, d, h, black);
+  } else if (kind === 'duck') {
+    // easter egg: a giant rubber duck
+    w = 0.3; h = 0.34; d = 0.34;
+    const yellow = std(0xffd23f, 0.35), orange = std(0xff8c1a, 0.4), black = std(0x111111, 0.3);
+    add(new THREE.Mesh(new THREE.SphereGeometry(0.15, 20, 14).scale(1, 0.75, 1.15), yellow), [0, -h * 0.12, 0]);
+    const head = add(new THREE.Mesh(new THREE.SphereGeometry(0.09, 18, 14), yellow), [0, h * 0.2, 0.08]);
+    const beak = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.07, 12).rotateX(Math.PI / 2), orange);
+    beak.position.set(0, -0.01, 0.1);
+    head.add(beak);
+    for (const x of [-0.04, 0.04]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), black); e.position.set(x, 0.025, 0.075); head.add(e); }
+    add(new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 8).scale(1, 0.6, 1.4), yellow), [0, -h * 0.02, -0.15]); // tail
+    base(w * 0.6, d * 0.6, h, yellow);
+  } else if (kind === 'cone') {
+    // easter egg: a traffic cone, knocked over in one hit
+    w = 0.22; h = 0.36; d = 0.22;
+    const orange = std(0xff6a13, 0.5), white = std(0xf4f4f4, 0.5);
+    add(new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.12, 16, 1, true), orange), [0, h * 0.28, 0]);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, 0.08, 16, 1, true), white), [0, h * 0.06, 0]);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.1, 0.12, 16, 1, true), orange), [0, -h * 0.17, 0]);
+    base(w, d, h, std(0x222222, 0.8));
+  } else if (kind === 'gnome') {
+    // easter egg: a garden gnome
+    w = 0.2; h = 0.4; d = 0.2;
+    const red = std(0xd62828, 0.6), blue = std(0x2b59c3, 0.6), skin = std(0xf1c6a7, 0.8), beardM = std(0xf7f7f2, 0.9);
+    add(new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 16), red), [0, h * 0.33, 0]);
+    add(new THREE.Mesh(new THREE.SphereGeometry(0.05, 14, 10), skin), [0, h * 0.13, 0.01]);
+    add(new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.1, 14).rotateX(Math.PI), beardM), [0, h * 0.02, 0.04]);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.14, 14), blue), [0, -h * 0.17, 0]);
+    base(w * 0.8, d * 0.8, h, std(0x5b3a1e, 0.9));
+  } else if (kind === 'tower') {
+    w = 0.14; h = 0.36; d = 0.3;
+    const black = std(0x141518, 0.45, 0.4), rgb = new THREE.MeshBasicMaterial({ color: 0xff3df2, toneMapped: false }), glass = std(0x223040, 0.05, 0.2);
+    shell(w, h, d, black);
+    const side = box(t, h - t * 2, d - t * 2, glass, [w / 2 + t / 2, 0, 0]);
+    const strip = new THREE.Mesh(new THREE.BoxGeometry(0.004, h * 0.8, 0.006), rgb);
+    strip.position.set(-0.01, 0, d * 0.4);
+    side.add(strip);
+    for (const y of [0.1, -0.02]) add(new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.006, 8, 20), rgb), [0, y, d / 2 + 0.004]); // fans
+    add(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.2), std(0x2e7d32, 0.5)), [0, 0.02, -0.02]); // graphics card
+    base(w, d, h, black);
+  } else if (kind === 'vending') {
+    w = 0.32; h = 0.62; d = 0.26;
+    const red = std(0xc1121f, 0.4, 0.2), glass = std(0x9fc5e8, 0.05, 0.1), dark = std(0x1a1a1a, 0.5);
+    shell(w, h, d, red);
+    const front = box(w * 0.64, h * 0.75, t, glass, [-w * 0.14, h * 0.08, d / 2 - t / 2]);
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) {
+      const can = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.05, 10), std([0xe63946, 0x2a9d8f, 0xf4a261][c], 0.4, 0.4));
+      can.position.set((c - 1) * 0.06, (r - 1.5) * 0.1, -0.03);
+      front.add(can);
+    }
+    box(w * 0.3, h * 0.75, t, dark, [w * 0.33, h * 0.08, d / 2 - t / 2]);
+    base(w, d, h, dark);
+  } else if (kind === 'lamp') {
+    w = 0.22; h = 0.5; d = 0.22;
+    const brass = std(0xb08d57, 0.35, 0.8), shade = std(0xf2e8cf, 0.9), glow = new THREE.MeshBasicMaterial({ color: 0xfff1c1, toneMapped: false });
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.11, 0.16, 20, 1, true), shade), [0, h * 0.3, 0]);
+    add(new THREE.Mesh(new THREE.SphereGeometry(0.03, 12, 10), glow), [0, h * 0.22, 0]);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, h * 0.6, 8), brass), [0, -h * 0.05, 0]);
+    base(w * 0.7, d * 0.7, h, brass);
+  } else if (kind === 'tank') {
+    // easter egg: a tiny fridge tank, googly eyes and all
+    w = 0.22; h = 0.3; d = 0.28;
+    const red = std(0xd62828, 0.35, 0.1), black = std(0x151515, 0.7), white = std(0xffffff, 0.3);
+    shell(w, h * 0.8, d, red);
+    const door = box(w - t, h * 0.8 - t, t, red, [0, 0, d / 2 - t / 2]);
+    for (const x of [-0.05, 0.05]) {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 14, 10), white);
+      eye.position.set(x, 0.05, 0.02);
+      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.014, 10, 8), black);
+      pupil.position.set(x + 0.006, 0.045, 0.045);
+      door.add(eye, pupil);
+    }
+    for (const x of [-1, 1]) add(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, d * 1.05), black), [x * (w / 2 + 0.02), -h * 0.4, 0]); // treads
+    base(w, d, h * 0.8, black);
+  } else if (kind === 'printer') {
+    w = 0.3; h = 0.16; d = 0.26;
+    const grey = std(0xe6e6e6, 0.6), dark = std(0x333333, 0.5), paper = std(0xffffff, 0.9);
+    shell(w, h, d, grey);
+    box(w - t * 2, h * 0.4, t, dark, [0, -h * 0.15, d / 2 - t / 2]);
+    add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.7, 0.004, 0.2), paper), [0, h / 2 + 0.02, -0.02], new THREE.Euler(-0.5, 0, 0));
+    add(new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.01, 0.03), std(0x57ab5a, 0.4)), [w * 0.35, h / 2 + 0.005, d * 0.35]);
+    base(w, d, h, dark);
   } else {
     // plush Miku: big head, teal twin tails, grey outfit, sitting
     w = 0.26; h = 0.36; d = 0.18;
@@ -150,6 +292,35 @@ export default function arena(ctx: EffectContext): Effect {
   const botRadius = Math.max(botSize.x, botSize.z) * 0.5;
 
   const half = ctx.foot * 0.48;
+
+  // ------------------------------------------------------------ spinning beater bar
+  // The red vertical bar at the front spins about the robot's left-right axis. A translucent cylinder of
+  // moving streaks around it reads as motion blur, and its speed follows the weapon: idle, spin-up, full.
+  const spinU = { uPhase: { value: 0 }, uSpeed: { value: 0 } };
+  const blur = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.36, 0.36, 2.2, 40, 1, true).rotateZ(Math.PI / 2),
+    glowMaterial({
+      uniforms: spinU,
+      side: THREE.DoubleSide,
+      vertexShader: /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: /* glsl */ `
+        uniform float uPhase; uniform float uSpeed; varying vec2 vUv;
+        void main() {
+          float a = fract(vUv.x * 2.0 - uPhase);
+          // two bar tips per turn, smeared wider as the weapon speeds up
+          float smear = mix(0.04, 0.45, uSpeed);
+          float streak = smoothstep(smear, 0.0, a) * (1.0 - smoothstep(0.0, 0.02, -a + 0.0));
+          float ends = smoothstep(0.08, 0.0, min(vUv.y, 1.0 - vUv.y));
+          vec3 col = mix(vec3(1.0, 0.18, 0.12), vec3(1.0, 0.85, 0.7), streak * uSpeed);
+          float alpha = (streak * 0.8 + 0.06) * uSpeed * (1.0 - ends * 0.7);
+          gl_FragColor = vec4(col * alpha, 0.0);
+        }`,
+    }),
+  );
+  blur.position.set(0, 0.38, -0.78);
+  blur.renderOrder = 4;
+  ctx.model.add(blur);
+  let spin = 0.15; // 0 idle, 1 full speed
   const floorY = 0.03;
 
   // ------------------------------------------------------------ arena
@@ -268,6 +439,7 @@ export default function arena(ctx: EffectContext): Effect {
   type Mode = 'roam' | 'charge' | 'recoil';
   let mode: Mode = 'roam';
   let timer = rand(1.5, 3);
+  let sinceHit = 0;
   let waypoint = new THREE.Vector2(rand(-half, half) * 0.6, rand(-half, half) * 0.6);
   ctx.model.position.y = floorY;
 
@@ -277,7 +449,10 @@ export default function arena(ctx: EffectContext): Effect {
       const lim = half - botRadius;
       const mpos = new THREE.Vector2(machine.pos.x, machine.pos.z);
       const toMachine = mpos.clone().sub(robot.pos);
-      const flying = machine.vel.lengthSq() > 0.02 || machine.pos.y > floorY + wm.half.y + 0.05;
+      // only a machine that is actually moving counts as airborne; resting jitter or an odd resting height
+      // used to block charges forever
+      const flying = machine.vel.lengthSq() > 0.25;
+      sinceHit += dt;
 
       timer -= dt;
       if (mode === 'roam') {
@@ -303,6 +478,8 @@ export default function arena(ctx: EffectContext): Effect {
           machine.ang.set(rand(-4, 4), rand(-5, 5), rand(-4, 4));
           mode = 'recoil';
           timer = 0.45;
+          sinceHit = 0;
+          spin = Math.max(0.55, spin - 0.35); // the hit bleeds off rotor speed
           robot.speed = -0.6;
         }
         if (timer <= 0) { mode = 'roam'; timer = rand(1.5, 3); }
@@ -316,6 +493,20 @@ export default function arena(ctx: EffectContext): Effect {
       for (const k of ['x', 'z'] as const) {
         if (Math.abs(machine.pos[k]) > wallLim) machine.vel[k] -= Math.sign(machine.pos[k]) * dt * 3;
       }
+      if (attached.length && dissolve <= 0 && sinceHit > 9) {
+        // something went wrong (wedged in a corner, knocked on top of the wall): drop it back in the middle
+        machine.pos.set(rand(-0.2, 0.2) * half, floorY + wm.half.y + 0.6, rand(-0.2, 0.2) * half);
+        machine.vel.set(0, 0, 0);
+        machine.ang.set(0, 0, 0);
+        sinceHit = 4;
+        mode = 'roam';
+        timer = 0.8;
+      }
+      // weapon speed: winds up while hunting, peaks during a charge, winds down between machines
+      const wantSpin = mode === 'charge' ? 1 : mode === 'recoil' ? 0.7 : attached.length ? 0.45 : 0.12;
+      spin += (wantSpin - spin) * (1 - Math.exp(-dt * (wantSpin > spin ? 1.6 : 0.8)));
+      spinU.uSpeed.value = spin;
+      spinU.uPhase.value += dt * (2 + spin * 26);
       robot.pos.x = THREE.MathUtils.clamp(robot.pos.x + Math.sin(robot.yaw) * robot.speed * dt, -lim, lim);
       robot.pos.y = THREE.MathUtils.clamp(robot.pos.y + Math.cos(robot.yaw) * robot.speed * dt, -lim, lim);
       ctx.model.position.set(robot.pos.x, floorY, robot.pos.y);
