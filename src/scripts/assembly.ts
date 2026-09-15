@@ -4,6 +4,7 @@
 
 import * as THREE from './three-lite';
 import type { Effect, EffectContext } from './effects/types';
+import { CellTint } from './desaturate';
 const { OrbitControls } = THREE;
 
 type ModelRef = { url: string; up: 'y' | 'z'; rotation: [number, number, number] };
@@ -133,7 +134,16 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     mats: THREE.MeshStandardMaterial[];
     edges: THREE.LineSegments[];
     state: State | null;
+    /** Idle cells play in slow motion and greyscale until hovered, selected or tapped. */
+    tint: CellTint;
+    clock: number;
+    speed: number;
   };
+  const tintRegistry = new WeakMap<THREE.Material, CellTint>();
+  const IDLE_SPEED = 0.15;
+  // ?active=all or ?active=<slug> keeps cells in colour for screenshot checks
+  const activeParam = new URLSearchParams(location.search).get('active');
+  const activeAll = activeParam === 'all';
   const parts: Part[] = [];
   const pickables: THREE.Object3D[] = [];
 
@@ -184,7 +194,8 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     mate.visible = false;
     group.add(mate);
 
-    const part: Part = { i, group, body, footprint, mate, label: { mesh: label, canvas, tex }, mats: [], edges: [], state: null };
+    const part: Part = { i, group, body, footprint, mate, label: { mesh: label, canvas, tex }, mats: [], edges: [], state: null, tint: new CellTint(tintRegistry), clock: 0, speed: activeAll ? 1 : IDLE_SPEED };
+    part.tint.sat.value = activeAll ? 1 : 0;
     label.userData.index = i;
     pickables.push(label);
     const hit = new THREE.Mesh(new THREE.BoxGeometry(FOOT + 0.3, 1.6, FOOT + 0.3), new THREE.MeshBasicMaterial({ visible: false }));
@@ -195,6 +206,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     parts.push(part);
 
     if (!p.model && !p.effect) addPlate(part, p);
+    part.tint.scan(group);
   });
 
   function addPlate(part: Part, p: Item) {
@@ -220,10 +232,11 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     part.mats.push(side, face);
     part.edges.push(edges);
     pickables.push(plate);
+    part.tint.scan(part.group);
   }
 
   // ------------------------------------------------------------ models + effects
-  const effects: Effect[] = [];
+  const effects: { part: Part; effect: Effect }[] = [];
   let loadGltf: ((url: string) => Promise<THREE.Object3D>) | null = null;
   const gltfCache = new Map<string, Promise<THREE.Object3D>>();
 
@@ -290,6 +303,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
           });
           holder.add(pivot);
           holder.scale.setScalar(p.modelScale ?? 1);
+          part.tint.scan(part.group);
           part.state = null;
           paint();
           if (p.effect) await startEffect(part, p, holder, s);
@@ -319,7 +333,9 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     // ?simulate=12 fast-forwards effects by that many seconds (for headless screenshot checks)
     const sim = Number(new URLSearchParams(location.search).get('simulate')) || 0;
     for (let k = 0; k < sim * 30; k++) effect.update(k / 30, 1 / 30);
-    effects.push(effect);
+    part.clock = sim;
+    effects.push({ part, effect });
+    part.tint.scan(part.group);
     requestRender();
   }
 
@@ -535,6 +551,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   let dpr = maxDpr;
   let lastRender = 0;
   let slowFrames = 0, fastFrames = 0;
+  let scanFrame = 0;
   function tick(now: number) {
     frame = 0;
     let moving = false;
@@ -572,9 +589,29 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     }
     const dt = Math.min((now - last) / 1000, 0.1);
     last = now;
+    // colour and speed ease toward full for the hovered / selected cell, and back to slow grey for the rest
+    const k = 1 - Math.exp(-dt * 6);
+    let tinting = false;
+    for (const p of parts) {
+      const active = activeAll || p.i === hovered || p.i === selected || data.parts[p.i].slug === activeParam;
+      const speed = active ? 1 : IDLE_SPEED;
+      const sat = active ? 1 : 0;
+      if (Math.abs(p.speed - speed) > 0.002 || Math.abs(p.tint.sat.value - sat) > 0.002) {
+        p.speed += (speed - p.speed) * k;
+        p.tint.sat.value += (sat - p.tint.sat.value) * k;
+        p.tint.flush();
+        tinting = true;
+      }
+    }
+    if (tinting) moving = true;
     if (effects.length && ((effectsVisible && !document.hidden) || forceEffects)) {
-      const t = reducedMotion ? 2 : now / 1000;
-      for (const e of effects) e.update(t, reducedMotion ? 0 : dt);
+      for (const { part: p, effect } of effects) {
+        const step = reducedMotion ? 0 : dt * p.speed;
+        p.clock += step;
+        effect.update(reducedMotion ? 2 : p.clock, step);
+      }
+      // effects spawn new objects (sparks, appliances, toys): pick up their materials now and then
+      if (++scanFrame % 45 === 0) for (const { part: p } of effects) p.tint.scan(p.group);
       if (!reducedMotion) moving = true;
     }
     renderer.render(scene, camera);
