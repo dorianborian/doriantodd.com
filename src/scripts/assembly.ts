@@ -458,7 +458,15 @@ export function mountAssembly(root: HTMLElement, data: Data) {
 
   function fitDirection(dir: THREE.Vector3, animate = !reducedMotion) {
     const bounds = new THREE.Box3();
-    for (const p of parts) if (p.group.visible) bounds.expandByObject(p.group);
+    // cell footprints, not the objects inside: effects park unused particles far below the floor
+    const cell = new THREE.Box3();
+    for (const p of parts) {
+      if (!p.group.visible) continue;
+      const c = p.group.position;
+      cell.min.set(c.x - FOOT / 2, 0, c.z - FOOT / 2);
+      cell.max.set(c.x + FOOT / 2, MAX_H + explode * LIFT, c.z + FOOT / 2 + LABEL_H + 0.4);
+      bounds.union(cell);
+    }
     bounds.expandByObject(sketch);
     // Fit the actual box corners on screen (tighter than a bounding sphere).
     const center = bounds.getCenter(new THREE.Vector3());

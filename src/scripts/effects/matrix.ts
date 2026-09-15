@@ -97,35 +97,17 @@ function marquee(text: string): Show {
   };
 }
 
-function silhouettes(): Show {
-  // an original black and white shadow play across all nine modules: a falling apple that bounces,
-  // splits into two, and a moon rising behind a hill
+// Bad Apple, from the board's own firmware data: 24x24 1-bit frames, 72 bytes each, MSB first, 10 fps
+function badApple(): Show {
+  let data: Uint8Array | null = null;
+  fetch('/badapple.bin').then((r) => r.arrayBuffer()).then((b) => (data = new Uint8Array(b))).catch(() => {});
   return {
-    name: 'silhouettes', seconds: 16, start() {},
+    name: 'bad apple', seconds: 60, start() {},
     draw(fb, t) {
-      const phase = t % 16;
-      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-        let on = 0;
-        if (phase < 8) {
-          // white sky, dark apple falling and bouncing
-          const bounce = Math.abs(Math.cos(phase * 1.4)) * Math.exp(-phase * 0.35);
-          const cy = 17 - bounce * 12, cx = 12 + Math.sin(phase * 0.6) * 4;
-          const dx = x - cx, dy = (y - cy) * 1.1;
-          const apple = dx * dx + dy * dy < 20 || (Math.abs(x - cx) < 1 && y < cy - 3 && y > cy - 7);
-          const leaf = (x - cx - 2) ** 2 + (y - cy + 6) ** 2 < 2.5;
-          const ground = y >= 22;
-          on = apple || leaf || ground ? 0 : 1;
-        } else {
-          // night: dark sky, a moon rising, hills in white outline
-          const p = phase - 8;
-          const my = 18 - p * 1.8, mx = 16;
-          const moon = (x - mx) ** 2 + (y - my) ** 2 < 14 && (x - mx - 2) ** 2 + (y - my + 1) ** 2 > 10;
-          const hill = y > 17 + 3 * Math.sin(x * 0.35 + 1) ;
-          const star = ((x * 7 + y * 13) % 29 === 0 && Math.sin(t * 3 + x) > 0) ? 0.5 : 0;
-          on = moon ? 1 : hill ? 0.9 : star;
-        }
-        if (on) set(fb, x, y, on);
-      }
+      if (!data) return;
+      const frames = Math.floor(data.length / 72);
+      const f = (Math.floor(t * 10) % frames) * 72;
+      for (let i = 0; i < N * N; i++) if ((data[f + (i >> 3)] >> (7 - (i & 7))) & 1) fb[i] = 1;
     },
   };
 }
@@ -267,7 +249,7 @@ export default function matrix(ctx: EffectContext): Effect {
 
   const fb: Frame = new Float32Array(N * N);
   const shown: Frame = new Float32Array(N * N);
-  const shows = [ticTacToe(), marquee('MATRIX GAME BOARD'), silhouettes(), snake(), life(), pong(), rain()];
+  const shows = [ticTacToe(), marquee('MATRIX GAME BOARD'), badApple(), snake(), life(), pong(), rain()];
   let current = -1, started = 0;
 
   return {

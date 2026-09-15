@@ -294,31 +294,36 @@ export default function arena(ctx: EffectContext): Effect {
   const half = ctx.foot * 0.48;
 
   // ------------------------------------------------------------ spinning beater bar
-  // The red vertical bar at the front spins about the robot's left-right axis. A translucent cylinder of
-  // moving streaks around it reads as motion blur, and its speed follows the weapon: idle, spin-up, full.
+  // The red weapon frame pivots on the white hub in the middle of the robot (model space: y 0.38, z -0.1)
+  // and its two teeth sweep a circle of radius ~0.78 about the left-right axis. A blurred disc at each
+  // tooth reads as motion blur; its speed follows the weapon: idle, spin-up, full.
   const spinU = { uPhase: { value: 0 }, uSpeed: { value: 0 } };
-  const blur = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.36, 0.36, 2.2, 40, 1, true).rotateZ(Math.PI / 2),
-    glowMaterial({
-      uniforms: spinU,
-      side: THREE.DoubleSide,
-      vertexShader: /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-      fragmentShader: /* glsl */ `
-        uniform float uPhase; uniform float uSpeed; varying vec2 vUv;
-        void main() {
-          float a = fract(vUv.x * 2.0 - uPhase);
-          // two bar tips per turn, smeared wider as the weapon speeds up
-          float smear = mix(0.04, 0.45, uSpeed);
-          float streak = smoothstep(smear, 0.0, a) * (1.0 - smoothstep(0.0, 0.02, -a + 0.0));
-          float ends = smoothstep(0.08, 0.0, min(vUv.y, 1.0 - vUv.y));
-          vec3 col = mix(vec3(1.0, 0.18, 0.12), vec3(1.0, 0.85, 0.7), streak * uSpeed);
-          float alpha = (streak * 0.8 + 0.06) * uSpeed * (1.0 - ends * 0.7);
-          gl_FragColor = vec4(col * alpha, 0.0);
-        }`,
-    }),
-  );
-  blur.position.set(0, 0.38, -0.78);
-  blur.renderOrder = 4;
+  const blurMat = glowMaterial({
+    uniforms: spinU,
+    side: THREE.DoubleSide,
+    vertexShader: /* glsl */ `varying vec2 vP; void main() { vP = position.zy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: /* glsl */ `
+      uniform float uPhase; uniform float uSpeed; varying vec2 vP;
+      void main() {
+        float r = length(vP);
+        float a = fract(atan(vP.y, vP.x) / 6.2831853 - uPhase);
+        // one tooth per disc, smeared into a longer arc as the weapon speeds up
+        float smear = mix(0.05, 0.6, uSpeed);
+        float streak = pow(smoothstep(smear, 0.0, a), 1.5);
+        float band = smoothstep(0.5, 0.66, r) * smoothstep(0.82, 0.74, r);
+        vec3 col = mix(vec3(1.0, 0.2, 0.15), vec3(1.0, 0.85, 0.75), streak * uSpeed);
+        float alpha = (streak * 0.9 + 0.08) * band * uSpeed;
+        gl_FragColor = vec4(col * alpha, 0.0);
+      }`,
+  });
+  const blur = new THREE.Group();
+  for (const x of [-0.62, 0.62]) {
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(0.84, 48).rotateY(Math.PI / 2), blurMat);
+    disc.position.x = x;
+    disc.renderOrder = 4;
+    blur.add(disc);
+  }
+  blur.position.set(0, 0.38, -0.1);
   ctx.model.add(blur);
   let spin = 0.15; // 0 idle, 1 full speed
   const floorY = 0.03;
