@@ -3,7 +3,7 @@
 // select, double-click (or Enter) to open. Renders on demand only.
 
 import * as THREE from './three-lite';
-import type { Effect, EffectContext } from './effects/types';
+import type { Effect, EffectContext, Interactive } from './effects/types';
 import { CellTint } from './desaturate';
 const { OrbitControls } = THREE;
 
@@ -316,6 +316,9 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     );
   }
 
+  // effect controls registered through ctx.interactive (handled in the "effect controls" block below picking)
+  const controls3d: { object: THREE.Object3D; part: Part; on: Interactive }[] = [];
+
   async function startEffect(part: Part, p: Item, holder: THREE.Group, modelScale: number) {
     const { loadEffect } = await import('./effects/index');
     const make = await loadEffect(p.effect!);
@@ -328,6 +331,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
       foot: FOOT,
       loadRaw: async (url, up, rotation) => (await orient({ url, up, rotation })).outer,
       pickable: (o) => { o.traverse((c) => { if ((c as THREE.Mesh).isMesh) { c.userData.index = part.i; pickables.push(c); } }); },
+      interactive: (o, on) => { o.traverse((c) => { if ((c as THREE.Mesh).isMesh) controls3d.push({ object: c, part, on }); }); },
     };
     const effect = await make(ctx);
     // ?simulate=12 fast-forwards effects by that many seconds (for headless screenshot checks)
@@ -674,6 +678,46 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     const i = pick(e);
     if (i >= 0) location.href = data.parts[i].url;
   });
+
+  // ------------------------------------------------------------ effect controls
+  // Controls inside effects (ctx.interactive, e.g. the matrix board's transport buttons) win over normal
+  // picking: a click on one runs its handler and clearing `down` makes the select handler skip that
+  // pointerup (OrbitControls still gets it); a double click on one does not open the project. Capture
+  // listeners on the canvas run before the bubbling ones registered above.
+  let overControl: (typeof controls3d)[number] | null = null;
+  const controlAt = (e: PointerEvent | MouseEvent) => {
+    if (!controls3d.length) return null;
+    const r = canvas.getBoundingClientRect();
+    ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    const live = controls3d.filter((c) => c.part.group.visible && c.object.visible);
+    const hit = raycaster.intersectObjects(live.map((c) => c.object), false)[0];
+    return hit ? live.find((c) => c.object === hit.object)! : null;
+  };
+  const hoverControl = (c: typeof overControl) => {
+    if (c?.on === overControl?.on) return;
+    overControl?.on.onHover?.(false);
+    c?.on.onHover?.(true);
+    overControl = c;
+    canvas.style.cursor = c ? 'pointer' : '';
+    requestRender();
+  };
+  let controlMove: PointerEvent | null = null;
+  canvas.addEventListener('pointermove', (e) => {
+    if (e.buttons || e.pointerType === 'touch' || !controls3d.length) return;
+    if (!controlMove) requestAnimationFrame(() => { const ev = controlMove!; controlMove = null; hoverControl(controlAt(ev)); });
+    controlMove = e;
+  });
+  canvas.addEventListener('pointerleave', () => hoverControl(null));
+  canvas.addEventListener('pointerup', (e) => {
+    if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5 || e.button !== 0) return;
+    const c = controlAt(e);
+    if (!c) return;
+    c.on.onClick();
+    down = null;
+    requestRender();
+  }, { capture: true });
+  canvas.addEventListener('dblclick', (e) => { if (controlAt(e)) e.stopImmediatePropagation(); }, { capture: true });
 
   root.addEventListener('keydown', (e) => {
     if ((e.target as HTMLElement).closest('input')) return;

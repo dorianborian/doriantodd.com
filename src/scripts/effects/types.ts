@@ -16,7 +16,11 @@ export type EffectContext = {
   loadRaw: (url: string, up: 'y' | 'z', rotation: [number, number, number]) => Promise<THREE.Object3D>;
   /** Make meshes clickable as part of this project. */
   pickable: (o: THREE.Object3D) => void;
+  /** Make meshes a control inside the cell: a click runs onClick instead of selecting the project, hover shows a pointer. */
+  interactive: (o: THREE.Object3D, on: Interactive) => void;
 };
+
+export type Interactive = { onClick: () => void; onHover?: (over: boolean) => void };
 
 export type Effect = { update: (time: number, dt: number) => void };
 export type EffectFactory = (ctx: EffectContext) => Effect | Promise<Effect>;
