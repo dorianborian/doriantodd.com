@@ -7,6 +7,8 @@
 import * as THREE from './three-lite';
 import type { Effect, EffectContext, Interactive } from './effects/types';
 import { CellTint } from './desaturate';
+import { CellReveal, lodStep } from './reveal';
+import { createLodLoader, detailCap, FrameProbe, idle, sleep, type LodAsset } from './progressive';
 const { OrbitControls } = THREE;
 
 type ModelRef = { url: string; up: 'y' | 'z'; rotation: [number, number, number] };
@@ -111,9 +113,23 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   controls.minDistance = 3;
   controls.maxDistance = 120;
 
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
-  pmrem.dispose();
+  // Soft start: the environment map is made after the first frame, before any model needs it (see
+  // loadModels() below). The room's shaders are compiled in parallel first, rendering into a target the way
+  // PMREMGenerator does; its filter passes (about 300 ms on a fast machine) still run in one go.
+  const makeEnvironment = async () => {
+    const room = new THREE.RoomEnvironment();
+    room.add(new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ side: THREE.BackSide, depthWrite: false, depthTest: false })));
+    const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+    renderer.setRenderTarget(target);
+    const compiled = renderer.compileAsync(room, new THREE.PerspectiveCamera(90, 1, 0.1, 100));
+    renderer.setRenderTarget(null);
+    await compiled;
+    target.dispose();
+    room.children.at(-1)!.removeFromParent();
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(room, 0.04).texture;
+    pmrem.dispose();
+  };
   scene.add(new THREE.HemisphereLight(0xe6ecf5, 0x2a2c31, 0.9));
   const headlight = new THREE.DirectionalLight(0xffffff, 1.2);
   headlight.position.set(0.4, 1, 0.2);
@@ -431,7 +447,8 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     if (!p.borrowed || !p.model || f.alt || f.altLoading) return;
     f.altLoading = true;
     try {
-      const { outer, model } = await orient(p.model);
+      const asset = await (await getLoader()).get(p.model.url);
+      const { outer, model } = orient(asset, p.model, f.parent);
       const pivot = new THREE.Group();
       pivot.add(outer);
       pivot.updateMatrixWorld(true);
@@ -544,28 +561,59 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   }
 
   // ------------------------------------------------------------ models + effects
+  // Soft, progressive start (see src/scripts/progressive.ts and src/scripts/reveal.ts):
+  //  1. the shell (grid, labels, footprints, name sketch) compiles its few shaders in parallel and draws first,
+  //  2. the environment map is made in idle time,
+  //  3. every model's small lod0 downloads at once and each cell scans in as a hologram, nearest the middle of
+  //     the view first, one per idle slot, with its shaders compiled in parallel before it is shown,
+  //  4. effects start one at a time in idle time once their cell has scanned in,
+  //  5. finer levels are swapped into the same meshes (a scan band sweeps up through each cell), up to the
+  //     detail this device can afford.
   const effects: { part: Part; effect: Effect }[] = [];
-  let loadGltf: ((url: string) => Promise<THREE.Object3D>) | null = null;
-  const gltfCache = new Map<string, Promise<THREE.Object3D>>();
+  const search = new URLSearchParams(location.search);
+  let lods: Promise<ReturnType<typeof createLodLoader>> | null = null;
+  const reveals = new Map<Part, CellReveal>();
+  const heights = new Map<Part, number>();
+  /** Cells showing clones of each asset (a geometry upgrade sweeps all of them). */
+  const users = new Map<LodAsset, Set<Part>>();
+  const priority = new Map<Part, number>();
+  let shellReady = false;
 
-  async function getLoader() {
-    if (loadGltf) return loadGltf;
-    const [{ GLTFLoader }, { MeshoptDecoder }] = await Promise.all([
+  function getLoader() {
+    lods ??= Promise.all([
       import('three/examples/jsm/loaders/GLTFLoader.js'),
       import('three/examples/jsm/libs/meshopt_decoder.module.js'),
-    ]);
-    const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-    loadGltf = (url) => {
-      if (!gltfCache.has(url)) gltfCache.set(url, loader.loadAsync(url).then((g) => g.scene));
-      return gltfCache.get(url)!.then((scene) => scene.clone(true));
-    };
-    return loadGltf;
+    ]).then(([{ GLTFLoader }, { MeshoptDecoder }]) => {
+      // decode meshopt buffers off the main thread where there are cores to spare
+      if ((navigator.hardwareConcurrency ?? 1) > 2) MeshoptDecoder.useWorkers(2);
+      const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+      return createLodLoader((url) => loader.loadAsync(url).then((g) => g.scene));
+    });
+    return lods;
   }
 
-  /** Model with its orientation applied: Z-up files stood up, then the extra rotation. */
-  async function orient(ref: ModelRef) {
-    const load = await getLoader();
-    const model = await load(ref.url);
+  function revealOf(part: Part) {
+    let r = reveals.get(part);
+    if (!r) {
+      const v = new THREE.Vector3();
+      r = new CellReveal(() => { part.body.getWorldPosition(v); return [v.y, v.y + (heights.get(part) ?? 1)]; }, (o) => part.tint.scan(o));
+      reveals.set(part, r);
+    }
+    return r;
+  }
+
+  /** A clone of the asset (shared geometry, own materials) with its orientation applied: Z-up files stood up, then the extra rotation. */
+  function orient(asset: LodAsset, ref: ModelRef, part: Part) {
+    const model = asset.scene.clone(true);
+    model.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const list = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      const cloned = list.map((m) => m.clone());
+      mesh.material = Array.isArray(mesh.material) ? cloned : cloned[0];
+    });
+    if (!users.has(asset)) users.set(asset, new Set());
+    users.get(asset)!.add(part);
     const inner = new THREE.Group();
     inner.add(model);
     if (ref.up === 'z') inner.rotation.x = -Math.PI / 2;
@@ -576,56 +624,170 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     return { outer, model };
   }
 
-  async function loadModels() {
-    const withModels = parts.filter((pt) => data.parts[pt.i].model || data.parts[pt.i].effect);
-    await Promise.all(
-      withModels.map(async (part) => {
-        const p = data.parts[part.i];
-        const holder = new THREE.Group();
-        part.body.add(holder);
-        try {
-          if (!p.model) {
-            await startEffect(part, p, holder, 1);
-            return;
-          }
-          const { outer, model } = await orient(p.model!);
-          const pivot = new THREE.Group();
-          pivot.add(outer);
-          pivot.updateMatrixWorld(true);
-          const box = new THREE.Box3().setFromObject(pivot, true);
-          const size = box.getSize(new THREE.Vector3());
-          const s = Math.min(FOOT / Math.max(size.x, size.z, 1e-6), MAX_H / Math.max(size.y, 1e-6));
-          pivot.scale.setScalar(s);
-          pivot.updateMatrixWorld(true);
-          box.setFromObject(pivot, true);
-          const c = box.getCenter(new THREE.Vector3());
-          pivot.position.set(-c.x, -box.min.y, -c.z);
+  /** Put a cell's first level on screen. */
+  async function place(part: Part, p: Item, asset: LodAsset | null) {
+    const holder = new THREE.Group();
+    part.body.add(holder);
+    if (!asset) {
+      queueEffect(part, p, holder, 1);
+      return;
+    }
+    const { outer, model } = orient(asset, p.model!, part);
+    const pivot = new THREE.Group();
+    pivot.add(outer);
+    pivot.updateMatrixWorld(true);
+    // every level keeps each part's extreme vertices, so this sizing matches the full model exactly
+    const box = new THREE.Box3().setFromObject(pivot, true);
+    const size = box.getSize(new THREE.Vector3());
+    const s = Math.min(FOOT / Math.max(size.x, size.z, 1e-6), MAX_H / Math.max(size.y, 1e-6));
+    pivot.scale.setScalar(s);
+    pivot.updateMatrixWorld(true);
+    box.setFromObject(pivot, true);
+    const c = box.getCenter(new THREE.Vector3());
+    pivot.position.set(-c.x, -box.min.y, -c.z);
 
-          model.traverse((o) => {
-            const mesh = o as THREE.Mesh;
-            if (!mesh.isMesh) return;
-            const list = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-            const cloned = list.map((m) => (m as THREE.MeshStandardMaterial).clone());
-            mesh.material = Array.isArray(mesh.material) ? cloned : cloned[0];
-            part.mats.push(...(cloned.filter((m) => 'emissive' in m) as THREE.MeshStandardMaterial[]));
-          });
-          holder.add(pivot);
-          holder.scale.setScalar(p.modelScale ?? 1);
-          part.tint.scan(part.group);
-          part.state = null;
-          paint();
-          if (p.effect) await startEffect(part, p, holder, s);
-        } catch (err) {
-          console.warn(`model failed for ${p.title}, showing cover instead`, err);
-          addPlate(part, p);
-          paint();
-        }
-      }),
-    );
+    model.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const list = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      part.mats.push(...(list.filter((m) => 'emissive' in m) as THREE.MeshStandardMaterial[]));
+    });
+    heights.set(part, (box.max.y - box.min.y) * (p.modelScale ?? 1));
+    const reveal = revealOf(part);
+    reveal.patch(model);
+    pivot.visible = false;
+    holder.add(pivot);
+    holder.scale.setScalar(p.modelScale ?? 1);
+    part.tint.scan(part.group);
+    part.state = null;
+    paint();
+    // shaders compile in parallel (KHR_parallel_shader_compile); the cell appears when they are ready
+    await renderer.compileAsync(pivot, camera, scene);
+    pivot.visible = true;
+    if (!performance.getEntriesByName('home:first-model').length) performance.mark('home:first-model');
+    requestRender();
+    reveal.materialize().then(() => { if (p.effect) queueEffect(part, p, holder, s); });
   }
 
   // effect controls registered through ctx.interactive (handled in the "effect controls" block below picking)
   const controls3d: { object: THREE.Object3D; part: Part; on: Interactive }[] = [];
+  async function loadModels() {
+    // shell first: its shaders compile without blocking, tick() draws nothing until they are ready
+    const shell = renderer.compileAsync(scene, camera).then(() => { shellReady = true; performance.mark('home:shell'); requestRender(); });
+    const loading = getLoader();
+    const withModels = parts.filter((pt) => data.parts[pt.i].model || data.parts[pt.i].effect);
+    // nearest the middle of the view first (the ?view= cell before everything)
+    const v = new THREE.Vector3();
+    const rank = (pt: Part) => {
+      if (data.parts[pt.i].slug === search.get('view')) return -1;
+      v.copy(pt.group.position).setY(0.8).project(camera);
+      return Math.hypot(v.x, v.y) + (Math.abs(v.x) > 1 || Math.abs(v.y) > 1 ? 10 : 0);
+    };
+    const order = withModels.map((pt) => ({ pt, r: rank(pt) })).sort((a, b) => a.r - b.r).map((x) => x.pt);
+    order.forEach((pt, k) => priority.set(pt, k));
+    // effect chunks download meanwhile
+    import('./effects/index').then(({ loadEffect }) => { for (const pt of order) if (data.parts[pt.i].effect) loadEffect(data.parts[pt.i].effect!); });
+
+    const lod = await loading;
+    // every lod0 starts downloading now, in priority order (a few dozen KB each)
+    const jobs = order.map((pt) => {
+      const p = data.parts[pt.i];
+      const job = { pt, p, asset: null as LodAsset | null, error: null as unknown, ready: false, wait: Promise.resolve() };
+      job.wait = (p.model ? lod.get(p.model.url).then((a) => { job.asset = a; }, (err) => { job.error = err ?? 'failed'; }) : Promise.resolve())
+        .then(() => { job.ready = true; });
+      return job;
+    });
+    await shell;
+    await idle();
+    await makeEnvironment();
+    performance.mark('home:env');
+    const pending = [...jobs];
+    while (pending.length) {
+      if (!pending.some((j) => j.ready)) await Promise.race(pending.map((j) => j.wait));
+      const j = pending.find((x) => x.ready)!;
+      pending.splice(pending.indexOf(j), 1);
+      try {
+        if (j.error) throw j.error;
+        await place(j.pt, j.p, j.asset);
+      } catch (err) {
+        console.warn(`model failed for ${j.p.title}, showing cover instead`, err);
+        addPlate(j.pt, j.p);
+        paint();
+      }
+      await idle(120);
+    }
+    performance.mark('home:lod0');
+    upgrade();
+  }
+
+  /** Swap finer levels in, asset by asset in placement order, in idle time. */
+  async function upgrade() {
+    const lod = await getLoader();
+    let cap = detailCap();
+    const probe = new FrameProbe().start();
+    for (let level = 1; level <= 2; level++) {
+      const assets = [...users.keys()];
+      for (let a = 0; a < assets.length; a++) {
+        const asset = assets[a];
+        const cells = [...users.get(asset)!];
+        const top = asset.levels.length - 1;
+        // weak frame rate (or the renderer already lowered its resolution): stop at lod1
+        if (level === 2 && (probe.slow() || dpr < maxDpr)) cap = Math.min(cap, 1);
+        const target = Math.min(level, top, cap);
+        if (asset.level >= target) {
+          // nothing finer for this file: resolve the hologram as it is
+          if (level === 1) for (const c of cells) if (revealOf(c).holo > 0) revealOf(c).upgrade(c.group, null, 1);
+          continue;
+        }
+        const next = lod.fetchLevel(asset, target);
+        const following = assets[a + 1];
+        if (following && following.level < Math.min(level, following.levels.length - 1, cap)) lod.fetchLevel(following, Math.min(level, following.levels.length - 1, cap)); // download ahead
+        const parsed = await next.catch(() => null);
+        await Promise.all(cells.map((c) => revealOf(c).idle()));
+        if (lodStep) await sleep(lodStep * 1000);
+        await idle();
+        const old = parsed ? lod.swap(asset, parsed, target) : null;
+        for (const c of cells) revealOf(c).upgrade(c.group, old, level);
+        requestRender();
+        await sleep(160);
+      }
+      await Promise.all([...reveals.values()].map((r) => r.idle()));
+      performance.mark(`home:lod${level}`);
+    }
+    probe.stop();
+  }
+
+  // Effects start one at a time in idle time, in cell priority order.
+  const effectQueue: { part: Part; run: () => Promise<void> }[] = [];
+  let pumping = false;
+  function queueEffect(part: Part, p: Item, holder: THREE.Group, modelScale: number) {
+    effectQueue.push({ part, run: () => startEffect(part, p, holder, modelScale) });
+    effectQueue.sort((a, b) => (priority.get(a.part) ?? 99) - (priority.get(b.part) ?? 99));
+    if (!pumping) pumpEffects();
+  }
+  async function pumpEffects() {
+    pumping = true;
+    while (effectQueue.length) {
+      await idle(200);
+      const job = effectQueue.shift()!;
+      await job.run().catch((err) => console.warn(`effect failed for ${data.parts[job.part.i].title}`, err));
+    }
+    pumping = false;
+  }
+
+  // A new light changes the light count compiled into every lit shader, which recompiles them all at once.
+  // The point lights effects are known to add are reserved as dark placeholders and swapped out as they come.
+  const EFFECT_LIGHTS: Record<string, number> = { 'led-mosaic': 1, arena: 1, flybrain: 1 };
+  const spareLights: THREE.PointLight[] = [];
+  for (const p of data.parts) {
+    for (let k = 0; k < (EFFECT_LIGHTS[p.effect ?? ''] ?? 0); k++) {
+      const l = new THREE.PointLight(0x000000, 0, 0.01);
+      l.position.y = -100;
+      scene.add(l);
+      spareLights.push(l);
+    }
+  }
+  const countLights = (o: THREE.Object3D) => { let n = 0; o.traverse((c) => { if ((c as THREE.PointLight).isPointLight) n++; }); return n; };
 
   async function startEffect(part: Part, p: Item, holder: THREE.Group, modelScale: number) {
     // grouping: a parked sub-project starts its scene on its group's first split (see wake())
@@ -639,13 +801,28 @@ export function mountAssembly(root: HTMLElement, data: Data) {
       modelScale,
       assets: data.assets,
       foot: FOOT,
-      loadRaw: async (url, up, rotation) => (await orient({ url, up, rotation })).outer,
+      // lowest detail level right away; finer levels are swapped into the same meshes later
+      loadRaw: async (url, up, rotation) => {
+        const asset = await (await getLoader()).get(url);
+        const { outer } = orient(asset, { url, up, rotation }, part);
+        revealOf(part).patch(outer);
+        return outer;
+      },
       pickable: (o) => { o.traverse((c) => { if ((c as THREE.Mesh).isMesh) { c.userData.index = part.i; pickables.push(c); } }); },
       interactive: (o, on) => { o.traverse((c) => { if ((c as THREE.Mesh).isMesh) controls3d.push({ object: c, part, on }); }); },
     };
+    const before = new Set([...part.body.children, ...holder.children]);
+    const lights = countLights(part.group);
     const effect = await make(ctx);
+    for (let k = countLights(part.group) - lights; k > 0 && spareLights.length; k--) spareLights.pop()!.removeFromParent();
+    part.tint.scan(part.group);
+    // new objects stay hidden while their shaders compile in parallel, so no frame stalls on them
+    const added = [...part.body.children, ...holder.children].filter((o) => !before.has(o) && o.visible && !(o as THREE.PointLight).isLight);
+    for (const o of added) o.visible = false;
+    await renderer.compileAsync(part.group, camera, scene);
+    for (const o of added) o.visible = true;
     // ?simulate=12 fast-forwards effects by that many seconds (for headless screenshot checks)
-    const sim = Number(new URLSearchParams(location.search).get('simulate')) || 0;
+    const sim = Number(search.get('simulate')) || 0;
     for (let k = 0; k < sim * 30; k++) effect.update(k / 30, 1 / 30);
     part.clock = sim;
     effects.push({ part, effect });
@@ -919,7 +1096,6 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     if (!frame) frame = requestAnimationFrame(tick);
   }
 
-  let intro: { t0: number } | null = reducedMotion ? null : { t0: performance.now() };
   // Performance: only ambient animation running -> cap at ~30 fps; resolution adapts to frame time.
   const maxDpr = Math.min(devicePixelRatio, 2);
   let dpr = maxDpr;
@@ -928,6 +1104,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   let scanFrame = 0;
   function tick(now: number) {
     frame = 0;
+    if (!shellReady) return; // soft start: loadModels() asks for a frame once the shell's shaders are ready
     let moving = false;
     let interactive = false;
     if (flight) {
@@ -939,18 +1116,13 @@ export function mountAssembly(root: HTMLElement, data: Data) {
       moving = true;
       interactive = true;
     }
-    if (intro) {
-      // projects rise into place from below the top plane
-      const t = Math.min((now - intro.t0) / 1100, 1);
-      for (const p of parts) {
-        const local = THREE.MathUtils.clamp(t * 1.6 - p.i * 0.05, 0, 1);
-        p.body.scale.setScalar(Math.max(ease(local), 0.001));
-      }
-      if (t >= 1) { intro = null; for (const p of parts) p.body.scale.setScalar(1); } else moving = true;
-    }
+    // detail reveal (replaces the old rise-in intro): scan-in, hologram shimmer and upgrade sweeps
+    let revealing = false, sweeping = false;
+    for (const r of reveals.values()) { if (r.update(now)) revealing = true; if (r.sweeping) sweeping = true; }
     if (controls.update()) { moving = true; interactive = true; }
-    if (intro) interactive = true;
     if (frozenT === null && families.some((f) => f.t !== f.target)) { moving = true; interactive = true; } // group split
+    if (revealing) moving = true;
+    if (sweeping) interactive = true;
     if (!interactive && effects.length && now - lastRender < 31 && !forceEffects) {
       requestRender(); // skip this frame, keep the loop alive
       return;

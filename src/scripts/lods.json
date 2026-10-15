@@ -1,0 +1,172 @@
+{
+ "/content-assets/projects/digital-mosaic/model-lite.glb": {
+  "levels": [
+   "/content-assets/projects/digital-mosaic/model-lite.lod0.glb",
+   "/content-assets/projects/digital-mosaic/model-lite.lod1.glb",
+   "/content-assets/projects/digital-mosaic/model-lite.glb"
+  ],
+  "tris": [
+   1148,
+   9182,
+   30330
+  ],
+  "bytes": [
+   21632,
+   106740,
+   311272
+  ]
+ },
+ "/content-assets/projects/executioner/model-lite.glb": {
+  "levels": [
+   "/content-assets/projects/executioner/model-lite.lod0.glb",
+   "/content-assets/projects/executioner/model-lite.lod1.glb",
+   "/content-assets/projects/executioner/model-lite.glb"
+  ],
+  "tris": [
+   3485,
+   28718,
+   93174
+  ],
+  "bytes": [
+   78520,
+   324948,
+   966244
+  ]
+ },
+ "/content-assets/projects/fridge-tank/model-lite.glb": {
+  "levels": [
+   "/content-assets/projects/fridge-tank/model-lite.lod0.glb",
+   "/content-assets/projects/fridge-tank/model-lite.lod1.glb",
+   "/content-assets/projects/fridge-tank/model-lite.glb"
+  ],
+  "tris": [
+   1349,
+   11660,
+   38630
+  ],
+  "bytes": [
+   30540,
+   133084,
+   419028
+  ]
+ },
+ "/content-assets/projects/matrix-game-board/model-lite.glb": {
+  "levels": [
+   "/content-assets/projects/matrix-game-board/model-lite.lod0.glb",
+   "/content-assets/projects/matrix-game-board/model-lite.lod1.glb",
+   "/content-assets/projects/matrix-game-board/model-lite.glb"
+  ],
+  "tris": [
+   3542,
+   22861,
+   73814
+  ],
+  "bytes": [
+   78568,
+   250344,
+   711132
+  ]
+ },
+ "/content-assets/projects/penbot-mini/model-lite.glb": {
+  "levels": [
+   "/content-assets/projects/penbot-mini/model-lite.lod0.glb",
+   "/content-assets/projects/penbot-mini/model-lite.lod1.glb",
+   "/content-assets/projects/penbot-mini/model-lite.glb"
+  ],
+  "tris": [
+   1350,
+   10031,
+   30265
+  ],
+  "bytes": [
+   44340,
+   120552,
+   274412
+  ]
+ },
+ "/content-assets/projects/penbot/model-lite.glb": {
+  "levels": [
+   "/content-assets/projects/penbot/model-lite.lod0.glb",
+   "/content-assets/projects/penbot/model-lite.lod1.glb",
+   "/content-assets/projects/penbot/model-lite.glb"
+  ],
+  "tris": [
+   2586,
+   16260,
+   53503
+  ],
+  "bytes": [
+   66740,
+   205060,
+   544004
+  ]
+ },
+ "/content-assets/projects/redhex/model-lite.glb": {
+  "levels": [
+   "/content-assets/projects/redhex/model-lite.lod0.glb",
+   "/content-assets/projects/redhex/model-lite.lod1.glb",
+   "/content-assets/projects/redhex/model-lite.glb"
+  ],
+  "tris": [
+   2757,
+   24522,
+   83138
+  ],
+  "bytes": [
+   49620,
+   301116,
+   906816
+  ]
+ },
+ "/content-assets/projects/sesame/model-lite.glb": {
+  "levels": [
+   "/content-assets/projects/sesame/model-lite.lod0.glb",
+   "/content-assets/projects/sesame/model-lite.lod1.glb",
+   "/content-assets/projects/sesame/model-lite.glb"
+  ],
+  "tris": [
+   2646,
+   16684,
+   52667
+  ],
+  "bytes": [
+   71948,
+   215020,
+   607200
+  ]
+ },
+ "/rigs/executioner/rig.glb": {
+  "levels": [
+   "/rigs/executioner/rig.lod0.glb",
+   "/rigs/executioner/rig.lod1.glb",
+   "/rigs/executioner/rig.glb"
+  ],
+  "tris": [
+   2572,
+   12360,
+   35216
+  ],
+  "bytes": [
+   39544,
+   75012,
+   159624
+  ]
+ },
+ "/rigs/penbot/rig.glb": {
+  "levels": [
+   "/rigs/penbot/rig.lod0.glb",
+   "/rigs/penbot/rig.lod1.glb",
+   "/rigs/penbot/rig.glb"
+  ],
+  "tris": [
+   2661,
+   18020,
+   58189
+  ],
+  "bytes": [
+   48500,
+   105924,
+   244556
+  ]
+ }
+}

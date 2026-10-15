@@ -80,6 +80,12 @@ exports are converted from sRGB, and named appearances like wood, fabric and cle
 materials. It sets `model: "./model.glb"` in the front matter and moves the originals to `models-src/`
 (not committed). Run `npm run models -- --rebuild` to reconvert everything from `models-src/`.
 
+Then run `npm run lods`. The home page loads every model progressively: `model-lite.lod0.glb` (a few percent of
+the triangles) first as a scanned-in hologram, then `.lod1.glb` and the full file, swapped into the same meshes
+with a scan band sweep (lod1 only on slow devices or connections). The script also covers GLBs under `public/`
+(rigs) and writes `src/scripts/lods.json`; rerun it whenever a model or rig changes. Debug URL params:
+`?lodstep=2` (each step takes 2 s), `?lodhold=1,0.5` (freeze the lod1 sweep half way), `?lod=1` (stop at lod1).
+
 Orientation, in front matter:
 
 - `modelUp: z` for Z-up files (most Fusion 360 exports).
@@ -122,6 +128,8 @@ properties panel. `path:` in front matter is the URL.
 | `npm run check` | Verify `dist/`: every old Google Sites URL exists, no broken links or assets, CNAME present. Add `-- --external` to also test outside links |
 | `npm run new "Title"` | Scaffold a project |
 | `npm run models` | Convert OBJ/glTF files in project folders to web-ready `model.glb` |
+| `npm run lods` | Progressive detail levels (`.lod0.glb`, `.lod1.glb`) for the home page models and rigs |
+| `npm run loadperf` | Home page load profile in headless Edge (`PORT=4403 npm run loadperf -- --net=4g --cpu=4`); run against `astro preview` |
 | `npm run media` | Convert heavy GIFs/images in `src/content` |
 | `node scripts/shot.mjs "?view=sesame&debug&simulate=8" out.png` | Headless screenshot for checking 3D scenes. `view` focuses a project, `simulate` fast-forwards effects, `debug` prints script errors on the page |
 | `npm run migrate` | Re-crawl the old Google Site (kept for reference; won't overwrite edited files without `--force`) |
