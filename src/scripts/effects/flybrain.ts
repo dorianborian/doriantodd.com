@@ -1,18 +1,32 @@
-// Fly Brain Bridge: a point cloud of real MaleCNS neuron positions floats over a small Sesame.
+// Fly Brain Bridge: a point cloud of real MaleCNS neuron positions lives inside a large glass Sesame.
 // It cycles through the project's circuits: a stimulus group lights up, activity spreads through
-// the brain, the command neurons fire, and Sesame does the matching behavior.
+// the brain, the command neurons fire, and Sesame plays the matching firmware sequence.
 // Data comes from the project's own export (public/flybrain), sampled from the 166,700 neurons.
 
 import * as THREE from '../three-lite';
-import { damp, glowMaterial } from './shared';
+import { damp, glowMaterial, wrapAngle } from './shared';
+import { buildRig } from './sesame-rig';
 import type { EffectContext, Effect } from './types';
 
 type Group = { id: string; label: string; color: string; idx: number[] };
-type Episode = { stim: Group; cmd: Group; action: 'feed' | 'escape' | 'groom' | 'walk' | 'left' | 'dance' | 'back' };
+type Action = 'feed' | 'escape' | 'groom' | 'walk' | 'left' | 'dance' | 'back';
+type Episode = { stim: Group; cmd: Group; action: Action };
 
 // Neuron families, same order as the export: sensory, optic lobe, visual projection, central brain,
 // descending, ascending, nerve cord, motor
 const FAMILY = [0x2ec4b6, 0x3a5bff, 0x4cc9f0, 0x8b5cf6, 0xff9f1c, 0xffd166, 0x2a9d8f, 0xef476f];
+
+// What Sesame does when each circuit's command neurons fire: the closest firmware sequence. Gaits loop
+// for the rest of the episode and move the robot (speed in body lengths/s, turn in rad/s); the others play once.
+const MOVES: Record<Action, { seq: string; gait?: { speed: number; turn: number } }> = {
+  feed: { seq: 'bow' }, // MN9: bow down to the sugar
+  escape: { seq: 'freaky' }, // Giant Fiber: startle
+  groom: { seq: 'wave' }, // aDN1/aDN2: a front leg up to the antennae
+  walk: { seq: 'walk_forward', gait: { speed: 0.22, turn: 0 } }, // P9/BDN2/oDN1
+  left: { seq: 'turn_left', gait: { speed: 0, turn: 0.9 } }, // DNa01/02
+  dance: { seq: 'dance' }, // pIP10/DNp13
+  back: { seq: 'walk_backward', gait: { speed: -0.18, turn: 0 } }, // MDN, the moonwalker neurons
+};
 
 const VERT = /* glsl */ `
   attribute float aAct;
@@ -26,7 +40,7 @@ const VERT = /* glsl */ `
     gl_Position = projectionMatrix * mv;
     gl_PointSize = uSize * (1.0 + aAct * 2.2) / -mv.z;
     vCol = mix(aColor * 0.55, aHot, clamp(aAct, 0.0, 1.0));
-    vA = 0.22 + aAct * 1.6;
+    vA = 0.3 + aAct * 1.4;
   }
 `;
 const FRAG = /* glsl */ `
@@ -51,39 +65,46 @@ export default async function flybrain(ctx: EffectContext): Promise<Effect> {
   const q = new Int16Array(buf, 8, n * 3);
   const fam = new Uint8Array(buf, 8 + n * 6, n);
 
-  // ---- Sesame, small, standing in front of the brain
-  const SCALE = 0.2;
-  ctx.model.scale.setScalar(SCALE);
-  // translucent blue, so it reads as the brain's body rather than the stock orange robot
-  const ghost = new THREE.MeshStandardMaterial({ color: 0x4a9bff, emissive: 0x12305a, roughness: 0.35, metalness: 0.1, transparent: true, opacity: 0.6, depthWrite: false });
-  ctx.model.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).material = ghost; });
-  const home = new THREE.Vector2(0, ctx.foot * 0.3);
-  const bot = { pos: home.clone(), yaw: 0, phase: 0, hop: 0, pitch: 0, roll: 0 };
+  // ---- Sesame: the posable rig, about the size of the red.HEX hexapod, in translucent blue glass so
+  // it reads as the brain's body rather than the stock orange robot
+  ctx.model.visible = false;
+  const glass = new THREE.MeshStandardMaterial({ color: 0x4a9bff, emissive: 0x12305a, roughness: 0.3, metalness: 0.1, transparent: true, opacity: 0.25, depthWrite: false });
+  const rig = await buildRig((url) => ctx.loadRaw(url, 'y', [0, 0, 0]), 1, { body: glass, frame: glass });
+  const botLen = ctx.foot * 0.66;
+  rig.root.scale.setScalar(botLen / Math.max(rig.size.x, rig.size.z));
+  // the glass shell draws first, the brain after it (additive, no depth writes), so nothing flickers
+  rig.root.traverse((o) => { o.renderOrder = 1; });
+  ctx.body.add(rig.root);
+  const home = new THREE.Vector2(0, -ctx.foot * 0.08);
+  const lim = ctx.foot * 0.5 - botLen * 0.5;
+  const bot = { pos: home.clone(), yaw: 0 };
+  rig.play('stand', false, true);
 
-  // ---- brain point cloud: the fly's head faces the viewer, the nerve cord trails away behind it
+  // ---- brain point cloud, normalised so its longest side is 1: x left/right, y dorsal up, z toward the
+  // nerve cord
   const pos = new Float32Array(n * 3);
   const col = new Float32Array(n * 3);
   const hot = new Float32Array(n * 3);
   const act = new Float32Array(n);
   const c = new THREE.Color();
   const lo = new THREE.Vector3(Infinity, Infinity, Infinity), hi = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
+  const v = new THREE.Vector3();
   for (let i = 0; i < n; i++) {
-    // export space: x left/right, y dorsal up, z toward the nerve cord
-    const v = new THREE.Vector3(q[i * 3], q[i * 3 + 1], -q[i * 3 + 2]);
+    v.set(q[i * 3], q[i * 3 + 1], q[i * 3 + 2]);
     lo.min(v);
     hi.max(v);
   }
   const mid = lo.clone().add(hi).multiplyScalar(0.5);
-  const R = (ctx.foot * 0.9) / Math.max(hi.x - lo.x, hi.y - lo.y, hi.z - lo.z);
+  const ext = hi.clone().sub(lo);
+  const R = 1 / Math.max(ext.x, ext.y, ext.z);
   for (let i = 0; i < n; i++) {
     pos[i * 3] = (q[i * 3] - mid.x) * R;
     pos[i * 3 + 1] = (q[i * 3 + 1] - mid.y) * R;
-    pos[i * 3 + 2] = (-q[i * 3 + 2] - mid.z) * R;
+    pos[i * 3 + 2] = (q[i * 3 + 2] - mid.z) * R;
     c.setHex(FAMILY[fam[i]] ?? 0xffffff);
     col.set([c.r, c.g, c.b], i * 3);
     hot.set([1, 1, 1], i * 3);
   }
-  const center = new THREE.Vector3(0, ctx.foot * 0.5, -ctx.foot * 0.15);
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('aColor', new THREE.BufferAttribute(col, 3));
@@ -93,20 +114,26 @@ export default async function flybrain(ctx: EffectContext): Promise<Effect> {
   actAttr.setUsage(THREE.DynamicDrawUsage);
   geo.setAttribute('aHot', hotAttr);
   geo.setAttribute('aAct', actAttr);
-  const uniforms = { uSize: { value: 30 } };
+  const uniforms = { uSize: { value: 26 } };
   const cloud = new THREE.Points(geo, glowMaterial({ uniforms, vertexShader: VERT, fragmentShader: FRAG }));
   cloud.frustumCulled = false;
+  cloud.renderOrder = 2;
+
+  // inside the body, in the rig's millimetre space (forward -x): the head end sits behind the face in the
+  // top cover and the nerve cord runs back along the body. The cover is about 37 mm wide.
+  const fit = 37 / (ext.x * R);
   const brain = new THREE.Group();
-  brain.position.copy(center);
-  brain.rotation.x = -0.3; // tilt so the nerve cord trails down and back
+  brain.scale.setScalar(fit);
+  brain.rotation.y = Math.PI / 2; // brain +z (nerve cord) to rig +x (back), brain x across the body
+  brain.position.set(-7 + (ext.z * R * fit) / 2, 40, 2.4);
   brain.add(cloud);
-  ctx.body.add(brain);
+  rig.mm.add(brain);
 
   // centroid of a group in brain space
   const centroid = (g: Group) => {
-    const v = new THREE.Vector3();
-    for (const i of g.idx) v.add(new THREE.Vector3(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]));
-    return v.multiplyScalar(1 / Math.max(1, g.idx.length));
+    const out = new THREE.Vector3();
+    for (const i of g.idx) out.add(v.set(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]));
+    return out.multiplyScalar(1 / Math.max(1, g.idx.length));
   };
   // background neurons near the straight path from stimulus to command neurons, for the spreading wave
   const pathNeurons = (a: THREE.Vector3, b: THREE.Vector3) => {
@@ -114,7 +141,7 @@ export default async function flybrain(ctx: EffectContext): Promise<Effect> {
     const len2 = Math.max(ab.lengthSq(), 1e-6);
     const out: { i: number; t: number }[] = [];
     const p = new THREE.Vector3();
-    const rad = ctx.foot * 0.12;
+    const rad = 0.133;
     for (let i = 0; i < n; i += 2) {
       p.set(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]);
       const t = THREE.MathUtils.clamp(p.clone().sub(a).dot(ab) / len2, 0, 1);
@@ -124,24 +151,17 @@ export default async function flybrain(ctx: EffectContext): Promise<Effect> {
   };
   const episodes = data.episodes.map((e) => {
     const a = centroid(e.stim), b = centroid(e.cmd);
-    return { ...e, a, b, path: pathNeurons(a, b), stimCol: new THREE.Color(e.stim.color), cmdCol: new THREE.Color(e.cmd.color) };
+    return { ...e, path: pathNeurons(a, b), stimCol: new THREE.Color(e.stim.color), cmdCol: new THREE.Color(e.cmd.color), b };
   });
 
-  // ---- a glowing line from the command neurons down to Sesame while it acts
-  const linkGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-  const linkMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, toneMapped: false, depthWrite: false });
-  const link = new THREE.Line(linkGeo, linkMat);
-  link.frustumCulled = false;
-  ctx.body.add(link);
+  // the firing neurons light the glass and the floor around it
+  const light = new THREE.PointLight(0x8b5cf6, 0, ctx.foot * 0.9, 1.6);
+  brain.add(light);
 
-  const light = new THREE.PointLight(0x8b5cf6, 0, ctx.foot * 1.4, 1.6);
-  light.position.copy(center);
-  ctx.body.add(light);
-
-  const EP = 4.2; // seconds per episode
+  const EP = 6; // seconds per episode
   let current = -1;
+  let acting = false;
   const setHot = (idx: number[], color: THREE.Color) => { for (const i of idx) hot.set([color.r, color.g, color.b], i * 3); };
-  const tmp = new THREE.Vector3();
 
   return {
     update(time, dt) {
@@ -151,11 +171,13 @@ export default async function flybrain(ctx: EffectContext): Promise<Effect> {
       const t = time / EP - k; // 0..1 through the episode
       if (k !== current) {
         current = k;
+        acting = false;
         hot.fill(1);
         for (const p of e.path) hot.set([0.75, 0.8, 1], p.i * 3);
         setHot(e.stim.idx, e.stimCol);
         setHot(e.cmd.idx, e.cmdCol);
         hotAttr.needsUpdate = true;
+        light.position.copy(e.b);
       }
 
       // decay, then drive: stimulus (0-45%), spreading wave (15-60%), command neurons (40-85%)
@@ -175,47 +197,31 @@ export default async function flybrain(ctx: EffectContext): Promise<Effect> {
       actAttr.needsUpdate = true;
 
       light.color.copy(cAmp > sAmp ? e.cmdCol : e.stimCol);
-      light.intensity = 0.4 + Math.max(sAmp, cAmp) * 2.2;
-      brain.rotation.y = Math.sin(time * 0.25) * 0.35;
+      light.intensity = 0.3 + Math.max(sAmp, cAmp) * 1.6;
 
-      // ---- Sesame acts while the command neurons fire
-      const acting = t > 0.45 && t < 0.95;
-      const s = acting ? Math.sin(((t - 0.45) / 0.5) * Math.PI) : 0;
-      let speed = 0, turn = 0;
-      let pitch = 0, roll = 0, hop = 0;
-      switch (e.action) {
-        case 'feed': pitch = 0.35 * s; break; // bow toward the "food"
-        case 'escape': hop = acting ? Math.max(0, Math.sin((t - 0.45) * 40)) * 0.05 * s : 0; pitch = -0.2 * s; break;
-        case 'groom': roll = Math.sin(time * 18) * 0.12 * s; break;
-        case 'walk': speed = 0.16 * s; break;
-        case 'left': turn = 2.2 * s; speed = 0.05 * s; break;
-        case 'dance': turn = 5 * s; hop = Math.abs(Math.sin(time * 14)) * 0.03 * s; break;
-        case 'back': speed = -0.12 * s; break;
+      // ---- Sesame acts once the command neurons fire, then stands again
+      const move = MOVES[e.action];
+      if (!acting && t > 0.45) {
+        acting = true;
+        rig.play(move.seq, !!move.gait, true);
+        if (!move.gait) rig.play('stand');
       }
-      bot.yaw += turn * dt;
-      // drift back home between behaviors so it never wanders off the cell
-      if (!acting) {
-        bot.pos.lerp(home, damp(1.5, dt));
-        bot.yaw += Math.atan2(Math.sin(-bot.yaw), Math.cos(-bot.yaw)) * damp(1.8, dt);
+      if (move.gait && t > 0.9 && rig.name === move.seq) rig.play('stand', false, true);
+      const gait = move.gait && rig.name === move.seq ? move.gait : null;
+      if (gait) {
+        bot.yaw += gait.turn * dt;
+        bot.pos.x += Math.sin(bot.yaw) * gait.speed * botLen * dt;
+        bot.pos.y += Math.cos(bot.yaw) * gait.speed * botLen * dt;
+      } else if (t < 0.45) {
+        // drift back home between behaviours so it never wanders off the cell
+        bot.pos.lerp(home, damp(0.8, dt));
+        bot.yaw += wrapAngle(-bot.yaw) * damp(0.8, dt);
       }
-      bot.pos.x += Math.sin(bot.yaw) * speed * dt;
-      bot.pos.y += Math.cos(bot.yaw) * speed * dt;
-      bot.phase += dt * (3 + Math.abs(speed) * 60 + Math.abs(turn) * 4);
-      bot.pitch += (pitch - bot.pitch) * damp(8, dt);
-      bot.roll += (roll - bot.roll) * damp(10, dt);
-      const wobble = Math.sin(bot.phase) * (0.02 + Math.abs(speed) * 0.25);
-      ctx.model.position.set(bot.pos.x, hop * ctx.foot + Math.abs(Math.sin(bot.phase)) * 0.006, bot.pos.y);
-      ctx.model.rotation.set(bot.pitch, bot.yaw, wobble + bot.roll, 'YXZ');
-
-      // link from the firing command neurons to Sesame
-      linkMat.opacity = cAmp * 0.8;
-      linkMat.color.copy(e.cmdCol);
-      brain.updateMatrixWorld();
-      tmp.copy(e.b).applyMatrix4(brain.matrix);
-      const pts = linkGeo.attributes.position as THREE.BufferAttribute;
-      pts.setXYZ(0, tmp.x, tmp.y, tmp.z);
-      pts.setXYZ(1, bot.pos.x, ctx.foot * 0.12, bot.pos.y);
-      pts.needsUpdate = true;
+      bot.pos.x = THREE.MathUtils.clamp(bot.pos.x, -lim, lim);
+      bot.pos.y = THREE.MathUtils.clamp(bot.pos.y, -lim, lim);
+      rig.update(dt);
+      rig.root.position.set(bot.pos.x, 0, bot.pos.y);
+      rig.root.rotation.y = bot.yaw;
     },
   };
 }

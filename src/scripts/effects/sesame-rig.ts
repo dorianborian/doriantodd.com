@@ -24,6 +24,20 @@ const AXES = { X: new THREE.Vector3(1, 0, 0), Y: new THREE.Vector3(0, 1, 0), Z: 
 export const STAND: Angles = { R1: 135, R2: 45, L1: 45, L2: 135, R4: 0, R3: 180, L3: 0, L4: 180 };
 const SLEW = 520; // deg/s, an MG90 under load
 
+// The OLED window in Top-Cover-Enclosed-v117, measured from the STL (rig millimetres, Y up, forward -x):
+// a 22.5 x 12.65 mm opening with 1.27 mm corner chamfers through the cover's front face, which leans back
+// 20.15 deg. `center` is the opening's centre on the outer surface, `normal` points out of the face, and
+// the wall is 1.04 mm thick. The real 0.96" panel (128 x 64 at 0.17 mm pitch, 21.74 x 10.87 mm active
+// area) sits just behind the wall.
+export const FACE_WINDOW = {
+  center: new THREE.Vector3(-8.274, 42.689, 2.61),
+  normal: new THREE.Vector3(-0.938775, 0.344530, 0),
+  width: 22.5,
+  height: 12.65,
+  wall: 1.04,
+  active: [21.744, 10.872] as const,
+};
+
 function offsetMatrix(offset: Offset, center: THREE.Vector3) {
   const [px, py, pz] = offset.position, [rx, ry, rz] = offset.rotation;
   return new THREE.Matrix4().makeTranslation(px, py, pz)
@@ -40,7 +54,7 @@ export type Rig = Awaited<ReturnType<typeof buildRig>>;
  * root: place and yaw this (forward is the root's +z). The rig inside is in millimetres, scaled by `scale`.
  * Call play(name) to queue a firmware sequence, update(dt) every frame.
  */
-export async function buildRig(load: (url: string) => Promise<THREE.Object3D>, scale: number, colors: { body: number; leg: number; foot: number }) {
+export async function buildRig(load: (url: string) => Promise<THREE.Object3D>, scale: number, mats: { body: THREE.Material; frame: THREE.Material }) {
   const [gltf, data] = await Promise.all([load('/sesame/rig.glb'), fetch('/sesame/rig.json').then((r) => r.json() as Promise<RigJson>)]);
   gltf.updateMatrixWorld(true);
   const geoms: Record<string, THREE.BufferGeometry> = {};
@@ -60,11 +74,6 @@ export async function buildRig(load: (url: string) => Promise<THREE.Object3D>, s
     g.computeBoundingBox();
     for (const n of [mesh.name, mesh.parent?.name]) if (n) geoms[key(n)] = g;
   });
-  const mats = {
-    body: new THREE.MeshStandardMaterial({ color: colors.body, roughness: 0.5, metalness: 0.05 }),
-    leg: new THREE.MeshStandardMaterial({ color: colors.leg, roughness: 0.5, metalness: 0.1 }),
-    foot: new THREE.MeshStandardMaterial({ color: colors.foot, roughness: 0.5, metalness: 0.05 }),
-  };
 
   const root = new THREE.Group();     // world placement, yaw
   const yawFix = new THREE.Group();   // rig forward (-x) to root forward (+z)
@@ -91,16 +100,16 @@ export async function buildRig(load: (url: string) => Promise<THREE.Object3D>, s
     return mesh;
   };
   const body = data.rig.body;
-  addPart(body.frame_stl, body.frame_offset, mats.body, inner);
+  addPart(body.frame_stl, body.frame_offset, mats.frame, inner);
   addPart(body.bottom_stl, body.bottom_offset, mats.body, inner);
-  const cover = addPart(body.cover_stl, body.cover_offset, mats.body, inner);
+  addPart(body.cover_stl, body.cover_offset, mats.body, inner);
 
   const joints: Partial<Record<Servo, { group: THREE.Group; cfg: JointCfg; foot: THREE.Mesh | null }>> = {};
   const groups: Record<string, THREE.Group> = {};
   for (const name of Object.keys(data.rig.joints)) { groups[name] = new THREE.Group(); groups[name].matrixAutoUpdate = false; }
   for (const [name, cfg] of Object.entries(data.rig.joints)) {
     (cfg.parent ? groups[cfg.parent] : inner).add(groups[name]);
-    const mesh = addPart(cfg.stl, cfg.offset, cfg.parent ? mats.foot : mats.leg, groups[name]);
+    const mesh = addPart(cfg.stl, cfg.offset, mats.body, groups[name]);
     joints[name as Servo] = { group: groups[name], cfg, foot: cfg.parent ? mesh : null };
   }
 
@@ -130,14 +139,18 @@ export async function buildRig(load: (url: string) => Promise<THREE.Object3D>, s
   inner.position.set(-c0.x, -box0.min.y, -c0.z);
   const size = box0.getSize(new THREE.Vector3());
 
-  // the OLED face sits on the front of the top cover (rig forward is -x)
-  let faceAnchor: THREE.Object3D = inner;
-  let faceSpot = new THREE.Vector3(box0.min.x / scale, c0.y / scale, c0.z / scale);
-  if (cover) {
-    const g = cover.geometry.boundingBox!.clone().applyMatrix4(cover.matrix);
-    faceAnchor = inner;
-    faceSpot = new THREE.Vector3(g.min.x - 0.4, g.min.y + (g.max.y - g.min.y) * 0.55, (g.min.z + g.max.z) / 2);
-  }
+  // the OLED screen sits in the top cover's face window: placeFace(o, depth) parents a plane (facing +z, u along +x)
+  // to the rig `depth` mm behind the cover's outer surface, upright and facing out of the window
+  const faceBasis = new THREE.Matrix4().makeBasis(
+    new THREE.Vector3(0, 0, 1),
+    FACE_WINDOW.normal.clone().cross(new THREE.Vector3(0, 0, 1)),
+    FACE_WINDOW.normal,
+  );
+  const placeFace = (o: THREE.Object3D, depth: number) => {
+    o.quaternion.setFromRotationMatrix(faceBasis);
+    o.position.copy(FACE_WINDOW.center).addScaledVector(FACE_WINDOW.normal, -depth);
+    inner.add(o);
+  };
 
   // ---- sequence playback
   let queue: { name: string; frames: SeqFrame[]; loop: boolean }[] = [];
@@ -184,9 +197,10 @@ export async function buildRig(load: (url: string) => Promise<THREE.Object3D>, s
 
   return {
     root,
+    /** the millimetre rig space (STL coordinates, Y up, forward -x); things added here ride the body */
+    mm: inner as THREE.Object3D,
     size,
-    faceAnchor,
-    faceSpot,
+    placeFace,
     scale,
     get face() { return face; },
     get name() { return playing?.name ?? null; },

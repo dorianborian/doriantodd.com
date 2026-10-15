@@ -4,7 +4,7 @@
 // real gap between modules skipped, so a pattern that crosses modules looks like the physical board.
 
 import * as THREE from '../three-lite';
-import { glowMaterial } from './shared';
+import { boundsInBody, glowMaterial } from './shared';
 import type { EffectContext, Effect } from './types';
 
 const N = 24;
@@ -250,23 +250,103 @@ export default function matrix(ctx: EffectContext): Effect {
   const fb: Frame = new Float32Array(N * N);
   const shown: Frame = new Float32Array(N * N);
   const shows = [ticTacToe(), marquee('MATRIX GAME BOARD'), badApple(), snake(), life(), pong(), rain()];
-  let current = -1, started = 0;
+  let current = 0, showT = 0, paused = false, fresh = true;
+  const go = (k: number) => {
+    current = (k + shows.length) % shows.length;
+    showT = 0;
+    shows[current].start();
+    fresh = true; // a show picked while paused still shows its first frame
+    if (paused) shown.fill(0);
+    drawName();
+  };
 
+  // ---- transport: faint sketch-style buttons on the ground in front of the board (previous, play/pause,
+  // next) and the current show's name. Hover brightens them in the preselect amber.
+  const full = boundsInBody(ctx, [ctx.model]);
+  const zRow = Math.min(full.max.z + 0.32, ctx.foot / 2 - 0.3);
+  const btn = 0.2;
+  const icon = (draw: (g: CanvasRenderingContext2D) => void) => {
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = 128;
+    const g = cv.getContext('2d')!;
+    g.strokeStyle = g.fillStyle = '#fff';
+    g.lineWidth = 5;
+    g.lineJoin = 'round';
+    g.strokeRect(6, 6, 116, 116); // button outline, with sketch points on the corners
+    for (const [x, y] of [[6, 6], [122, 6], [6, 122], [122, 122]]) g.fillRect(x - 6, y - 6, 12, 12);
+    g.beginPath();
+    draw(g);
+    g.stroke();
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  };
+  const tri = (g: CanvasRenderingContext2D, x0: number, x1: number) => { g.moveTo(x0, 40); g.lineTo(x1, 64); g.lineTo(x0, 88); g.closePath(); };
+  const bar = (g: CanvasRenderingContext2D, x: number) => { g.rect(x, 40, 10, 48); };
+  const tex = {
+    prev: icon((g) => { bar(g, 34); tri(g, 92, 52); }),
+    next: icon((g) => { tri(g, 36, 76); bar(g, 84); }),
+    play: icon((g) => tri(g, 48, 86)),
+    pause: icon((g) => { bar(g, 46); bar(g, 72); }),
+  };
+  const SKETCH = 0xaeb6c2, AMBER = 0xf2b84b;
+  const button = (map: THREE.Texture, x: number, onClick: () => void) => {
+    const mat = new THREE.MeshBasicMaterial({ map, color: SKETCH, transparent: true, opacity: 0.4, depthWrite: false, toneMapped: false });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(btn, btn).rotateX(-Math.PI / 2), mat);
+    mesh.position.set(x, 0.008, zRow);
+    ctx.body.add(mesh);
+    ctx.interactive(mesh, {
+      onClick,
+      onHover(over) { mat.color.setHex(over ? AMBER : SKETCH); mat.opacity = over ? 1 : 0.4; },
+    });
+    return mat;
+  };
+  button(tex.prev, -btn * 1.5, () => go(current - 1));
+  const playMat = button(tex.pause, 0, () => { paused = !paused; playMat.map = paused ? tex.play : tex.pause; drawName(); });
+  button(tex.next, btn * 1.5, () => go(current + 1));
+
+  // the show's name in small mono text under the buttons
+  const nameCv = document.createElement('canvas');
+  nameCv.width = 512;
+  nameCv.height = 48;
+  const nameTex = new THREE.CanvasTexture(nameCv);
+  nameTex.colorSpace = THREE.SRGBColorSpace;
+  const nameW = btn * 5;
+  const name = new THREE.Mesh(
+    new THREE.PlaneGeometry(nameW, (nameW * nameCv.height) / nameCv.width).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ map: nameTex, color: SKETCH, transparent: true, opacity: 0.45, depthWrite: false, toneMapped: false }),
+  );
+  name.position.set(0, 0.008, zRow + btn * 0.5 + 0.08);
+  ctx.body.add(name);
+  function drawName() {
+    const g = nameCv.getContext('2d')!;
+    g.clearRect(0, 0, nameCv.width, nameCv.height);
+    g.fillStyle = '#fff';
+    g.font = '500 30px ui-monospace, Consolas, monospace';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    const no = (k: number) => String(k).padStart(2, '0');
+    g.fillText(`${no(current + 1)}/${no(shows.length)}  ${shows[current].name.toUpperCase()}${paused ? '  PAUSED' : ''}`, nameCv.width / 2, nameCv.height / 2);
+    nameTex.needsUpdate = true;
+  }
+  go(0);
+
+  const white = new THREE.Color(1, 1, 1);
   return {
-    update(t, dt) {
-      if (current < 0 || t - started > shows[current].seconds) {
-        current = (current + 1) % shows.length;
-        started = t;
-        shows[current].start();
-      }
+    update(_t, dt) {
+      if (paused && !fresh) return; // hold the current frame
+      fresh = false;
+      dt = paused ? 0 : Math.min(dt, 0.1);
+      showT += dt;
+      if (showT > shows[current].seconds) go(current + 1);
       fb.fill(0);
-      shows[current].draw(fb, t - started, Math.min(dt, 0.1));
+      shows[current].draw(fb, showT, dt);
       // LEDs fade out quickly and switch on instantly, like the real matrices
       const fall = Math.exp(-Math.max(dt, 0) * 18);
       for (let i = 0; i < N * N; i++) {
         shown[i] = Math.max(fb[i], shown[i] * fall);
         const b = shown[i];
-        c.copy(off).lerp(new THREE.Color(1, 1, 1), b);
+        c.copy(off).lerp(white, b);
         leds.setColorAt(i, c);
         glow.setColorAt(i, c.setScalar(b));
       }

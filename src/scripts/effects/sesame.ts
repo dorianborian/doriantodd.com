@@ -5,7 +5,7 @@
 import * as THREE from '../three-lite';
 import { makeBody, shove, step, type Body, type World } from './physics';
 import { boundsInBody, glowMaterial, rand } from './shared';
-import { buildRig } from './sesame-rig';
+import { buildRig, FACE_WINDOW } from './sesame-rig';
 import type { EffectContext, Effect } from './types';
 
 type Atlas = { cols: number; rows: number; frames: Record<string, number> };
@@ -40,22 +40,33 @@ export default async function sesame(ctx: EffectContext): Promise<Effect> {
   // the static model is swapped for the posable rig, sized to match it
   ctx.model.visible = false;
   const botLen = Math.max(size.x, size.z) * 0.15;
-  const rig = await buildRig((url) => ctx.loadRaw(url, 'y', [0, 0, 0]), 1, { body: 0xf0782a, leg: 0x3a3f4a, foot: 0x9aa3b5 });
-  rig.root.scale.setScalar(botLen / Math.max(rig.size.x, rig.size.z));
+  // printed in Sesame orange, with the black internal frame
+  const rig = await buildRig((url) => ctx.loadRaw(url, 'y', [0, 0, 0]), 1, {
+    body: new THREE.MeshStandardMaterial({ color: 0xf0782a, roughness: 0.5, metalness: 0.05 }),
+    frame: new THREE.MeshStandardMaterial({ color: 0x141518, roughness: 0.6, metalness: 0.05 }),
+  });
+  // ?pose=...&big=N scales the posed robot up N times for close-up checks
+  const params = new URLSearchParams(location.search);
+  const big = params.has('pose') ? Number(params.get('big')) || 1 : 1;
+  rig.root.scale.setScalar((botLen / Math.max(rig.size.x, rig.size.z)) * big);
   ctx.body.add(rig.root);
   const botRadius = botLen * 0.45;
 
-  // face on the OLED, in the rig's millimetre space (the robot looks along -x there)
+  // face on the OLED: the 128 x 64 active area just behind the cover's face window, on a black panel
+  // that fills the whole opening (rig millimetres)
   const atlas: Atlas = await fetch('/sesame/faces.json').then((r) => r.json());
   const tex = await new THREE.TextureLoader().loadAsync('/sesame/faces.png');
   tex.magFilter = THREE.NearestFilter;
   tex.minFilter = THREE.NearestFilter;
   tex.generateMipmaps = false;
   tex.repeat.set(1 / atlas.cols, 1 / atlas.rows);
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(26, 13), new THREE.MeshBasicMaterial({ map: tex, color: 0xcdefff, toneMapped: false }));
-  face.rotation.y = -Math.PI / 2;
-  face.position.copy(rig.faceSpot);
-  rig.faceAnchor.add(face);
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(...FACE_WINDOW.active), new THREE.MeshBasicMaterial({ map: tex, color: 0xcdefff, toneMapped: false }));
+  rig.placeFace(face, FACE_WINDOW.wall + 0.05);
+  const glass = new THREE.Mesh(
+    new THREE.PlaneGeometry(FACE_WINDOW.width + 2, FACE_WINDOW.height + 2),
+    new THREE.MeshBasicMaterial({ color: 0x030405, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 }),
+  );
+  rig.placeFace(glass, FACE_WINDOW.wall + 0.3);
   const showFrame = (name: string) => {
     const i = atlas.frames[name] ?? atlas.frames.idle;
     tex.offset.set((i % atlas.cols) / atlas.cols, 1 - (Math.floor(i / atlas.cols) + 1) / atlas.rows);
@@ -96,7 +107,7 @@ export default async function sesame(ctx: EffectContext): Promise<Effect> {
   addToy(new THREE.Mesh(new THREE.SphereGeometry(0.04, 20, 14), toyMat(0xff8fd6)), 'sphere', new THREE.Vector3(0.04, 0.04, 0.04), 0.35, -0.45);
 
   // behaviour: walk to a toy and shove it, perform one of the firmware's emotes, or lie down for a rest
-  const bot = { pos: new THREE.Vector2(0, 0.1), yaw: new URLSearchParams(location.search).has('pose') ? 0 : Math.PI };
+  const bot = { pos: new THREE.Vector2(0, 0.1), yaw: params.has('pose') ? 0 : Math.PI };
   type Plan = { kind: 'walk' | 'emote' | 'rest'; toy?: Body; timer: number; name?: string };
   let plan: Plan = { kind: 'emote', timer: 0, name: 'wave' };
   let lastEmote = 'wave';
@@ -107,7 +118,7 @@ export default async function sesame(ctx: EffectContext): Promise<Effect> {
     if (g) rig.play(g, true, true);
   };
   // ?pose=<sequence> holds one firmware sequence in place (for checking poses)
-  const forced = new URLSearchParams(location.search).get('pose');
+  const forced = params.get('pose');
   rig.play(forced ?? 'wave', !!forced, true);
   if (!forced) rig.play('stand');
 
