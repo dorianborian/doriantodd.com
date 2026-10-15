@@ -29,9 +29,21 @@ const items = await Promise.all(
       // the lighter mesh on the home page; the project page viewer uses the full one
       model: model ? { ...model, url: model.url.replace(/model\.glb$/, 'model-lite.glb') } : null,
       effect: entry.data.effect ?? null,
+      parent: entry.data.parent ?? null,
+      /** true when the effect is borrowed from a sub-project (red.HEX shows HEX-VISION while grouped) */
+      borrowed: false,
     };
   }),
 );
+// Sub-projects are grouped with their parent on the home page. A parent without a scene of its own
+// shows its first sub-project's scene while the group is collapsed.
+for (const p of items) {
+  if (p.effect) continue;
+  const child = items.find((c) => c.parent === p.slug && c.effect);
+  if (child) Object.assign(p, { effect: child.effect, borrowed: true });
+}
+// Tree order: top-level projects, each followed by its sub-projects
+const tree = items.flatMap((p, i) => (p.parent ? [] : [{ p, i, depth: 0 }, ...items.flatMap((c, j) => (c.parent === p.slug ? [{ p: c, i: j, depth: 1 }] : []))]));
 // Extra models the effects need (the soccer robots are the Sesame model)
 const sesame = projects.find((p) => p.slug === 'sesame')?.model;
 // Photos for the FCE scene: small WebP copies of the images on that page
@@ -54,8 +66,6 @@ const portrait = home.data.cover ? await getImage({ src: home.data.cover, width:
     <span class="tool-sep"></span>
     <button class="tool" data-mode="shaded" aria-pressed="true" title="Shaded"><Icon name="shaded" /><span class="hide-mobile">Shaded</span></button>
     <button class="tool" data-mode="wire" aria-pressed="false" title="Wireframe"><Icon name="wire" /><span class="hide-mobile">Wireframe</span></button>
-    <span class="tool-sep"></span>
-    <label class="tool-range" title="Explode"><Icon name="explode" /><span class="hide-mobile">Explode</span><input type="range" min="0" max="100" value="0" data-explode aria-label="Explode" /></label>
     <span class="tool-sep hide-mobile"></span>
     <a class="tool hide-mobile" href="/projects"><Icon name="bom" />All projects</a>
   </Fragment>
@@ -63,10 +73,10 @@ const portrait = home.data.cover ? await getImage({ src: home.data.cover, width:
   <Fragment slot="left">
     <label class="filter"><Icon name="search" size={13} /><input type="search" placeholder="Filter projects" data-filter aria-label="Filter projects" /></label>
     <ul class="tree">
-      {items.map((p, i) => (
-        <li>
-          <a class="tree-item" href={p.url} data-part={i} data-title={p.title.toLowerCase()} style="--depth:0">
-            <Icon name={p.model ? 'cube' : 'part'} size={14} /><span class="label">{p.title}</span><span class="meta">{p.no}{p.year ? ` · ${p.year}` : ''}</span>
+      {tree.map(({ p, i, depth }) => (
+        <li class:list={[{ 'tree-sub': depth > 0 }]}>
+          <a class="tree-item" href={p.url} data-part={i} data-title={p.title.toLowerCase()} style={`--depth:${depth}`}>
+            <Icon name={items.some((c) => c.parent === p.slug) ? 'assembly' : p.model ? 'cube' : 'part'} size={14} /><span class="label">{p.title}</span><span class="meta">{p.no}{p.year ? ` · ${p.year}` : ''}</span>
           </a>
         </li>
       ))}
@@ -91,7 +101,7 @@ const portrait = home.data.cover ? await getImage({ src: home.data.cover, width:
       <text data-label="x" fill="var(--x)">X</text><text data-label="y" fill="var(--y)">Y</text><text data-label="z" fill="var(--z)">Z</text>
     </svg>
     <div class="vp-tip" hidden></div>
-    <div class="vp-hint hide-mobile"><span><b>Click</b> select</span><span><b>Double-click</b> open</span><span><b>Drag</b> rotate</span><span><b>Right-drag</b> pan</span><span><b>Scroll</b> zoom</span></div>
+    <div class="vp-hint hide-mobile"><span><b>Click</b> select / split</span><span><b>Double-click</b> open</span><span><b>Drag</b> rotate</span><span><b>Right-drag</b> pan</span><span><b>Scroll</b> zoom</span></div>
     <noscript>
       <div class="cards" style="position:absolute;inset:0;overflow:auto">
         {items.map((p) => <a class="card" href={p.url}>{p.thumb && <img src={p.thumb} alt="" loading="lazy" />}<div><small>{p.no}</small><br />{p.title}</div></a>)}
@@ -138,6 +148,15 @@ const portrait = home.data.cover ? await getImage({ src: home.data.cover, width:
     background: rgba(22, 23, 26, 0.92); border: 1px solid var(--preselect); border-radius: 3px; color: var(--text);
   }
   .vp-tip small { font-family: var(--mono); color: var(--text-3); margin-left: 6px; }
+  /* sub-projects nested under their parent, with a feature-tree guide line */
+  .tree-sub .tree-item::before {
+    content: ''; position: absolute; left: 19px; top: 0; bottom: 0;
+    border-left: 1px solid var(--line);
+  }
+  .tree-sub .tree-item::after {
+    content: ''; position: absolute; left: 19px; top: 50%; width: 7px;
+    border-top: 1px solid var(--line);
+  }
 </style>
 
 <script is:inline>

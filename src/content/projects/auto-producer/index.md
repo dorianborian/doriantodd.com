@@ -1,4 +1,5 @@
 ---
+parent: sesame
 modelUp: z
 effect: soccer
 model: "./model.glb"

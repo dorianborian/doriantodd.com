@@ -16,6 +16,7 @@ export {
   Texture,
   TorusGeometry,
   AdditiveBlending,
+  NormalBlending, // grouping: ghost x-ray in assembly.ts
   Color,
   CustomBlending,
   OneFactor,

@@ -5,7 +5,7 @@ import { getCollection, render } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
 import Shell from '../layouts/Shell.astro';
 import Icon from '../components/Icon.astro';
-import { SITE, CUSTOM_ROUTES, getProjects, type Project, type Page } from '../lib/site';
+import { SITE, CUSTOM_ROUTES, getProjects, getUnlistedProjects, type Project, type Page } from '../lib/site';
 
 export async function getStaticPaths() {
   const projects = await getProjects();
@@ -14,6 +14,11 @@ export async function getStaticPaths() {
     ...projects.map((p, i) => ({
       params: { path: p.url.replace(/^\//, '') },
       props: { kind: 'project' as const, entry: p.entry, no: p.no, year: p.year, modelUrl: p.modelUrl, model: p.model, prev: projects[i - 1] ?? null, next: projects[i + 1] ?? null },
+    })),
+    // unlisted projects (FCE) keep their page but render like a plain page: no number, neighbours or project list
+    ...(await getUnlistedProjects()).map((p) => ({
+      params: { path: p.url.replace(/^\//, '') },
+      props: { kind: 'page' as const, entry: p.entry, no: null, year: null, modelUrl: null, model: null, prev: null, next: null },
     })),
     ...pages.map((entry) => ({
       params: { path: entry.data.path.replace(/^\//, '') },
@@ -91,7 +96,7 @@ const icon = (depth: number) => (depth === 1 ? 'extrude' : depth === 2 ? 'sketch
         </div>
       </div>
 
-      {d.summary && isProject && <p class="lede">{d.summary}</p>}
+      {d.summary && (isProject || 'listed' in d) && <p class="lede">{d.summary}</p>}
 
       {isProject && d.repo && (
         <a class="repo-card" href={`https://github.com/${d.repo}`} rel="noopener">
