@@ -1,0 +1,589 @@
+{
+ "design": {
+  "name": "penbot-mini2",
+  "upVector": [
+   0,
+   0,
+   1
+  ],
+  "units": {
+   "fusion_native": "centimeters",
+   "export_length": "meters",
+   "scale_to_meters": 0.01
+  }
+ },
+ "occurrences": [
+  {
+   "id": "Petoi_P1S_servo_v1_1",
+   "name": "Petoi P1S servo v1:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.004000000189989805,
+     -9.999999974752427e-7,
+     0
+    ],
+    [
+     0.02800000086426735,
+     0.03049900010228157,
+     0.012000000104308128
+    ]
+   ]
+  },
+  {
+   "id": "Petoi_P1S_servo_v1_2",
+   "name": "Petoi P1S servo v1:2",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.004000000189989805,
+     -9.999999974752427e-7,
+     0.02539999969303608
+    ],
+    [
+     0.02800000086426735,
+     0.03049900010228157,
+     0.03739999979734421
+    ]
+   ]
+  },
+  {
+   "id": "SPDT_Mini_Slide_Switch_1",
+   "name": "SPDT Mini Slide Switch:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.053769659250974655,
+     0.0031840000301599503,
+     0.0003549999964889139
+    ],
+    [
+     -0.04041966050863266,
+     0.008684000000357628,
+     0.019954999908804893
+    ]
+   ]
+  },
+  {
+   "id": "crank1_1_1",
+   "name": "crank1:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.011651542969048023,
+     0.027000000700354576,
+     0.02505207434296608
+    ],
+    [
+     0.0721161961555481,
+     0.03334999829530716,
+     0.06525959074497223
+    ]
+   ]
+  },
+  {
+   "id": "crank2_1_1",
+   "name": "crank2:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.01165050733834505,
+     0.027000000700354576,
+     -0.03684728965163231
+    ],
+    [
+     0.06586787849664688,
+     0.03811249881982803,
+     0.012349660508334637
+    ]
+   ]
+  },
+  {
+   "id": "link1_1_1",
+   "name": "link1:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.056242309510707855,
+     0.027000000700354576,
+     -0.01198664028197527
+    ],
+    [
+     0.11092889308929443,
+     0.03811249881982803,
+     0.06208373233675957
+    ]
+   ]
+  },
+  {
+   "id": "link2_1_1",
+   "name": "link2:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.04681895673274994,
+     0.03334999829530716,
+     -0.036847472190856934
+    ],
+    [
+     0.09800046682357788,
+     0.03970000147819519,
+     0.021547453477978706
+    ]
+   ]
+  },
+  {
+   "id": "Frame_1",
+   "name": "Frame:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.047564998269081116,
+     -0.0012700000079348683,
+     -0.00317499996162951
+    ],
+    [
+     0.031175000593066216,
+     0.018498819321393967,
+     0.04057500138878822
+    ]
+   ]
+  },
+  {
+   "id": "Top_Cover_1",
+   "name": "Top Cover:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.047564998269081116,
+     0.013728699646890163,
+     -0.00317499996162951
+    ],
+    [
+     0.031175000593066216,
+     0.027000000700354576,
+     0.04057500138878822
+    ]
+   ]
+  },
+  {
+   "id": "Rubber_Shoe_1",
+   "name": "Rubber Shoe:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.047564998269081116,
+     -0.00634999992325902,
+     -0.00317499996162951
+    ],
+    [
+     -0.032138340175151825,
+     -0.0012700000079348683,
+     0.04057500138878822
+    ]
+   ]
+  }
+ ],
+ "joints": [
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "Petoi_P1S_servo_v1_2",
+   "child": "crank1_1",
+   "origin": [
+    0.043779,
+    0.03145,
+    -0.012332
+   ],
+   "axis": [
+    0,
+    -1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0.532866
+   }
+  },
+  {
+   "id": "Revolute_2",
+   "name": "Revolute 2",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "Petoi_P1S_servo_v1_1",
+   "child": "crank2_1",
+   "origin": [
+    0.017972,
+    0.03145,
+    0.006025
+   ],
+   "axis": [
+    0,
+    -1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 5.833419
+   }
+  },
+  {
+   "id": "Rigid_3",
+   "name": "Rigid 3",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Frame_1",
+   "child": "Petoi_P1S_servo_v1_1",
+   "origin": [
+    0.026267,
+    0.018498,
+    0.006004
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_4",
+   "name": "Rigid 4",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Frame_1",
+   "child": "Petoi_P1S_servo_v1_2",
+   "origin": [
+    0.026267,
+    0.018498,
+    0.056804
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_5",
+   "name": "Revolute 5",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "Top_Cover_1",
+   "child": "crank2_1",
+   "origin": [
+    0.017996,
+    0.029215,
+    0.006037
+   ],
+   "axis": [
+    0,
+    -1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 5.567722
+   }
+  },
+  {
+   "id": "Revolute_6",
+   "name": "Revolute 6",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "Top_Cover_1",
+   "child": "crank1_1",
+   "origin": [
+    0.042298,
+    0.029215,
+    -0.013184
+   ],
+   "axis": [
+    0,
+    -1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0.499542
+   }
+  },
+  {
+   "id": "Rigid_7",
+   "name": "Rigid 7",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Frame_1",
+   "child": "Top_Cover_1",
+   "origin": [
+    -0.008195,
+    0.018499,
+    0.040575
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_8",
+   "name": "Rigid 8",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Frame_1",
+   "child": "Rubber_Shoe_1",
+   "origin": [
+    -0.039852,
+    -0.00127,
+    0.02851
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "origin": [
+    0,
+    0.032914,
+    0.036714
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": -3.141593
+   }
+  },
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "crank1_1",
+   "child": "link1_1",
+   "origin": [
+    -0.046803,
+    0.029863,
+    0.030123
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 1.104274
+   }
+  },
+  {
+   "id": "Revolute_2",
+   "name": "Revolute 2",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "crank2_1",
+   "child": "link2_1",
+   "origin": [
+    -0.016272,
+    0.033038,
+    -0.039138
+   ],
+   "axis": [
+    0,
+    -1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 1.06987
+   }
+  },
+  {
+   "id": "Cylindrical_3",
+   "name": "Cylindrical 3",
+   "type": "cylindrical",
+   "is_as_built": false,
+   "parent": "link1_1",
+   "child": "link2_1",
+   "origin": [
+    -0.015919,
+    0.033038,
+    -0.077237
+   ],
+   "axis": [
+    0,
+    -1,
+    0
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "crank1_1",
+   "child": "link1_1",
+   "origin": [
+    -0.058017,
+    0.035565,
+    0.069866
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 1.283029
+   }
+  },
+  {
+   "id": "Revolute_2",
+   "name": "Revolute 2",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "crank2_1",
+   "child": "link2_1",
+   "origin": [
+    -0.035271,
+    0.035565,
+    -0.053214
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 4.934427
+   }
+  },
+  {
+   "id": "Revolute_3",
+   "name": "Revolute 3",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "link2_1",
+   "child": "link1_1",
+   "origin": [
+    -0.045505,
+    0.035565,
+    0.119101
+   ],
+   "axis": [
+    0,
+    -1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 4.866402
+   }
+  }
+ ]
+}

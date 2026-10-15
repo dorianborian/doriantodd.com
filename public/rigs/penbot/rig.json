@@ -1,0 +1,773 @@
+{
+ "design": {
+  "name": "penbot-ultra-max",
+  "upVector": [
+   0,
+   0,
+   1
+  ],
+  "units": {
+   "fusion_native": "centimeters",
+   "export_length": "meters",
+   "scale_to_meters": 0.01
+  }
+ },
+ "occurrences": [
+  {
+   "id": "root_base",
+   "name": "Root Component Base",
+   "grounded": true,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.26681989431381226,
+     -0.16684210300445557,
+     -0.06422500312328339
+    ],
+    [
+     0.06606238335371017,
+     0.09071396291255951,
+     0.1143999993801117
+    ]
+   ]
+  },
+  {
+   "id": "Sharpie_Pen_1",
+   "name": "Sharpie Pen:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     0.06284236162900925,
+     -0.09720013290643692,
+     -0.04527202621102333
+    ],
+    [
+     0.07515792548656464,
+     -0.085891492664814,
+     0.0879894569516182
+    ]
+   ]
+  },
+  {
+   "id": "2664N353_Metal_Gear_-_20_Degree_Pressure_Angle_1",
+   "name": "2664N353_Metal Gear - 20 Degree Pressure Angle:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.10511349886655807,
+     0.008086499758064747,
+     -0.0062500000931322575
+    ],
+    [
+     -0.08328650146722794,
+     0.02991349995136261,
+     0.013749999925494194
+    ]
+   ]
+  },
+  {
+   "id": "2664N353_Metal_Gear_-_20_Degree_Pressure_Angle_2",
+   "name": "2664N353_Metal Gear - 20 Degree Pressure Angle:2",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.10511349886655807,
+     0.008086499758064747,
+     0.020549999549984932
+    ],
+    [
+     -0.08328650146722794,
+     0.02991349995136261,
+     0.040550000965595245
+    ]
+   ]
+  },
+  {
+   "id": "Component2_1",
+   "name": "Component2:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.06224459037184715,
+     -0.01197838969528675,
+     0.007043419871479273
+    ],
+    [
+     -0.0002934100048150867,
+     0.09365669637918472,
+     0.019509999081492424
+    ]
+   ]
+  },
+  {
+   "id": "Component3_1",
+   "name": "Component3:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.04593370109796524,
+     0.06629200279712677,
+     0.018239429220557213
+    ],
+    [
+     0.08339550346136093,
+     0.0916920006275177,
+     0.02585943043231964
+    ]
+   ]
+  },
+  {
+   "id": "Component4_1",
+   "name": "Component4:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.06224459037184715,
+     -0.01197838969528675,
+     0.025939440354704857
+    ],
+    [
+     0.08339550346136093,
+     0.049972791224718094,
+     0.03728942945599556
+    ]
+   ]
+  },
+  {
+   "id": "Carriage-LWL7B_1",
+   "name": "Carriage-LWL7B:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     0.060256000608205795,
+     -0.08272799849510193,
+     0.01719599962234497
+    ],
+    [
+     0.07720600068569183,
+     -0.07622800022363663,
+     0.038995999842882156
+    ]
+   ]
+  },
+  {
+   "id": "LinearRail-LWL7B-100mm_1",
+   "name": "LinearRail-LWL7B-100mm:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     0.06523100286722183,
+     -0.07947800308465958,
+     0.007765000220388174
+    ],
+    [
+     0.0722310021519661,
+     -0.07467799633741379,
+     0.04776500165462494
+    ]
+   ]
+  },
+  {
+   "id": "Component11_1",
+   "name": "Component11:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.057555798441171646,
+     -0.07947859913110733,
+     0.002364430110901594
+    ],
+    [
+     0.07990580052137375,
+     -0.06197800114750862,
+     0.05316442996263504
+    ]
+   ]
+  },
+  {
+   "id": "Component12_1",
+   "name": "Component12:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     0.05603079870343208,
+     -0.07150299847126007,
+     0.024589430540800095
+    ],
+    [
+     0.08143080025911331,
+     0.09365669637918472,
+     0.032209429889917374
+    ]
+   ]
+  },
+  {
+   "id": "Component14_1",
+   "name": "Component14:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     0.04179868847131729,
+     -0.0954279974102974,
+     0.012220789678394794
+    ],
+    [
+     0.0956629067659378,
+     -0.09032897651195526,
+     0.06380599737167358
+    ]
+   ]
+  },
+  {
+   "id": "Component16_1",
+   "name": "Component16:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     0.052855800837278366,
+     -0.08782701939344406,
+     0.012220789678394794
+    ],
+    [
+     0.08460579812526703,
+     -0.08272799849510193,
+     0.04397078976035118
+    ]
+   ]
+  }
+ ],
+ "joints": [
+  {
+   "id": "Rigid_3",
+   "name": "Rigid 3",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "18mm_Ring_Neodymium_Disc_Magnet_1",
+   "origin": [
+    0,
+    0.038,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_4",
+   "name": "Rigid 4",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "18mm_Ring_Neodymium_Disc_Magnet_2",
+   "origin": [
+    -0.29,
+    0,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_5",
+   "name": "Rigid 5",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "18mm_Ring_Neodymium_Disc_Magnet_3",
+   "origin": [
+    -0.29,
+    0,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_6",
+   "name": "Rigid 6",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "Sharpie_Pen_1",
+   "origin": [
+    0.154093,
+    -0.169408,
+    -0.001056
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_7",
+   "name": "Rigid 7",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "2664N353_Metal_Gear_-_20_Degree_Pressure_Angle_1",
+   "origin": [
+    0,
+    0.038,
+    0.01
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_8",
+   "name": "Rigid 8",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "2664N353_Metal_Gear_-_20_Degree_Pressure_Angle_2",
+   "origin": [
+    0,
+    0,
+    0.0711
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_9",
+   "name": "Revolute 9",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "Component4_1",
+   "origin": [
+    0,
+    0.059995,
+    0.061726
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Cylindrical_10",
+   "name": "Cylindrical 10",
+   "type": "cylindrical",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "Component2_1",
+   "origin": [
+    0,
+    0.059995,
+    0.031632
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_11",
+   "name": "Revolute 11",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "Component15_1",
+   "origin": [
+    0.028603,
+    0.039355,
+    0.057234
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_12",
+   "name": "Revolute 12",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "Component9_1",
+   "origin": [
+    -0.007093,
+    0.035329,
+    -0.027665
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_13",
+   "name": "Rigid 13",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Component16_1",
+   "child": "Sharpie_Pen_1",
+   "origin": [
+    0.15155,
+    -0.163788,
+    0.04413
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_4",
+   "name": "Rigid 4",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Component6_1",
+   "child": "Component5_1",
+   "origin": [
+    -0.1,
+    0.150495,
+    0.000153
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_6",
+   "name": "Revolute 6",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "Component12_1",
+   "child": "Component4_1",
+   "origin": [
+    -0.1,
+    0.059995,
+    0.055376
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_7",
+   "name": "Rigid 7",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Component11_1",
+   "child": "Component12_1",
+   "origin": [
+    -0.093905,
+    0.145733,
+    0.055376
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_12",
+   "name": "Revolute 12",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "Component3_1",
+   "child": "Component12_1",
+   "origin": [
+    -0.1,
+    0,
+    0.049026
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_13",
+   "name": "Revolute 13",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "Component3_1",
+   "child": "Component2_1",
+   "origin": [
+    0,
+    0,
+    0.042829
+   ],
+   "axis": [
+    0,
+    0,
+    -1
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_8",
+   "name": "Rigid 8",
+   "type": "fixed",
+   "is_as_built": true,
+   "parent": "Component16_1",
+   "child": "Component14_1",
+   "origin": [
+    0,
+    0,
+    0.000635
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_9",
+   "name": "Rigid 9",
+   "type": "fixed",
+   "is_as_built": true,
+   "parent": "Carriage-LWL7B_1",
+   "child": "Component16_1",
+   "origin": [
+    0,
+    0,
+    0.000635
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_10",
+   "name": "Rigid 10",
+   "type": "fixed",
+   "is_as_built": true,
+   "parent": "LinearRail-LWL7B-100mm_1",
+   "child": "Carriage-LWL7B_1",
+   "origin": [
+    -0.1,
+    0.15522,
+    0.004295
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_11",
+   "name": "Rigid 11",
+   "type": "fixed",
+   "is_as_built": true,
+   "parent": "Component11_1",
+   "child": "LinearRail-LWL7B-100mm_1",
+   "origin": [
+    -0.1,
+    0.15367,
+    0.003963
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  }
+ ]
+}

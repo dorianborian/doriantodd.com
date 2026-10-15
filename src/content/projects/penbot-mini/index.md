@@ -1,5 +1,6 @@
 ---
 model: "./model.glb"
+effect: "penbot-mini"
 title: "PenBot Mini"
 summary: "Most drawing robots lean on the same playbook: Cartesian rigs borrowed straight from 3D printers and CNC machines. PenBot never played by those rules. What started as a simple, kind of absurd goal (build a robot to sign a senior yearbook) eventually grew into a toaster-sized portrait artist, and then got shrunk all the way down to the size of a credit card."
 cover: "./img-2595fcb8.png"

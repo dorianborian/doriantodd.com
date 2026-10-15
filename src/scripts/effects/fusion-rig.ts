@@ -22,9 +22,10 @@ export type FusionInfo = {
 // GLTFLoader sanitises node names the way three's PropertyBinding does
 const key = (name: string) => name.replace(/[[\].:/]/g, '').replace(/\s/g, '_');
 
-export async function loadFusionRig(ctx: EffectContext, base: string) {
+/** `up` is the CAD axis that should point up in the scene (Fusion designs are Z-up unless modelled lying down). */
+export async function loadFusionRig(ctx: EffectContext, base: string, up: 'y' | 'z' = 'z') {
   const [outer, info] = await Promise.all([
-    ctx.loadRaw(`${base}/rig.glb`, 'z', [0, 0, 0]),
+    ctx.loadRaw(`${base}/rig.glb`, up, [0, 0, 0]),
     fetch(`${base}/rig.json`).then((r) => r.json() as Promise<FusionInfo>),
   ]);
   outer.updateMatrixWorld(true);
