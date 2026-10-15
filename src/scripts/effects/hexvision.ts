@@ -30,7 +30,10 @@ const SCAN_FRAG = /* glsl */ `
 `;
 
 export default function hexvision(ctx: EffectContext): Effect {
-  // Measure the robot before shrinking it, in the holder's own (unscaled) space
+  // Measure the robot before shrinking it, in the holder's own (unscaled) space. The loader may already show
+  // the holder at its final scale, so measure at 1 and set the scale back in the same frame.
+  ctx.model.scale.setScalar(1);
+  ctx.model.updateMatrixWorld(true);
   const b = boundsInBody(ctx, [ctx.model]);
   const size = b.getSize(new THREE.Vector3());
   const SCALE = 0.32;

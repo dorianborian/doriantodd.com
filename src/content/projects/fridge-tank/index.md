@@ -23,22 +23,6 @@ This is the long version. If you want the code, it is all up at [autonomous-tank
 
 ![](./img-7e601417.png)
 
-## Winning the SF Tech Week robot contest
-
-![right: Fridge Tank V23 at the DaiDai Labs robot contest, SF Tech Week](./fashion-portrait.jpg)
-
-Winning a robot fashion show in a random building in SF was not on my 2026 bingo card. Somehow, that is exactly what happened.
-
-For SF Tech Week, [DaiDai Labs](https://www.daidailabs.com/) brought together some of the best robot builders in the Bay Area, from solo makers to startups to major companies, to show off their tech on a makeshift runway complete with music, lights and some very creative pitches. Humanoids, quadrupeds, robot arms, a nine foot field vehicle, and one mini fridge on tank treads. It was one of the most unique events I have ever been part of.
-
-Turns out googly eyes are a crowd favorite. The Fridge Tank took the audience award, and I walked away with a comically large check and a ton of new connections. Huge thanks to DaiDai Labs for putting it together, and to everyone who voted for my mini fridge.
-
-![The runway, with the crowd on both sides](./fashion-runway.jpg)
-
-![The audience award: one thousand dollars, payable to Fridge Tank V23](./fashion-check.jpg)
-
-![Fridge Tank V23 on the venue floor](./fashion-fridge.jpg)
-
 ## Choosing a mini fridge as the chassis
 
 The honest answer is that the chassis was the joke and everything else was the engineering. A Frigidaire retro mini fridge is the right size, it is thermoelectric so it runs on 12V DC instead of needing a compressor and mains power, and it has a door. That last part mattered more than I expected. A robot that drives around is a robot. A robot that drives around and opens its own door to hand you a drink is a character.
@@ -366,3 +350,18 @@ The fridge also made a few appearances in William Osman's video:
 
 https://www.youtube.com/watch?v=5Y21THNFZWg
 
+## Winning the SF Tech Week robot contest
+
+![right: Fridge Tank V23 at the DaiDai Labs robot contest, SF Tech Week](./fashion-portrait.jpg)
+
+Winning a robot fashion show in a random building in SF was not on my 2026 bingo card. Somehow, that is exactly what happened.
+
+For SF Tech Week, [DaiDai Labs](https://www.daidailabs.com/) brought together some of the best robot builders in the Bay Area, from solo makers to startups to major companies, to show off their tech on a makeshift runway complete with music, lights and some very creative pitches. Humanoids, quadrupeds, robot arms, a nine foot field vehicle, and one mini fridge on tank treads. It was one of the most unique events I have ever been part of.
+
+Turns out googly eyes are a crowd favorite. The Fridge Tank took the audience award, and I walked away with a comically large check and a ton of new connections. Huge thanks to DaiDai Labs for putting it together, and to everyone who voted for my mini fridge.
+
+![The runway, with the crowd on both sides](./fashion-runway.jpg)
+
+![The audience award: one thousand dollars, payable to Fridge Tank V23](./fashion-check.jpg)
+
+![Fridge Tank V23 on the venue floor](./fashion-fridge.jpg)

@@ -624,6 +624,13 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     return { outer, model };
   }
 
+  // What each effect does to the static model, so cells appear at their final size from the first frame:
+  // a number is the holder scale the effect sets, 'rig' means the effect hides it and builds its own robot.
+  const EFFECT_MODEL: Record<string, number | 'rig'> = {
+    chase: 0.26, scanner: 0.32, soccer: 0.86,
+    playpen: 'rig', arena: 'rig', flybrain: 'rig', penbot: 'rig', 'penbot-mini': 'rig',
+  };
+
   /** Put a cell's first level on screen. */
   async function place(part: Part, p: Item, asset: LodAsset | null) {
     const holder = new THREE.Group();
@@ -652,15 +659,23 @@ export function mountAssembly(root: HTMLElement, data: Data) {
       const list = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       part.mats.push(...(list.filter((m) => 'emissive' in m) as THREE.MeshStandardMaterial[]));
     });
-    heights.set(part, (box.max.y - box.min.y) * (p.modelScale ?? 1));
+    const mode = EFFECT_MODEL[p.effect ?? ''];
+    const scale = typeof mode === 'number' ? mode : (p.modelScale ?? 1);
+    heights.set(part, (box.max.y - box.min.y) * scale);
     const reveal = revealOf(part);
     reveal.patch(model);
     pivot.visible = false;
     holder.add(pivot);
-    holder.scale.setScalar(p.modelScale ?? 1);
+    holder.scale.setScalar(scale);
     part.tint.scan(part.group);
     part.state = null;
     paint();
+    if (mode === 'rig' && !part.ghost) {
+      // the static model never shows; the effect's own robot joins the cell's reveal when it exists
+      reveal.materialize();
+      queueEffect(part, p, holder, s);
+      return;
+    }
     // shaders compile in parallel (KHR_parallel_shader_compile); the cell appears when they are ready
     await renderer.compileAsync(pivot, camera, scene);
     pivot.visible = true;

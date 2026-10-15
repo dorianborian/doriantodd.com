@@ -350,11 +350,11 @@ export class Sheets {
     s.to.set(this.o.pile.x + rand(-1, 1) * this.o.w * 0.04, this.o.pile.y + rand(-1, 1) * this.o.h * 0.05, this.o.pile.z + this.o.thick * (level + 0.5));
     s.yaw0 = s.mesh.rotation.z;
     s.yaw1 = rand(-0.22, 0.22);
-    // half or whole turns, so the sheet lands square with the pile
-    s.spin = (Math.random() < 0.5 ? -1 : 1) * Math.PI * (Math.random() < 0.4 ? 1 : 2);
+    // slides off onto the pile, lifting just enough to clear it, no spinning
+    s.spin = 0;
     s.t = 0;
-    s.dur = 1.05;
-    s.arc = this.o.arc;
+    s.dur = 1.5;
+    s.arc = this.o.arc * 0.3;
     s.flying = true;
     this.flying.push(s);
 
@@ -400,12 +400,11 @@ export class Sheets {
         m.position.x += Math.sin(t * 7) * (1 - t) * this.o.w * 0.06;
         m.rotation.set(Math.sin(t * 9) * (1 - t) * 0.25, Math.cos(t * 7) * (1 - t) * 0.2, s.yaw0 + (s.yaw1 - s.yaw0) * e);
       } else {
-        // thrown: up and over in an arc, spinning, then settle flat
-        const e = ease(t);
+        // slid off: a smooth glide with a gentle lift over the pile, turning slightly to its resting angle
+        const e = t * t * t * (t * (t * 6 - 15) + 10);
         m.position.lerpVectors(s.from, s.to, e);
-        m.position.z += Math.sin(Math.PI * t) * s.arc;
-        const flutter = Math.sin(Math.PI * t);
-        m.rotation.set(flutter * 0.5 * Math.sin(t * 11), flutter * 0.35, s.yaw0 + (s.yaw1 + s.spin - s.yaw0) * (1 - (1 - t) ** 3));
+        m.position.z += Math.sin(Math.PI * e) * s.arc;
+        m.rotation.set(0, Math.sin(Math.PI * e) * 0.04, s.yaw0 + (s.yaw1 - s.yaw0) * e);
       }
       if (t >= 1) {
         s.flying = false;

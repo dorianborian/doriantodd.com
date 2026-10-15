@@ -6,7 +6,7 @@
 //
 // public/rigs/executioner was made with (root_base is a flattened copy of the whole assembly, so it is skipped;
 // fasteners, bearings and the electronics hidden under the top plates go too):
-//   node scripts/fusion.mjs <Executioner-nexp> public/rigs/executioner --ratio 0.03 --error 0.01 --skip
+//   node scripts/fusion.mjs <Executioner-fixed-2> public/rigs/executioner --ratio 0.03 --error 0.01 --skip
 //     "^root_base$|Screw|Locknut|Bearing|nutsrip|KakeSwitch|S2_Mini|LED_Strip|FlyColor|6s1p|Ovonic|Drive_Pulley|Repeat_Ultra|Anti-Buckle|Internal_Link"
 
 import * as THREE from '../three-lite';
