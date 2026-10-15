@@ -11,12 +11,12 @@ migratedFrom: "https://www.doriantodd.com/"
 
 ## Newest video
 
-Is your refrigerator running? What if it had a fully autonomous real-time navigation system and people tracking as well?
+Can I build a tiny robot from scratch in the middle of China?
 
-https://www.youtube.com/watch?v=_FpqlkK-Nx8
+https://www.youtube.com/watch?v=WrQNBdtGT8g
 
 ## Featured project
 
-PenBot Mini is the natural evolution of my larger PenBot drawing robot, and uses its tiny footprint to make interesting sketches and drawings.
+The Autonomous Fridge Tank: a mini fridge on tank treads that follows you around, or runs away from you, on its own. It also won the audience award at the SF Tech Week robot contest.
 
-https://www.youtube.com/watch?v=pL0wKQ6DZD0
+https://www.youtube.com/watch?v=_FpqlkK-Nx8

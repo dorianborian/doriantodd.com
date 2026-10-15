@@ -10,7 +10,7 @@ repo: "dorianborian/autonomous-tank-system"
 repoNote: "ROS 2 packages, ESP32 drive firmware and the web control UI"
 order: 9
 year: 2026
-tags: ["ROS 2","Jetson","ESP32","Computer vision","Autonomy"]
+tags: ["ROS 2","Jetson","ESP32","Computer vision","Autonomy","Events"]
 ---
 
 ![](./img-8d478ece.png)
@@ -22,6 +22,22 @@ The pitch was simple enough that I could explain it in one sentence: a mini frid
 This is the long version. If you want the code, it is all up at [autonomous-tank-system](https://github.com/dorianborian/autonomous-tank-system) and I will link the relevant pieces as I go.
 
 ![](./img-7e601417.png)
+
+## Winning the SF Tech Week robot contest
+
+![right: Fridge Tank V23 at the DaiDai Labs robot contest, SF Tech Week](./fashion-portrait.jpg)
+
+Winning a robot fashion show in a random building in SF was not on my 2026 bingo card. Somehow, that is exactly what happened.
+
+For SF Tech Week, [DaiDai Labs](https://www.daidailabs.com/) brought together some of the best robot builders in the Bay Area, from solo makers to startups to major companies, to show off their tech on a makeshift runway complete with music, lights and some very creative pitches. Humanoids, quadrupeds, robot arms, a nine foot field vehicle, and one mini fridge on tank treads. It was one of the most unique events I have ever been part of.
+
+Turns out googly eyes are a crowd favorite. The Fridge Tank took the audience award, and I walked away with a comically large check and a ton of new connections. Huge thanks to DaiDai Labs for putting it together, and to everyone who voted for my mini fridge.
+
+![The runway, with the crowd on both sides](./fashion-runway.jpg)
+
+![The audience award: one thousand dollars, payable to Fridge Tank V23](./fashion-check.jpg)
+
+![Fridge Tank V23 on the venue floor](./fashion-fridge.jpg)
 
 ## Choosing a mini fridge as the chassis
 
