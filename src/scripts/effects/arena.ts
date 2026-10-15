@@ -1,14 +1,28 @@
-// Combat Robotics: Executioner drives around a small arena (steel floor, hazard border, clear
-// polycarbonate walls) and keeps attacking the same washing machine. Every hit throws sparks and
-// knocks a panel loose; once it's in pieces, the parts slowly pull themselves back together.
+// Combat Robotics: the Executioner (its real CAD, with the weapon on its shaft) hunts household appliances
+// and nerd-culture easter eggs around a small steel arena. The weapon idles, winds up while hunting and
+// hits full speed in a charge; every hit bleeds rotor speed, dents the panel it lands on, bends or tears off
+// the parts on that side, pops screws, throws sparks, and heavy hits start fires. When a target is stripped
+// the wreck burns for a moment, gets cleared, and the next one drops in.
+//
+// public/rigs/executioner was made with (root_base is a flattened copy of the whole assembly, so it is skipped;
+// fasteners, bearings and the electronics hidden under the top plates go too):
+//   node scripts/fusion.mjs <Executioner-nexp> public/rigs/executioner --ratio 0.03 --error 0.01 --skip
+//     "^root_base$|Screw|Locknut|Bearing|nutsrip|KakeSwitch|S2_Mini|LED_Strip|FlyColor|6s1p|Ovonic|Drive_Pulley|Repeat_Ultra|Anti-Buckle|Internal_Link"
 
 import * as THREE from '../three-lite';
-import { makeBody, step, type Body, type World } from './physics';
-import { damp, glowMaterial, rand, turnToward, wrapAngle } from './shared';
+import { buildAppliance, LINEUP, type Build, type Piece } from './appliances';
+import { Bits, boltGeometry, Sprites } from './arena-fx';
+import { loadFusionRig } from './fusion-rig';
+import { hitAt, makeRigid, resize, RigidWorld, wake, type Kinematic, type Rigid } from './rigid';
+import { damp, rand, turnToward, wrapAngle } from './shared';
 import type { EffectContext, Effect } from './types';
 
-/** Executioner's weapon side faces -z in the model, so the drive heading is flipped. */
-const FRONT = Math.PI;
+// Weapon joint, checked against the geometry: the export's joint origin is off in space, but the weapon,
+// its pulley and both bearings are all centred on y = 0.2113, z = 0.0730 (CAD metres, Z-up), axis along x.
+const WEAPON = { ids: ['Revised-asymmetrical_weapon_v1_1', '1277N771_Timing_Belt_Pulley_v2_1'], origin: [0.2132, 0.211287, 0.073025], tip: 0.068, length: 0.144 };
+const WHEELS = ['MK3_Cast_Front_Wheels_v7_1', 'MK3_Cast_Front_Wheels_v6_Mirror_1', 'MK3_Cast_Rear_Wheels_v9_1', 'MK3_Cast_Rear_Wheels_v9_1_1'];
+/** World units per CAD metre: about the size the old static model had. */
+const S = 2.0;
 
 function hazardTexture() {
   const c = document.createElement('canvas');
@@ -29,303 +43,47 @@ function hazardTexture() {
   return t;
 }
 
-type Piece = {
-  mesh: THREE.Mesh;
-  /** Offset and rotation relative to the machine when assembled. */
-  home: THREE.Vector3;
-  homeQ: THREE.Quaternion;
-  half: THREE.Vector3;
-  body: Body | null;
-};
-
-type Kind = 'washer' | 'stove' | 'fridge' | 'microwave' | 'miku' | 'toaster' | 'crt' | 'trash' | 'heater' | 'arcade' | 'duck' | 'cone' | 'gnome' | 'tower' | 'vending' | 'lamp' | 'tank' | 'printer';
-// appliances first, with the easter eggs mixed in between
-const LINEUP: Kind[] = ['washer', 'toaster', 'stove', 'duck', 'crt', 'fridge', 'cone', 'microwave', 'tower', 'gnome', 'heater', 'arcade', 'trash', 'tank', 'printer', 'vending', 'lamp', 'miku'];
-
-/** Appliances built from separate parts so they can come apart. The last part stays with the chassis. */
-function appliance(kind: Kind) {
-  const std = (color: number, roughness = 0.4, metalness = 0.1) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
-  const pieces: Piece[] = [];
-  const add = (obj: THREE.Mesh, pos: [number, number, number], rot?: THREE.Euler) => {
-    if (rot) obj.rotation.copy(rot);
-    const bb = new THREE.Box3().setFromObject(obj, true);
-    obj.rotation.set(0, 0, 0);
-    const half = bb.getSize(new THREE.Vector3()).multiplyScalar(0.5).max(new THREE.Vector3(0.01, 0.01, 0.01));
-    pieces.push({ mesh: obj, home: new THREE.Vector3(...pos), homeQ: new THREE.Quaternion().setFromEuler(rot ?? new THREE.Euler()), half, body: null });
-    return obj;
-  };
-  const box = (w: number, h: number, d: number, mat: THREE.Material, pos: [number, number, number]) => add(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat), pos);
-  const t = 0.018;
-  /** top, sides and back of a cabinet */
-  const shell = (w: number, h: number, d: number, mat: THREE.Material, top: THREE.Material = mat) => {
-    box(w, t, d, top, [0, h / 2 - t / 2, 0]);
-    box(t, h, d, mat, [-w / 2 + t / 2, 0, 0]);
-    box(t, h, d, mat, [w / 2 - t / 2, 0, 0]);
-    box(w, h, t, mat, [0, 0, -d / 2 + t / 2]);
-  };
-  const base = (w: number, d: number, h: number, mat: THREE.Material) => box(w, t * 2, d, mat, [0, -h / 2 + t, 0]);
-  let w = 0.3, h = 0.36, d = 0.3;
-
-  if (kind === 'washer') {
-    const white = std(0xf2f3f5, 0.35), grey = std(0x9aa3ad), chrome = std(0xc8ced6, 0.25, 0.7);
-    shell(w, h, d, white);
-    box(w, h * 0.16, t * 1.6, grey, [0, h * 0.4, d / 2 - t * 0.2]);
-    const door = add(new THREE.Mesh(new THREE.CylinderGeometry(w * 0.28, w * 0.28, 0.012, 28).rotateX(Math.PI / 2), std(0x223a55, 0.05, 0.2)), [0, -h * 0.06, d / 2 + 0.01]);
-    door.add(new THREE.Mesh(new THREE.TorusGeometry(w * 0.3, 0.018, 12, 28), chrome));
-    add(new THREE.Mesh(new THREE.CylinderGeometry(w * 0.34, w * 0.34, d * 0.8, 24).rotateX(Math.PI / 2), std(0x7d8691, 0.3, 0.8)), [0, -h * 0.06, 0]);
-    base(w, d, h, grey);
-  } else if (kind === 'stove') {
-    w = 0.32; h = 0.34;
-    const yellow = std(0xf2c230, 0.35), black = std(0x17181a, 0.5), coil = std(0x3a3c40, 0.4, 0.6);
-    shell(w, h, d, yellow, black);
-    const top = pieces[0].mesh;
-    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-      const burner = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.008, 8, 20).rotateX(Math.PI / 2), coil);
-      burner.position.set(x * w * 0.24, t / 2 + 0.004, z * d * 0.22);
-      top.add(burner);
-    }
-    box(w, 0.07, t, yellow, [0, h / 2 + 0.035, -d / 2 + t / 2]); // backsplash
-    const oven = box(w - t * 2, h * 0.62, t, yellow, [0, -h * 0.12, d / 2 - t / 2]);
-    const win = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.6, h * 0.28), black);
-    win.position.z = t / 2 + 0.002;
-    oven.add(win);
-    box(w - t * 2, h * 0.14, t, black, [0, h * 0.34, d / 2 - t / 2]); // knob panel
-    base(w, d, h, black);
-  } else if (kind === 'fridge') {
-    w = 0.28; h = 0.6; d = 0.28;
-    const silver = std(0xc9ced4, 0.28, 0.65), chrome = std(0xe8ecf0, 0.15, 0.9), inner = std(0xf4f7fb, 0.6);
-    shell(w, h, d, silver);
-    const upper = box(w, h * 0.34, t * 1.5, silver, [0, h * 0.32, d / 2 - t / 2]);
-    const lower = box(w, h * 0.6, t * 1.5, silver, [0, -h * 0.18, d / 2 - t / 2]);
-    for (const [door, y] of [[upper, -h * 0.08], [lower, h * 0.18]] as const) {
-      const handle = new THREE.Mesh(new THREE.BoxGeometry(0.015, h * 0.14, 0.02), chrome);
-      handle.position.set(w * 0.38, y, t * 1.2);
-      door.add(handle);
-    }
-    box(w - t * 2, t, d * 0.8, inner, [0, 0, 0]); // shelves
-    box(w - t * 2, t, d * 0.8, inner, [0, h * 0.2, 0]);
-    base(w, d, h, silver);
-  } else if (kind === 'microwave') {
-    h = 0.18; d = 0.22;
-    const black = std(0x151619, 0.35, 0.2), glass = std(0x2c3440, 0.05, 0.3), grey = std(0x3b3f45, 0.4);
-    shell(w, h, d, black);
-    const door = box(w * 0.7, h - t, t, black, [-w * 0.15, 0, d / 2 - t / 2]);
-    const pane = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.52, h * 0.6), glass);
-    pane.position.z = t / 2 + 0.002;
-    door.add(pane);
-    box(w * 0.3, h - t, t, grey, [w * 0.35, 0, d / 2 - t / 2]);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(w * 0.3, w * 0.3, 0.008, 24), std(0xdde6ee, 0.05, 0.1)), [0, -h / 2 + t * 2.5, 0]);
-    base(w, d, h, black);
-  } else if (kind === 'toaster') {
-    w = 0.26; h = 0.18; d = 0.16;
-    const chrome = std(0xd9dde2, 0.18, 0.9), black = std(0x1b1c1f, 0.6);
-    shell(w, h, d, chrome);
-    const slots = pieces[0].mesh;
-    for (const z of [-0.035, 0.035]) { const slot = new THREE.Mesh(new THREE.BoxGeometry(w * 0.7, 0.004, 0.018), black); slot.position.set(0, t / 2 + 0.002, z); slots.add(slot); }
-    box(w - t * 2, h - t, t, chrome, [0, 0, d / 2 - t / 2]);
-    add(new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.025, 0.03), black), [w / 2 + 0.015, h * 0.2, 0]); // lever
-    for (const z of [-0.035, 0.035]) add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.6, 0.09, 0.012), std(0xc98b4a, 0.9)), [0, h / 2 + 0.03, z]); // toast
-    base(w, d, h, black);
-  } else if (kind === 'crt') {
-    w = 0.3; h = 0.26; d = 0.28;
-    const beige = std(0xd8cfb8, 0.7), glass = std(0x1d2a2a, 0.08, 0.3), dark = std(0x2a2a2a, 0.6);
-    shell(w, h, d, beige);
-    const screen = box(w - t * 2, h - t * 2, t, beige, [0, 0, d / 2 - t / 2]);
-    const tube = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.72, h * 0.62), glass);
-    tube.position.z = t / 2 + 0.002; tube.position.y = h * 0.06;
-    screen.add(tube);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.012, 10).rotateX(Math.PI / 2), dark), [w * 0.32, -h * 0.36, d / 2 + 0.006]);
-    add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.7, h * 0.7, d * 0.6), dark), [0, 0, -d * 0.1]); // the tube inside
-    base(w, d, h, beige);
-  } else if (kind === 'trash') {
-    w = 0.22; h = 0.34; d = 0.22;
-    const green = std(0x3f6b4a, 0.55, 0.3), lid = std(0x2f5238, 0.5, 0.3);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.1, 0.02, 20), lid), [0, h / 2 - 0.01, 0]);
-    for (let k = 0; k < 4; k++) {
-      const a = (k / 4) * Math.PI * 2;
-      add(new THREE.Mesh(new THREE.BoxGeometry(0.15, h * 0.9, 0.012), green), [Math.sin(a) * 0.1, 0, Math.cos(a) * 0.1], new THREE.Euler(0, a, 0));
-    }
-    add(new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), std(0xe9e4d8, 0.9)), [0, h * 0.1, 0]); // paper ball
-    base(w, d, h, lid);
-  } else if (kind === 'heater') {
-    w = 0.22; h = 0.55; d = 0.22;
-    const white = std(0xeef0f2, 0.4), copper = std(0xb87333, 0.35, 0.8);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.03, 20), white), [0, h / 2 - 0.015, 0]);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, h * 0.8, 20, 1, true), white), [0, 0, 0]);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, h * 0.7, 16), std(0x7d8691, 0.35, 0.7)), [0, 0, 0]);
-    for (const x of [-0.04, 0.04]) add(new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.12, 8), copper), [x, h / 2 + 0.05, 0]);
-    base(w, d, h, white);
-  } else if (kind === 'arcade') {
-    w = 0.26; h = 0.6; d = 0.28;
-    const purple = std(0x3b1f6b, 0.5), black = std(0x111214, 0.6), neon = new THREE.MeshBasicMaterial({ color: 0x29f0ff, toneMapped: false });
-    shell(w, h, d, purple);
-    const bezel = box(w - t * 2, h * 0.3, t, black, [0, h * 0.14, d / 2 - t / 2]);
-    const screen = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.66, h * 0.22), new THREE.MeshBasicMaterial({ color: 0x6b2cff, toneMapped: false }));
-    screen.position.z = t / 2 + 0.002;
-    bezel.add(screen);
-    const marquee = box(w, h * 0.1, t * 1.5, black, [0, h * 0.42, d / 2 - t]);
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.8, h * 0.05), neon);
-    sign.position.z = t;
-    marquee.add(sign);
-    const panel = box(w, 0.03, 0.12, black, [0, -h * 0.05, d / 2 + 0.03]);
-    const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.05, 6), black);
-    stick.position.set(-0.05, 0.035, 0);
-    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.016, 10, 8), std(0xe5484d, 0.4));
-    ball.position.set(-0.05, 0.06, 0);
-    panel.add(stick, ball);
-    for (const x of [0.02, 0.06, 0.1]) { const b = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.01, 12), std(x > 0.05 ? 0xffd166 : 0x4a9bff, 0.4)); b.position.set(x - 0.02, 0.018, 0); panel.add(b); }
-    base(w, d, h, black);
-  } else if (kind === 'duck') {
-    // easter egg: a giant rubber duck
-    w = 0.3; h = 0.34; d = 0.34;
-    const yellow = std(0xffd23f, 0.35), orange = std(0xff8c1a, 0.4), black = std(0x111111, 0.3);
-    add(new THREE.Mesh(new THREE.SphereGeometry(0.15, 20, 14).scale(1, 0.75, 1.15), yellow), [0, -h * 0.12, 0]);
-    const head = add(new THREE.Mesh(new THREE.SphereGeometry(0.09, 18, 14), yellow), [0, h * 0.2, 0.08]);
-    const beak = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.07, 12).rotateX(Math.PI / 2), orange);
-    beak.position.set(0, -0.01, 0.1);
-    head.add(beak);
-    for (const x of [-0.04, 0.04]) { const e = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), black); e.position.set(x, 0.025, 0.075); head.add(e); }
-    add(new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 8).scale(1, 0.6, 1.4), yellow), [0, -h * 0.02, -0.15]); // tail
-    base(w * 0.6, d * 0.6, h, yellow);
-  } else if (kind === 'cone') {
-    // easter egg: a traffic cone, knocked over in one hit
-    w = 0.22; h = 0.36; d = 0.22;
-    const orange = std(0xff6a13, 0.5), white = std(0xf4f4f4, 0.5);
-    add(new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.12, 16, 1, true), orange), [0, h * 0.28, 0]);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, 0.08, 16, 1, true), white), [0, h * 0.06, 0]);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.1, 0.12, 16, 1, true), orange), [0, -h * 0.17, 0]);
-    base(w, d, h, std(0x222222, 0.8));
-  } else if (kind === 'gnome') {
-    // easter egg: a garden gnome
-    w = 0.2; h = 0.4; d = 0.2;
-    const red = std(0xd62828, 0.6), blue = std(0x2b59c3, 0.6), skin = std(0xf1c6a7, 0.8), beardM = std(0xf7f7f2, 0.9);
-    add(new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 16), red), [0, h * 0.33, 0]);
-    add(new THREE.Mesh(new THREE.SphereGeometry(0.05, 14, 10), skin), [0, h * 0.13, 0.01]);
-    add(new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.1, 14).rotateX(Math.PI), beardM), [0, h * 0.02, 0.04]);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.14, 14), blue), [0, -h * 0.17, 0]);
-    base(w * 0.8, d * 0.8, h, std(0x5b3a1e, 0.9));
-  } else if (kind === 'tower') {
-    w = 0.14; h = 0.36; d = 0.3;
-    const black = std(0x141518, 0.45, 0.4), rgb = new THREE.MeshBasicMaterial({ color: 0xff3df2, toneMapped: false }), glass = std(0x223040, 0.05, 0.2);
-    shell(w, h, d, black);
-    const side = box(t, h - t * 2, d - t * 2, glass, [w / 2 + t / 2, 0, 0]);
-    const strip = new THREE.Mesh(new THREE.BoxGeometry(0.004, h * 0.8, 0.006), rgb);
-    strip.position.set(-0.01, 0, d * 0.4);
-    side.add(strip);
-    for (const y of [0.1, -0.02]) add(new THREE.Mesh(new THREE.TorusGeometry(0.035, 0.006, 8, 20), rgb), [0, y, d / 2 + 0.004]); // fans
-    add(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.2), std(0x2e7d32, 0.5)), [0, 0.02, -0.02]); // graphics card
-    base(w, d, h, black);
-  } else if (kind === 'vending') {
-    w = 0.32; h = 0.62; d = 0.26;
-    const red = std(0xc1121f, 0.4, 0.2), glass = std(0x9fc5e8, 0.05, 0.1), dark = std(0x1a1a1a, 0.5);
-    shell(w, h, d, red);
-    const front = box(w * 0.64, h * 0.75, t, glass, [-w * 0.14, h * 0.08, d / 2 - t / 2]);
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) {
-      const can = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.05, 10), std([0xe63946, 0x2a9d8f, 0xf4a261][c], 0.4, 0.4));
-      can.position.set((c - 1) * 0.06, (r - 1.5) * 0.1, -0.03);
-      front.add(can);
-    }
-    box(w * 0.3, h * 0.75, t, dark, [w * 0.33, h * 0.08, d / 2 - t / 2]);
-    base(w, d, h, dark);
-  } else if (kind === 'lamp') {
-    w = 0.22; h = 0.5; d = 0.22;
-    const brass = std(0xb08d57, 0.35, 0.8), shade = std(0xf2e8cf, 0.9), glow = new THREE.MeshBasicMaterial({ color: 0xfff1c1, toneMapped: false });
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.11, 0.16, 20, 1, true), shade), [0, h * 0.3, 0]);
-    add(new THREE.Mesh(new THREE.SphereGeometry(0.03, 12, 10), glow), [0, h * 0.22, 0]);
-    add(new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, h * 0.6, 8), brass), [0, -h * 0.05, 0]);
-    base(w * 0.7, d * 0.7, h, brass);
-  } else if (kind === 'tank') {
-    // easter egg: a tiny fridge tank, googly eyes and all
-    w = 0.22; h = 0.3; d = 0.28;
-    const red = std(0xd62828, 0.35, 0.1), black = std(0x151515, 0.7), white = std(0xffffff, 0.3);
-    shell(w, h * 0.8, d, red);
-    const door = box(w - t, h * 0.8 - t, t, red, [0, 0, d / 2 - t / 2]);
-    for (const x of [-0.05, 0.05]) {
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 14, 10), white);
-      eye.position.set(x, 0.05, 0.02);
-      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.014, 10, 8), black);
-      pupil.position.set(x + 0.006, 0.045, 0.045);
-      door.add(eye, pupil);
-    }
-    for (const x of [-1, 1]) add(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, d * 1.05), black), [x * (w / 2 + 0.02), -h * 0.4, 0]); // treads
-    base(w, d, h * 0.8, black);
-  } else if (kind === 'printer') {
-    w = 0.3; h = 0.16; d = 0.26;
-    const grey = std(0xe6e6e6, 0.6), dark = std(0x333333, 0.5), paper = std(0xffffff, 0.9);
-    shell(w, h, d, grey);
-    box(w - t * 2, h * 0.4, t, dark, [0, -h * 0.15, d / 2 - t / 2]);
-    add(new THREE.Mesh(new THREE.BoxGeometry(w * 0.7, 0.004, 0.2), paper), [0, h / 2 + 0.02, -0.02], new THREE.Euler(-0.5, 0, 0));
-    add(new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.01, 0.03), std(0x57ab5a, 0.4)), [w * 0.35, h / 2 + 0.005, d * 0.35]);
-    base(w, d, h, dark);
-  } else {
-    // plush Miku: big head, teal twin tails, grey outfit, sitting
-    w = 0.26; h = 0.36; d = 0.18;
-    const skin = std(0xf7e6d8, 0.9), teal = std(0x39c5bb, 0.85), grey = std(0x6b7078, 0.9), dark = std(0x24262b, 0.9), pink = std(0xe8457a, 0.8);
-    const head = add(new THREE.Mesh(new THREE.SphereGeometry(0.085, 20, 16), skin), [0, h * 0.2, 0]);
-    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.091, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), teal);
-    hair.rotation.x = -0.35;
-    head.add(hair);
-    for (const x of [-0.03, 0.03]) {
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), std(0x1f6f8b, 0.4));
-      eye.position.set(x, -0.005, 0.08);
-      head.add(eye);
-    }
-    for (const side of [-1, 1]) {
-      add(new THREE.Mesh(new THREE.CapsuleGeometry(0.03, 0.2, 4, 10), teal), [side * 0.11, h * 0.02, -0.02], new THREE.Euler(0, 0, side * 0.35));
-      add(new THREE.Mesh(new THREE.CapsuleGeometry(0.022, 0.06, 4, 8), skin), [side * 0.065, -h * 0.2, 0.03], new THREE.Euler(0.4, 0, side * 0.5));
-    }
-    const body = add(new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.07, 0.1, 16), grey), [0, -h * 0.17, 0]);
-    const tie = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.05, 0.01), teal);
-    tie.position.set(0, 0.015, 0.055);
-    body.add(tie);
-    add(new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.02, 0.02), pink), [0, h * 0.3, -0.04]); // hair ties
-    add(new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.04, 0.12), dark), [0, -h / 2 + 0.02, 0.02]); // legs and boots, stays
-  }
-  return { pieces, half: new THREE.Vector3(w / 2, h / 2, d / 2) };
-}
-
-export default function arena(ctx: EffectContext): Effect {
-  const SCALE = 0.3;
-  ctx.model.scale.setScalar(SCALE);
-  const bot = new THREE.Box3().setFromObject(ctx.model, true);
-  const botSize = bot.getSize(new THREE.Vector3());
-  const botRadius = Math.max(botSize.x, botSize.z) * 0.5;
-
-  const half = ctx.foot * 0.48;
-
-  // ------------------------------------------------------------ spinning beater bar
-  // The red weapon frame pivots on the white hub in the middle of the robot (model space: y 0.38, z -0.1)
-  // and its two teeth sweep a circle of radius ~0.78 about the left-right axis. A blurred disc at each
-  // tooth reads as motion blur; its speed follows the weapon: idle, spin-up, full.
-  const spinU = { uPhase: { value: 0 }, uSpeed: { value: 0 } };
-  const blurMat = glowMaterial({
-    uniforms: spinU,
+/** Motion smear around the real weapon: a translucent drum that streaks behind each tooth, fading in with speed. */
+function blurDrum(radius: number, length: number) {
+  const uniforms = { uAngle: { value: 0 }, uSpeed: { value: 0 } };
+  const mat = new THREE.ShaderMaterial({
+    uniforms,
+    transparent: true,
+    depthWrite: false,
     side: THREE.DoubleSide,
-    vertexShader: /* glsl */ `varying vec2 vP; void main() { vP = position.zy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    vertexShader: /* glsl */ `varying vec3 vP; void main() { vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
     fragmentShader: /* glsl */ `
-      uniform float uPhase; uniform float uSpeed; varying vec2 vP;
+      uniform float uAngle; uniform float uSpeed; varying vec3 vP;
       void main() {
-        float r = length(vP);
-        float a = fract(atan(vP.y, vP.x) / 6.2831853 - uPhase);
-        // one tooth per disc, smeared into a longer arc as the weapon speeds up
-        float smear = mix(0.05, 0.6, uSpeed);
-        float streak = pow(smoothstep(smear, 0.0, a), 1.5);
-        float band = smoothstep(0.5, 0.66, r) * smoothstep(0.82, 0.74, r);
-        vec3 col = mix(vec3(1.0, 0.2, 0.15), vec3(1.0, 0.85, 0.75), streak * uSpeed);
-        float alpha = (streak * 0.9 + 0.08) * band * uSpeed;
-        gl_FragColor = vec4(col * alpha, 0.0);
+        float phi = atan(vP.z, vP.y);
+        // two teeth, half a turn apart; d is how far this point trails the nearest one
+        float d = mod(uAngle - phi, 3.14159265);
+        float smear = 0.12 + 2.2 * uSpeed * uSpeed;
+        float streak = exp(-d / smear);
+        float r = length(vP.yz) / ${radius.toFixed(4)};
+        float band = smoothstep(0.25, 0.55, r);
+        float a = (0.06 + 0.42 * streak) * band * smoothstep(0.3, 0.9, uSpeed);
+        vec3 col = mix(vec3(0.75, 0.04, 0.03), vec3(1.0, 0.75, 0.7), streak * 0.5);
+        gl_FragColor = vec4(col, a);
       }`,
   });
-  const blur = new THREE.Group();
-  for (const x of [-0.62, 0.62]) {
-    const disc = new THREE.Mesh(new THREE.CircleGeometry(0.84, 48).rotateY(Math.PI / 2), blurMat);
-    disc.position.x = x;
-    disc.renderOrder = 4;
-    blur.add(disc);
-  }
-  blur.position.set(0, 0.38, -0.1);
-  ctx.model.add(blur);
-  let spin = 0.15; // 0 idle, 1 full speed
+  const g = new THREE.Group();
+  const drum = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 48, 1, true).rotateZ(Math.PI / 2), mat);
+  const capGeo = new THREE.CircleGeometry(radius, 48).rotateY(Math.PI / 2);
+  const capA = new THREE.Mesh(capGeo, mat);
+  const capB = new THREE.Mesh(capGeo, mat);
+  capA.position.x = -length / 2;
+  capB.position.x = length / 2;
+  for (const m of [drum, capA, capB]) { m.renderOrder = 5; g.add(m); }
+  return { group: g, uniforms };
+}
+
+type Loose = { piece: Piece; body: Rigid; lastVy: number };
+type Bent = { piece: Piece; hinge: THREE.Group; axis: THREE.Vector3; angle: number; vel: number; target: number; life: number };
+type Fire = { local: THREE.Vector3; heat: number };
+
+export default async function arena(ctx: EffectContext): Promise<Effect> {
+  const half = ctx.foot * 0.48;
   const floorY = 0.03;
 
   // ------------------------------------------------------------ arena
@@ -363,214 +121,487 @@ export default function arena(ctx: EffectContext): Effect {
     ctx.body.add(post);
   }
 
-  // ------------------------------------------------------------ the appliance
-  const world: World = { gravity: 9.8, floor: floorY, bounds: { cx: 0, cz: 0, hx: half, hz: half }, bodies: [] };
-  let chassis = new THREE.Group();
-  let wm = appliance('washer');
-  let machine = makeBody(chassis, 'box', wm.half, { restitution: 0.3, friction: 0.8, mass: 2 });
-  let attached: Piece[] = [];
+  // ------------------------------------------------------------ the robot: real CAD, live weapon and wheels
+  ctx.model.visible = false;
+  const rig = await loadFusionRig(ctx, '/rigs/executioner');
+  const robot = new THREE.Group();
+  ctx.body.add(robot);
+  const tilt = new THREE.Group(); // pitches up on hits
+  robot.add(tilt);
+  tilt.add(rig.root);
+  // CAD front is +y, which stands up as -z; turn it to +z (the drive direction) and size it
+  rig.root.rotation.set(0, Math.PI, 0);
+  rig.root.scale.setScalar(S);
+  robot.updateMatrixWorld(true);
+  const rb = new THREE.Box3().setFromObject(rig.root, true).applyMatrix4(new THREE.Matrix4().copy(tilt.matrixWorld).invert());
+  const rc = rb.getCenter(new THREE.Vector3());
+  rig.root.position.set(-rc.x, -rb.min.y, -rc.z);
+  const botSize = rb.getSize(new THREE.Vector3());
+  robot.updateMatrixWorld(true);
+  ctx.pickable(rig.root);
+
+  const weapon = rig.pivot(WEAPON.ids, WEAPON.origin, [1, 0, 0]);
+  const blur = blurDrum(WEAPON.tip * 1.02, WEAPON.length);
+  blur.group.position.set(WEAPON.origin[0], WEAPON.origin[1], WEAPON.origin[2]);
+  rig.scene.add(blur.group);
+  const wheels = WHEELS.map((id) => {
+    const o = rig.info.occurrences.find((x) => x.id === id);
+    if (!o) return null;
+    const c = [0, 1, 2].map((k) => (o.bbox[0][k] + o.bbox[1][k]) / 2);
+    return { pivot: rig.pivot([id], c, [1, 0, 0]), left: c[0] < 0.2, r: ((o.bbox[1][2] - o.bbox[0][2]) / 2) * S, angle: 0 };
+  }).filter((x) => x !== null);
+
+  // weapon axis in the robot frame, for contact points
+  robot.updateMatrixWorld(true);
+  const axisLocal = robot.worldToLocal(weapon.group.getWorldPosition(new THREE.Vector3()));
+  const tipReach = axisLocal.z + WEAPON.tip * S; // how far in front of the robot centre the teeth reach
+  // physics box for the chassis only: the low forks slide under things, the weapon makes the contact
+  const kin: Kinematic = {
+    pos: new THREE.Vector3(), quat: new THREE.Quaternion(), vel: new THREE.Vector3(),
+    half: new THREE.Vector3(botSize.x / 2, botSize.y / 2, (axisLocal.z + botSize.z / 2) / 2),
+  };
+  const kinOffset = (axisLocal.z - botSize.z / 2) / 2; // its centre sits behind the robot centre
+  const botRadius = Math.max(botSize.x, botSize.z) / 2;
+
+  // ------------------------------------------------------------ effects
+  const fxU = { uTime: { value: 0 } };
+  const sparks = new Sprites(ctx.body, 360, 'spark', fxU);
+  const flames = new Sprites(ctx.body, 220, 'flame', fxU);
+  const smoke = new Sprites(ctx.body, 160, 'smoke', fxU);
+  const bolts = new Bits(ctx.body, 60, boltGeometry(), new THREE.MeshStandardMaterial({ color: 0xb7bec6, roughness: 0.3, metalness: 0.9 }), half - 0.02, half - 0.02);
+  const chips = new Bits(ctx.body, 70, new THREE.BoxGeometry(1, 0.35, 0.7), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 }), half - 0.02, half - 0.02);
+  chips.mesh.setColorAt(0, new THREE.Color(0xffffff));
+  const flash = new THREE.PointLight(0xffa640, 0, 1.8, 2);
+  ctx.body.add(flash);
+  let flashI = 0;
+  const C = {
+    spark: new THREE.Color(1, 0.55, 0.18), ember: new THREE.Color(1, 0.4, 0.08), flame: new THREE.Color(1, 0.42, 0.08),
+    smoke: new THREE.Color(0.11, 0.11, 0.12), dust: new THREE.Color(0.55, 0.53, 0.5), fluff: new THREE.Color(0.95, 0.95, 0.93),
+  };
+  const v = new THREE.Vector3();
+  const w = new THREE.Vector3();
+
+  const sparkBurst = (at: THREE.Vector3, dir: THREE.Vector3, n: number, speed = 3) => {
+    for (let k = 0; k < n; k++) {
+      const s = speed * rand(0.35, 1.25);
+      v.set(rand(-1, 1), rand(-0.2, 1), rand(-1, 1)).normalize().multiplyScalar(0.7).add(dir).normalize().multiplyScalar(s);
+      sparks.spawn(at.x, at.y, at.z, v.x, v.y, v.z, rand(0.008, 0.016), rand(0.25, 0.7), C.spark, { stretch: 0.035, buoy: -7 });
+    }
+  };
+  const puff = (at: THREE.Vector3, color: THREE.Color, n: number, size = 0.12, rise = 0.3) => {
+    for (let k = 0; k < n; k++) {
+      smoke.spawn(at.x + rand(-0.04, 0.04), at.y + rand(-0.02, 0.04), at.z + rand(-0.04, 0.04), rand(-0.25, 0.25), rise * rand(0.6, 1.4), rand(-0.25, 0.25),
+        size * rand(0.7, 1.3), rand(1.4, 2.6), color, { grow: 2.2, buoy: 0.05, drag: 1.5 });
+    }
+  };
+
+  // ------------------------------------------------------------ robot state
+  const R = { pos: new THREE.Vector2(-half * 0.45, half * 0.45), yaw: 0.6, speed: 0, turn: 0 };
+  type Mode = 'roam' | 'hunt' | 'charge' | 'recoil';
+  let mode: Mode = 'roam';
+  let timer = rand(1, 2);
+  let sinceHit = 0;
+  let spin = 0.1; // 0 idle .. 1 full speed
+  let weaponAngle = 0;
+  let pitch = 0, pitchVel = 0;
+  const waypoint = new THREE.Vector2(rand(-1, 1) * half * 0.5, rand(-1, 1) * half * 0.5);
+  let time = 0;
+
+  // ------------------------------------------------------------ physics and the current target
+  const world = new RigidWorld(floorY, half, half);
+  world.robots.push(kin);
   let lineup = 0;
-  let brokenFor = 0;
-  let dissolve = 0; // > 0 while the wreck fades away
-  const spawnAppliance = (kind: Kind, drop: boolean) => {
-    wm = appliance(kind);
+  let build!: Build;
+  let chassis!: THREE.Group;
+  let body!: Rigid;
+  let attached: Piece[] = [];
+  let loose: Loose[] = [];
+  let bent: Bent[] = [];
+  let vanishing: { mesh: THREE.Object3D; t: number }[] = [];
+  let fires: Fire[] = [];
+  let power = 1;
+  let damage = 0;
+  let perHit = 2;
+  let finished = 0; // seconds since the last part came off (0 while parts remain)
+  let clearing = 0; // > 0 while the wreck shrinks away
+
+  const spawn = (index: number, drop: boolean) => {
+    build = buildAppliance(LINEUP[index % LINEUP.length]);
     chassis = new THREE.Group();
     ctx.body.add(chassis);
-    for (const p of wm.pieces) {
+    for (const p of build.pieces) {
       p.mesh.position.copy(p.home);
       p.mesh.quaternion.copy(p.homeQ);
       chassis.add(p.mesh);
     }
-    machine = makeBody(chassis, 'box', wm.half, { restitution: 0.3, friction: 0.8, mass: 2 });
-    machine.pos.set(rand(-0.3, 0.3) * half, floorY + wm.half.y + (drop ? 1.2 : 0), rand(-0.3, 0.1) * half);
-    world.bodies = [machine];
-    attached = wm.pieces.slice(0, -1);
-  };
-  spawnAppliance('washer', false);
-  const everything = () => [chassis, ...wm.pieces.map((p) => p.mesh)];
-
-  const detach = (piece: Piece, dir: THREE.Vector2, strength: number) => {
-    chassis.updateMatrixWorld(true);
-    const worldPos = new THREE.Vector3();
-    const worldQ = new THREE.Quaternion();
-    piece.mesh.getWorldPosition(worldPos);
-    piece.mesh.getWorldQuaternion(worldQ);
-    const toBody = new THREE.Matrix4().copy(ctx.body.matrixWorld).invert();
-    worldPos.applyMatrix4(toBody);
-    ctx.body.add(piece.mesh);
-    piece.mesh.position.copy(worldPos);
-    piece.mesh.quaternion.copy(new THREE.Quaternion().setFromRotationMatrix(toBody).multiply(worldQ));
-    const b = makeBody(piece.mesh, 'box', piece.half, { restitution: 0.35, friction: 0.7, mass: 0.4 });
-    b.vel.set(dir.x * strength * rand(0.8, 1.5) + rand(-0.6, 0.6), rand(1.8, 3.4), dir.y * strength * rand(0.8, 1.5) + rand(-0.6, 0.6));
-    b.ang.set(rand(-12, 12), rand(-8, 8), rand(-12, 12));
-    piece.body = b;
-    world.bodies.push(b);
-    attached = attached.filter((x) => x !== piece);
-  };
-
-  // ------------------------------------------------------------ sparks: big bright streaks
-  const SPARKS = 260;
-  const sPos = new Float32Array(SPARKS * 3);
-  const sVel = new Float32Array(SPARKS * 3);
-  const sLife = new Float32Array(SPARKS);
-  const sGeo = new THREE.BufferGeometry();
-  const sAttr = new THREE.Float32BufferAttribute(sPos, 3);
-  sAttr.setUsage(THREE.DynamicDrawUsage);
-  sGeo.setAttribute('position', sAttr);
-  for (let k = 0; k < SPARKS; k++) sPos[k * 3 + 1] = -50;
-  const sparks = new THREE.Points(sGeo, new THREE.PointsMaterial({
-    color: 0xffc46b, size: 0.07, sizeAttenuation: true, transparent: true, depthWrite: false, toneMapped: false,
-    blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor, blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor,
-  }));
-  sparks.frustumCulled = false;
-  ctx.body.add(sparks);
-  const flash = new THREE.PointLight(0xffa640, 0, 1.6, 2);
-  ctx.body.add(flash);
-  let cursor = 0;
-  const burst = (at: THREE.Vector3, dir: THREE.Vector2, count: number) => {
-    for (let k = 0; k < count; k++) {
-      const i = cursor++ % SPARKS;
-      const sp = rand(1.2, 3.6);
-      sPos.set([at.x, at.y, at.z], i * 3);
-      sVel.set([dir.x * sp + rand(-1.4, 1.4), rand(0.6, 2.8), dir.y * sp + rand(-1.4, 1.4)], i * 3);
-      sLife[i] = rand(0.3, 0.75);
+    body = makeRigid(chassis, build.half, 3, { restitution: 0.25, friction: 0.7 });
+    // drop in away from the robot, facing roughly toward the front of the cell
+    for (let k = 0; k < 8; k++) {
+      body.pos.set(rand(-0.4, 0.4) * half, floorY + build.half.y + (drop ? 1.1 : 0.002), rand(-0.45, 0.2) * half);
+      if (Math.hypot(body.pos.x - R.pos.x, body.pos.z - R.pos.y) > 0.9) break;
     }
-    flash.position.copy(at).setY(at.y + 0.1);
-    flash.intensity = 4;
+    body.quat.setFromAxisAngle(v.set(0, 1, 0), rand(-0.5, 0.5));
+    chassis.position.copy(body.pos);
+    chassis.quaternion.copy(body.quat);
+    world.add(body);
+    attached = build.pieces.slice(0, -1);
+    perHit = Math.max(2, Math.ceil(attached.length / 7));
+    loose = []; bent = []; vanishing = []; fires = [];
+    power = 1; damage = 0; finished = 0;
+    build.tick(0, 1);
   };
 
-  // ------------------------------------------------------------ robot
-  const robot = { pos: new THREE.Vector2(-half * 0.5, half * 0.4), yaw: 0, speed: 0 };
-  type Mode = 'roam' | 'charge' | 'recoil';
-  let mode: Mode = 'roam';
-  let timer = rand(1.5, 3);
-  let sinceHit = 0;
-  let waypoint = new THREE.Vector2(rand(-half, half) * 0.6, rand(-half, half) * 0.6);
-  ctx.model.position.y = floorY;
+  /** Re-fit the chassis box to what is still attached, keeping the body origin at the box centre. */
+  const refit = () => {
+    const bb = new THREE.Box3();
+    const pb = new THREE.Box3();
+    const m = new THREE.Matrix4();
+    const one = new THREE.Vector3(1, 1, 1);
+    for (const p of [...attached, build.core]) {
+      pb.setFromCenterAndSize(v.set(0, 0, 0), w.copy(p.half).multiplyScalar(2));
+      bb.union(pb.applyMatrix4(m.compose(p.home, p.homeQ, one)));
+    }
+    const c = bb.getCenter(new THREE.Vector3());
+    for (const ch of chassis.children) ch.position.sub(c);
+    for (const p of build.pieces) if (p.state < 2) p.home.sub(c);
+    for (const f of fires) f.local.sub(c);
+    resize(body, bb.getSize(w).multiplyScalar(0.5));
+    body.pos.add(c.applyQuaternion(body.quat));
+    chassis.position.copy(body.pos);
+  };
+
+  /** Pose of an object in the cell body's space. */
+  const bodyPose = (o: THREE.Object3D, pos: THREE.Vector3, quat: THREE.Quaternion) => {
+    ctx.body.updateMatrixWorld(true);
+    o.updateMatrixWorld(true);
+    new THREE.Matrix4().copy(ctx.body.matrixWorld).invert().multiply(o.matrixWorld).decompose(pos, quat, new THREE.Vector3());
+  };
+
+  const popScrews = (p: Piece, n: number, kick: THREE.Vector3) => {
+    if (!n) return;
+    const pos = new THREE.Vector3(), q = new THREE.Quaternion();
+    bodyPose(p.mesh, pos, q);
+    for (let k = 0; k < n; k++) {
+      const corner = new THREE.Vector3(Math.random() < 0.5 ? p.half.x : -p.half.x, Math.random() < 0.5 ? p.half.y : -p.half.y, Math.random() < 0.5 ? p.half.z : -p.half.z).multiplyScalar(0.85).applyQuaternion(q).add(pos);
+      const out = corner.clone().sub(pos).normalize();
+      bolts.spawn(corner, out.multiplyScalar(rand(0.8, 1.8)).add(kick).add(v.set(rand(-0.5, 0.5), rand(1.2, 2.6), rand(-0.5, 0.5))), rand(0.022, 0.034));
+    }
+  };
+
+  /** Tear a piece off: it becomes its own rigid body (or vanishes, for a blade). */
+  const detach = (p: Piece, kick: THREE.Vector3) => {
+    const pos = new THREE.Vector3(), q = new THREE.Quaternion();
+    bodyPose(p.mesh, pos, q);
+    const b = bent.find((x) => x.piece === p);
+    if (b) { bent = bent.filter((x) => x !== b); b.hinge.removeFromParent(); }
+    ctx.body.add(p.mesh);
+    p.mesh.position.copy(pos);
+    p.mesh.quaternion.copy(q);
+    p.state = 2;
+    attached = attached.filter((x) => x !== p);
+    if (p.vanish) { vanishing.push({ mesh: p.mesh, t: 0.25 }); return; }
+    const r = makeRigid(p.mesh, p.half, p.mass, { restitution: 0.3, friction: 0.65 });
+    // start with the chassis' own motion at that point, plus the kick
+    r.vel.crossVectors(body.ang, w.copy(pos).sub(body.pos)).add(body.vel).add(kick);
+    r.ang.set(rand(-14, 14), rand(-10, 10), rand(-14, 14)).multiplyScalar(Math.min(1, 0.4 / Math.max(0.05, p.half.length())));
+    world.add(r);
+    loose.push({ piece: p, body: r, lastVy: r.vel.y });
+  };
+
+  /** Bend a panel out on a hinge along one of its edges (the one away from the hit, or a door's own). */
+  const bend = (p: Piece, hitLocal: THREE.Vector3) => {
+    const h = p.half;
+    // thin axis is the panel normal; the hinge sits on an in-plane edge
+    const axes = [0, 1, 2].sort((a, b) => h.getComponent(a) - h.getComponent(b));
+    const thin = axes[0];
+    let edge: THREE.Vector3;
+    if (p.hinge) edge = p.hinge.clone();
+    else {
+      // hinge on the far side from the hit, across whichever in-plane axis the hit is further along
+      const q = hitLocal.clone().sub(p.home).applyQuaternion(p.homeQ.clone().invert());
+      const a = Math.abs(q.getComponent(axes[1]) / h.getComponent(axes[1])) > Math.abs(q.getComponent(axes[2]) / h.getComponent(axes[2])) ? axes[1] : axes[2];
+      edge = new THREE.Vector3().setComponent(a, -Math.sign(q.getComponent(a)) || 1);
+    }
+    const ea = [0, 1, 2].find((k) => Math.abs(edge.getComponent(k)) > 0.5) ?? 1;
+    const line = [0, 1, 2].find((k) => k !== ea && k !== thin) ?? [0, 1, 2].find((k) => k !== ea)!;
+    // panel's outward normal (away from the chassis centre)
+    const nrm = new THREE.Vector3().setComponent(thin, 1);
+    if (nrm.clone().applyQuaternion(p.homeQ).dot(p.home) < 0) nrm.negate();
+    const axis = new THREE.Vector3().setComponent(line, 1);
+    // the free edge must swing outward
+    if (new THREE.Vector3().crossVectors(axis, edge.clone().negate()).dot(nrm) < 0) axis.negate();
+    const hinge = new THREE.Group();
+    hinge.position.copy(edge.clone().multiply(h).applyQuaternion(p.homeQ).add(p.home));
+    chassis.add(hinge);
+    chassis.updateMatrixWorld(true);
+    hinge.attach(p.mesh);
+    p.state = 1;
+    bent.push({ piece: p, hinge, axis: axis.applyQuaternion(p.homeQ).normalize(), angle: 0, vel: rand(6, 10), target: rand(0.45, 1.1), life: rand(5, 9) });
+  };
+
+  /** Push panel vertices in around the hit point (the segmented bevelled boxes take this well). */
+  const dent = (p: Piece, at: THREE.Vector3, dir: THREE.Vector3, depth: number) => {
+    const geo = p.mesh.geometry;
+    const pos = geo.attributes.position as THREE.BufferAttribute;
+    ctx.body.updateMatrixWorld(true);
+    p.mesh.updateMatrixWorld(true);
+    const inv = new THREE.Matrix4().copy(p.mesh.matrixWorld).invert();
+    const local = at.clone().applyMatrix4(ctx.body.matrixWorld).applyMatrix4(inv);
+    const d = dir.clone().transformDirection(ctx.body.matrixWorld).transformDirection(inv);
+    const radius = Math.max(p.half.x, p.half.y, p.half.z) * 0.6;
+    let moved = false;
+    for (let i = 0; i < pos.count; i++) {
+      // distance across the panel only, so both skins move together and it bends instead of folding through
+      const ox = pos.getX(i) - local.x, oy = pos.getY(i) - local.y, oz = pos.getZ(i) - local.z;
+      const along = ox * d.x + oy * d.y + oz * d.z;
+      const r = Math.hypot(ox - d.x * along, oy - d.y * along, oz - d.z * along) / radius;
+      if (r >= 1) continue;
+      const k = (1 - r * r) * (1 - r * r) * depth;
+      pos.setXYZ(i, pos.getX(i) + d.x * k, pos.getY(i) + d.y * k, pos.getZ(i) + d.z * k);
+      moved = true;
+    }
+    if (!moved) return;
+    pos.needsUpdate = true;
+    geo.computeVertexNormals();
+  };
+
+  spawn(lineup, false);
+
+  const fwd = new THREE.Vector3();
+  const tip = new THREE.Vector3();
+  const tmpQ = new THREE.Quaternion();
+  const up = new THREE.Vector3(0, 1, 0);
+  const toTarget = new THREE.Vector2();
+
+  /** The weapon connects: knock the target, take parts off near the contact, sparks, dents, fire. */
+  const hit = () => {
+    // nearest point on the chassis box to the teeth
+    tmpQ.copy(body.quat).invert();
+    const local = tip.clone().sub(body.pos).applyQuaternion(tmpQ).clamp(body.half.clone().negate(), body.half);
+    const contact = local.clone().applyQuaternion(body.quat).add(body.pos);
+    const k = 0.45 + 0.55 * spin;
+    // uppercut: the teeth come up through the front, so the shove is forward and up
+    hitAt(body, contact, fwd.clone().multiplyScalar(2.2 * k).addScaledVector(up, 2.7 * k).multiplyScalar(1 / body.invMass));
+    body.ang.clampLength(0, 9);
+
+    const dirLocal = local.lengthSq() > 1e-6 ? local.clone().normalize() : v.set(0, 0, 1);
+    // pieces on the struck side first; already bent ones are next to go
+    const scored = attached.map((p) => ({ p, s: (p.home.lengthSq() > 1e-8 ? p.home.clone().normalize().dot(dirLocal) : 0) + (p.state === 1 ? 0.6 : 0) + rand(0, 0.35) }));
+    scored.sort((a, b) => b.s - a.s);
+    let dented = false;
+    for (const { p } of scored.slice(0, perHit)) {
+      if (p.panel && !dented) { dent(p, contact, fwd, 0.035 * k); dented = true; }
+      if (p.panel && p.state === 0 && Math.random() < 0.8) {
+        bend(p, local);
+        popScrews(p, Math.ceil(p.screws / 2), fwd.clone().multiplyScalar(0.6));
+      } else {
+        popScrews(p, p.screws, fwd.clone().multiplyScalar(0.8));
+        detach(p, fwd.clone().multiplyScalar(rand(1, 2.4) * k).addScaledVector(up, rand(1.4, 2.8) * k).add(v.set(rand(-0.6, 0.6), 0, rand(-0.6, 0.6))));
+      }
+    }
+    refit();
+
+    // what flies
+    const n = build.matter === 'soft' ? 18 : build.matter === 'plastic' ? 40 : 80;
+    sparkBurst(contact, up.clone().multiplyScalar(1.2).addScaledVector(fwd, 0.6), Math.round(n * k), 3.2 * k + 1);
+    for (let c = 0; c < (build.matter === 'metal' ? 3 : 7); c++) chips.spawn(contact, v.set(rand(-1, 1), rand(1, 2.6), rand(-1, 1)).addScaledVector(fwd, 1.2), rand(0.012, 0.024), build.chip);
+    if (build.matter === 'soft') puff(contact, C.fluff, 6, 0.06, 0.6);
+    if (spin > 0.7) puff(contact, C.smoke, 2, 0.08, 0.35);
+    flash.position.copy(contact).y += 0.1;
+    flashI = 5;
+    // fire: every hit adds damage; flammable things catch sooner
+    damage += k;
+    power = Math.max(0, power - 0.45);
+    if (damage > 2.4 - build.fuel * 1.4 && fires.length < 3) fires.push({ local: contact.clone().sub(body.pos).applyQuaternion(tmpQ.copy(body.quat).invert()).multiplyScalar(0.7), heat: 0.4 });
+    for (const f of fires) f.heat = Math.min(1, f.heat + 0.2);
+
+    // recoil and rotor speed loss
+    spin = Math.max(0.25, spin - 0.38);
+    R.speed = -0.9;
+    pitchVel += 2.5 * k;
+    mode = 'recoil';
+    timer = rand(0.5, 0.8);
+    sinceHit = 0;
+  };
 
   return {
-    update(_t, dt) {
-      dt = Math.min(dt, 1 / 30);
-      const lim = half - botRadius;
-      const mpos = new THREE.Vector2(machine.pos.x, machine.pos.z);
-      const toMachine = mpos.clone().sub(robot.pos);
-      // only a machine that is actually moving counts as airborne; resting jitter or an odd resting height
-      // used to block charges forever
-      const flying = machine.vel.lengthSq() > 0.25;
+    update(_t, dtIn) {
+      const dt = Math.min(dtIn, 1 / 30);
+      if (dt <= 0) return;
+      time += dt;
+      fxU.uTime.value = time;
+      const lim = half - botRadius * 0.9;
       sinceHit += dt;
 
-      timer -= dt;
-      if (mode === 'roam') {
-        if (robot.pos.distanceTo(waypoint) < 0.15) waypoint = new THREE.Vector2(rand(-lim, lim) * 0.8, rand(-lim, lim) * 0.8);
-        robot.yaw = turnToward(robot.yaw, Math.atan2(waypoint.x - robot.pos.x, waypoint.y - robot.pos.y), dt * 2.5);
-        robot.speed += (0.4 - robot.speed) * damp(3, dt);
-        if (timer <= 0 && !flying && dissolve <= 0 && attached.length) { mode = 'charge'; timer = 3.5; }
-      } else if (mode === 'charge') {
-        const want = Math.atan2(toMachine.x, toMachine.y);
-        robot.yaw = turnToward(robot.yaw, want, dt * 3.5);
-        const aligned = Math.abs(wrapAngle(want - robot.yaw)) < 0.25;
-        robot.speed += ((aligned ? 1.3 : 0.1) - robot.speed) * damp(4, dt);
-        const reach = botRadius + Math.max(wm.half.x, wm.half.z) * 1.35 + 0.04;
-        // a pinned or awkward wreck still counts as hit when the charge runs out nearby
-        if (toMachine.length() < reach || (timer <= 0 && toMachine.length() < reach * 2)) {
-          const dir = toMachine.clone().normalize();
-          const at = new THREE.Vector3(robot.pos.x + dir.x * botRadius, floorY + 0.12, robot.pos.y + dir.y * botRadius);
-          burst(at, dir, 90);
-          // a panel or two comes loose each hit; the chassis gets shoved and spun
-          const loose = Math.min(attached.length, Math.round(rand(2, 3)));
-          for (let k = 0; k < loose; k++) detach(attached[Math.floor(rand(0, attached.length))], dir, 1.6);
-          machine.vel.set(dir.x * rand(0.9, 1.4), rand(1.2, 2), dir.y * rand(0.9, 1.4));
-          machine.ang.set(rand(-4, 4), rand(-5, 5), rand(-4, 4));
-          mode = 'recoil';
-          timer = 0.45;
-          sinceHit = 0;
-          spin = Math.max(0.55, spin - 0.35); // the hit bleeds off rotor speed
-          robot.speed = -0.6;
-        }
-        if (timer <= 0) { mode = 'roam'; timer = rand(1.5, 3); }
-      } else {
-        robot.speed += (0 - robot.speed) * damp(2.5, dt);
-        if (timer <= 0) { mode = 'roam'; timer = rand(0.5, 1.1); }
-      }
-
-      // keep the wreck off the walls so it can always be reached
-      const wallLim = half - Math.max(wm.half.x, wm.half.z) - botRadius * 1.2;
+      // ---------------------------------------------------------- target state
+      const toT = toTarget.set(body.pos.x - R.pos.x, body.pos.z - R.pos.y);
+      const distT = toT.length();
+      const settled = body.air < 0.3 && body.vel.lengthSq() < 0.5;
+      const live = attached.length > 0 && clearing <= 0;
+      // keep the target off the walls so there is always a way in
+      const wallLim = half - Math.max(build.half.x, build.half.z) - botRadius * 1.1;
       for (const k of ['x', 'z'] as const) {
-        if (Math.abs(machine.pos[k]) > wallLim) machine.vel[k] -= Math.sign(machine.pos[k]) * dt * 3;
+        if (Math.abs(body.pos[k]) > wallLim && live) { body.vel[k] -= Math.sign(body.pos[k]) * dt * 2.5; wake(body); }
       }
-      if (attached.length && dissolve <= 0 && sinceHit > 9) {
-        // something went wrong (wedged in a corner, knocked on top of the wall): drop it back in the middle
-        machine.pos.set(rand(-0.2, 0.2) * half, floorY + wm.half.y + 0.6, rand(-0.2, 0.2) * half);
-        machine.vel.set(0, 0, 0);
-        machine.ang.set(0, 0, 0);
-        sinceHit = 4;
-        mode = 'roam';
-        timer = 0.8;
-      }
-      // weapon speed: winds up while hunting, peaks during a charge, winds down between machines
-      const wantSpin = mode === 'charge' ? 1 : mode === 'recoil' ? 0.7 : attached.length ? 0.45 : 0.12;
-      spin += (wantSpin - spin) * (1 - Math.exp(-dt * (wantSpin > spin ? 1.6 : 0.8)));
-      spinU.uSpeed.value = spin;
-      spinU.uPhase.value += dt * (2 + spin * 26);
-      robot.pos.x = THREE.MathUtils.clamp(robot.pos.x + Math.sin(robot.yaw) * robot.speed * dt, -lim, lim);
-      robot.pos.y = THREE.MathUtils.clamp(robot.pos.y + Math.cos(robot.yaw) * robot.speed * dt, -lim, lim);
-      ctx.model.position.set(robot.pos.x, floorY, robot.pos.y);
-      ctx.model.rotation.set(0, robot.yaw + FRONT, 0);
-
-      // scraping sparks when the machine lands hard
-      if (flying && machine.pos.y < floorY + wm.half.y * 1.2 && Math.hypot(machine.vel.x, machine.vel.z) > 0.8 && Math.random() < 0.5) {
-        burst(new THREE.Vector3(machine.pos.x, floorY + 0.02, machine.pos.z), new THREE.Vector2(machine.vel.x, machine.vel.z).normalize(), 5);
+      // watchdog: never get stuck unable to reach the last pieces
+      if (live && sinceHit > 9) {
+        body.pos.set(rand(-0.2, 0.2) * half, floorY + build.half.y + 0.7, rand(-0.2, 0.2) * half);
+        body.vel.set(0, 0, 0); body.ang.set(0, 0, 0); wake(body);
+        puff(v.set(body.pos.x, floorY + 0.05, body.pos.z), C.dust, 5, 0.12);
+        sinceHit = 4; mode = 'roam'; timer = 0.6;
       }
 
-      // fully stripped: the wreck dissolves and the next appliance drops in
-      if (!attached.length && dissolve <= 0) {
-        brokenFor += dt;
-        if (brokenFor > 1.8) {
-          dissolve = 1.2;
-          brokenFor = 0;
-          for (const o of everything()) o.traverse((m) => {
-            const mesh = m as THREE.Mesh;
-            if (!mesh.material) return;
-            mesh.material = (mesh.material as THREE.Material).clone();
-            (mesh.material as THREE.Material).transparent = true;
-          });
+      // ---------------------------------------------------------- driving
+      timer -= dt;
+      const yawPrev = R.yaw;
+      // standoff: just outside weapon reach of the target's box
+      const reach = tipReach + Math.max(build.half.x, build.half.z);
+      if (mode === 'roam') {
+        if (R.pos.distanceTo(waypoint) < 0.2 || timer < -4) {
+          waypoint.set(rand(-lim, lim) * 0.85, rand(-lim, lim) * 0.85);
+          timer = Math.min(timer, rand(0.8, 2));
+        }
+        R.yaw = turnToward(R.yaw, Math.atan2(waypoint.x - R.pos.x, waypoint.y - R.pos.y), dt * 2.6);
+        R.speed += (0.45 - R.speed) * damp(3, dt);
+        if (timer <= 0 && live && settled) { mode = 'hunt'; timer = 4; }
+      } else if (mode === 'hunt') {
+        const want = Math.atan2(toT.x, toT.y);
+        R.yaw = turnToward(R.yaw, want, dt * 3);
+        const err = Math.abs(wrapAngle(want - R.yaw));
+        // line up a run: back off if too close, creep in if far
+        const gap = distT - (reach + 0.45);
+        R.speed += (THREE.MathUtils.clamp(gap * 2, -0.5, 0.6) * (err < 0.6 ? 1 : 0.3) - R.speed) * damp(4, dt);
+        if ((err < 0.18 && spin > 0.55 && Math.abs(gap) < 0.35) || timer <= 0) { mode = 'charge'; timer = 2.6; }
+        if (!live) { mode = 'roam'; timer = rand(1, 2); }
+      } else if (mode === 'charge') {
+        R.yaw = turnToward(R.yaw, Math.atan2(toT.x, toT.y), dt * 2.2);
+        R.speed += (1.5 - R.speed) * damp(5, dt);
+        if (!live) { mode = 'roam'; timer = rand(1, 2); }
+      } else {
+        R.speed += (0 - R.speed) * damp(3, dt);
+        if (timer <= 0) { mode = live ? 'hunt' : 'roam'; timer = live ? 3.5 : rand(1, 2); }
+      }
+      R.turn = wrapAngle(R.yaw - yawPrev) / dt;
+      R.pos.x = THREE.MathUtils.clamp(R.pos.x + Math.sin(R.yaw) * R.speed * dt, -lim, lim);
+      R.pos.y = THREE.MathUtils.clamp(R.pos.y + Math.cos(R.yaw) * R.speed * dt, -lim, lim);
+      robot.position.set(R.pos.x, floorY, R.pos.y);
+      robot.rotation.set(0, R.yaw, 0);
+      // the nose lifts a little on hits (gyro kick), then drops back onto the forks
+      pitchVel += (-60 * pitch - 9 * pitchVel) * dt;
+      pitch = Math.max(0, pitch + pitchVel * dt);
+      tilt.rotation.x = -pitch * 0.25;
+      fwd.set(Math.sin(R.yaw), 0, Math.cos(R.yaw));
+      kin.pos.set(R.pos.x + fwd.x * kinOffset, floorY + kin.half.y, R.pos.y + fwd.z * kinOffset);
+      kin.quat.setFromAxisAngle(up, R.yaw);
+      kin.vel.copy(fwd).multiplyScalar(R.speed);
+      tip.set(R.pos.x + fwd.x * tipReach, floorY + axisLocal.y, R.pos.y + fwd.z * tipReach);
+
+      // the teeth reach the target's box (or a charge runs out right next to it)
+      if (mode === 'charge' && live) {
+        tmpQ.copy(body.quat).invert();
+        const l = w.copy(tip).sub(body.pos).applyQuaternion(tmpQ);
+        const out = Math.hypot(Math.max(0, Math.abs(l.x) - body.half.x), Math.max(0, Math.abs(l.y) - body.half.y), Math.max(0, Math.abs(l.z) - body.half.z));
+        if (out < 0.05 || (timer <= 0 && distT < reach * 1.6)) hit();
+        else if (timer <= 0) { mode = 'hunt'; timer = 3; }
+      }
+
+      // ---------------------------------------------------------- weapon: idle, winding up, full speed
+      const wantSpin = !live ? 0.12 : mode === 'charge' ? 1 : mode === 'hunt' ? 0.8 : mode === 'recoil' ? 0.55 : 0.3;
+      spin += (wantSpin - spin) * damp(wantSpin > spin ? 0.9 : 0.5, dt);
+      weaponAngle += (1.2 + spin * 34) * dt;
+      weapon.set(weaponAngle);
+      blur.uniforms.uAngle.value = weaponAngle % (Math.PI * 2);
+      blur.uniforms.uSpeed.value = spin;
+      for (const wh of wheels) {
+        const vSide = R.speed + R.turn * (wh.left ? -1 : 1) * botSize.x * 0.45;
+        wh.angle -= (vSide / wh.r) * dt;
+        wh.pivot.set(wh.angle);
+      }
+
+      // ---------------------------------------------------------- appliance animation and bent panels
+      build.tick(time, power);
+      for (const b of bent) {
+        b.vel += (40 * (b.target - b.angle) - 4 * b.vel) * dt + rand(-1, 1) * body.vel.length() * 6 * dt;
+        b.angle = THREE.MathUtils.clamp(b.angle + b.vel * dt, 0, 1.9);
+        b.hinge.quaternion.setFromAxisAngle(b.axis, b.angle);
+        // violent tumbles tear hinged panels off on their own
+        b.life -= dt * (1 + body.ang.length() * 0.3);
+      }
+      const torn = bent.find((x) => x.life <= 0);
+      if (torn) { detach(torn.piece, v.set(rand(-0.5, 0.5), rand(0.5, 1.2), rand(-0.5, 0.5))); refit(); }
+
+      world.step(dt);
+
+      for (const l of loose) {
+        // landing hard: sparks off metal, a little dust off everything else
+        const vy = l.body.vel.y;
+        if (l.lastVy < -1.6 && vy > -0.3) {
+          v.copy(l.body.pos).setY(floorY + 0.01);
+          if (build.matter === 'metal') sparkBurst(v, up, 6, 1.4);
+          puff(v, C.dust, 1, 0.07, 0.15);
+        }
+        l.lastVy = vy;
+      }
+      for (const x of vanishing) { x.t -= dt; x.mesh.scale.setScalar(Math.max(0.001, x.t / 0.25)); if (x.t <= 0) x.mesh.visible = false; }
+
+      // ---------------------------------------------------------- fire: flames, embers and smoke from points on the chassis
+      const burning = finished > 0 ? 1 : 0;
+      let fireLight = 0;
+      for (const f of fires) {
+        if (clearing > 0) f.heat = Math.max(0, f.heat - dt * 2);
+        const heat = clearing > 0 ? f.heat : Math.min(1, f.heat + burning * 0.6);
+        w.copy(f.local).applyQuaternion(body.quat).add(body.pos);
+        w.y = Math.max(w.y, floorY + 0.02);
+        if (Math.random() < 40 * heat * dt) flames.spawn(w.x + rand(-0.04, 0.04), w.y, w.z + rand(-0.04, 0.04), rand(-0.05, 0.05), rand(0.15, 0.35), rand(-0.05, 0.05), rand(0.07, 0.14) * (0.6 + heat * 0.6), rand(0.45, 0.8), C.flame, { buoy: 0.9, drag: 1 });
+        if (Math.random() < 5 * heat * dt) sparks.spawn(w.x, w.y + 0.05, w.z, rand(-0.3, 0.3), rand(0.5, 1.1), rand(-0.3, 0.3), rand(0.006, 0.011), rand(1.2, 2.2), C.ember, { stretch: 0.01, buoy: 0.25, drag: 0.8 });
+        if (Math.random() < 4 * heat * dt) smoke.spawn(w.x, w.y + 0.12, w.z, rand(-0.06, 0.06), rand(0.18, 0.32), rand(-0.06, 0.06), rand(0.1, 0.16), rand(2.4, 3.6), C.smoke, { grow: 2.6, buoy: 0.08, drag: 0.6 });
+        fireLight = Math.max(fireLight, heat);
+        flash.position.lerp(w, damp(4, dt));
+      }
+      flashI = Math.max(0, flashI - dt * 22);
+      flash.intensity = Math.max(flashI, fireLight * (1.2 + 0.5 * Math.sin(time * 23) * Math.sin(time * 7.3)));
+
+      sparks.update(dt, floorY);
+      flames.update(dt, floorY);
+      smoke.update(dt, floorY);
+      bolts.update(dt, floorY);
+      chips.update(dt, floorY);
+
+      // ---------------------------------------------------------- stripped: burn, clear, next
+      if (!attached.length && clearing <= 0) {
+        if (finished === 0) {
+          // the last part is off: everything flares up
+          if (!fires.length) fires.push({ local: new THREE.Vector3(), heat: 1 });
+          fires.push({ local: new THREE.Vector3(rand(-0.05, 0.05), build.core.half.y, 0), heat: 1 });
+          puff(v.copy(body.pos).setY(body.pos.y + 0.1), C.smoke, 6, 0.14, 0.5);
+        }
+        finished += dt;
+        if (finished > 4.5) {
+          clearing = 1;
+          for (const l of loose) puff(l.body.pos, C.dust, 1, 0.1, 0.2);
+          puff(body.pos, C.dust, 4, 0.16, 0.3);
+          bolts.expire(0.6);
+          chips.expire(0.6);
         }
       }
-      if (dissolve > 0) {
-        dissolve -= dt;
-        const k = Math.max(0, dissolve / 1.2);
-        for (const o of everything()) o.traverse((m) => {
-          const mat = (m as THREE.Mesh).material as THREE.Material | undefined;
-          if (mat) mat.opacity = k;
-        });
-        if (dissolve <= 0) {
-          for (const o of everything()) {
+      if (clearing > 0) {
+        clearing -= dt;
+        const k = Math.max(0.001, clearing);
+        chassis.scale.setScalar(k);
+        for (const l of loose) l.piece.mesh.scale.setScalar(k);
+        if (clearing <= 0) {
+          for (const o of [chassis, ...build.pieces.map((p) => p.mesh)]) {
             o.removeFromParent();
-            o.traverse((m) => { const mesh = m as THREE.Mesh; mesh.geometry?.dispose(); (mesh.material as THREE.Material | undefined)?.dispose(); });
+            o.traverse((m) => (m as THREE.Mesh).geometry?.dispose());
           }
+          world.bodies.length = 0;
           lineup = (lineup + 1) % LINEUP.length;
-          spawnAppliance(LINEUP[lineup], true);
+          spawn(lineup, true);
           mode = 'roam';
-          timer = 1.4;
+          timer = 1.5;
+          sinceHit = 0;
         }
       }
-
-      step(world, dt);
-
-      // sparks
-      for (let i = 0; i < SPARKS; i++) {
-        if (sLife[i] <= 0) continue;
-        sLife[i] -= dt;
-        const j = i * 3;
-        sVel[j + 1] -= 7 * dt;
-        sPos[j] += sVel[j] * dt;
-        sPos[j + 1] += sVel[j + 1] * dt;
-        sPos[j + 2] += sVel[j + 2] * dt;
-        if (sPos[j + 1] < floorY) { sPos[j + 1] = floorY; sVel[j + 1] *= -0.35; sVel[j] *= 0.6; sVel[j + 2] *= 0.6; }
-        if (sLife[i] <= 0) sPos[j + 1] = -50;
-      }
-      sAttr.needsUpdate = true;
-      flash.intensity = Math.max(0, flash.intensity - dt * 18);
     },
   };
 }

@@ -1,0 +1,531 @@
+{
+ "design": {
+  "name": "Executioner Remaster v162",
+  "upVector": [
+   0,
+   0,
+   1
+  ],
+  "units": {
+   "fusion_native": "centimeters",
+   "export_length": "meters",
+   "scale_to_meters": 0.01
+  }
+ },
+ "occurrences": [
+  {
+   "id": "Mk3_Motor_Mount_v13_1",
+   "name": "Mk3 Motor Mount v13:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.1277352,
+     0.089027,
+     0.004438050000000002
+    ],
+    [
+     0.20188792,
+     0.14478,
+     0.06035795000000001
+    ]
+   ]
+  },
+  {
+   "id": "1277N771_Timing_Belt_Pulley_v2_1",
+   "name": "1277N771 Timing Belt Pulley v2:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.12718190000000001,
+     0.18429960576038001,
+     0.04603921377841001
+    ],
+    [
+     0.1414821,
+     0.23827177616164,
+     0.10001206086702
+    ]
+   ]
+  },
+  {
+   "id": "Rhino_Fork_v13_v2_1",
+   "name": "Rhino Fork v13 v2:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.09207499999999999,
+     0.21663916778851,
+     -0.003731569489839999
+    ],
+    [
+     0.09842499999999998,
+     0.32316641015948,
+     0.03746347412934
+    ]
+   ]
+  },
+  {
+   "id": "Revised-asymmetrical_weapon_v1_1",
+   "name": "Revised-asymmetrical weapon v1:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.141194,
+     0.15452657,
+     0.05067474000000001
+    ],
+    [
+     0.28470399999999996,
+     0.27820662,
+     0.09537526
+    ]
+   ]
+  },
+  {
+   "id": "MK3_Cast_Front_Wheels_v7_1",
+   "name": "MK3 Cast Front Wheels v7:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.016967,
+     0.14606603690838002,
+     -0.00318395304895
+    ],
+    [
+     0.0127002,
+     0.19686610428098,
+     0.04761613544917
+    ]
+   ]
+  },
+  {
+   "id": "MK3_Cast_Rear_Wheels_v9_1",
+   "name": "MK3 Cast Rear Wheels v9:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.023418800000000004,
+     0.03175013,
+     -0.0031757599999999997
+    ],
+    [
+     0.103759,
+     0.08255247,
+     0.04762675
+    ]
+   ]
+  },
+  {
+   "id": "MK3_Cast_Rear_Wheels_v9_1_1",
+   "name": "MK3 Cast Rear Wheels v9 (1):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.30193000000000003,
+     0.031747529999999996,
+     -0.0031757599999999997
+    ],
+    [
+     0.3822702,
+     0.08254987,
+     0.04762675
+    ]
+   ]
+  },
+  {
+   "id": "MK3_Cast_Front_Wheels_v6_Mirror_1",
+   "name": "MK3 Cast Front Wheels v6(Mirror):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.3936998,
+     0.14606603690838002,
+     -0.0031839887806699996
+    ],
+    [
+     0.42716589,
+     0.19686610428098,
+     0.04761613544917
+    ]
+   ]
+  },
+  {
+   "id": "Outer_Wall_Rail_Left_1",
+   "name": "Outer Wall Rail Left:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.012700000000000001,
+     0.0418338,
+     0.0015748000000000001
+    ],
+    [
+     0.022225,
+     0.20320000000000002,
+     0.0605028
+    ]
+   ]
+  },
+  {
+   "id": "Front_Wall_Right_1",
+   "name": "Front Wall Right:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.28575,
+     0.19685,
+     0.0031750000000000003
+    ],
+    [
+     0.3937,
+     0.20320000000000002,
+     0.0605028
+    ]
+   ]
+  },
+  {
+   "id": "Shaft_End_Stop_Right_1",
+   "name": "Shaft End Stop Right:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.29845,
+     0.18884775,
+     0.05810283
+    ],
+    [
+     0.30162500000000003,
+     0.22620929,
+     0.08794654
+    ]
+   ]
+  },
+  {
+   "id": "Core_Upright_Rail_Right_1",
+   "name": "Core Upright Rail Right:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.10795,
+     0.0418338,
+     0.0015748000000000001
+    ],
+    [
+     0.29845,
+     0.24957263000000002,
+     0.13159066
+    ]
+   ]
+  },
+  {
+   "id": "Outer_Wall_Rail_Right_1",
+   "name": "Outer Wall Rail Right:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.384175,
+     0.0418338,
+     0.0015748000000000001
+    ],
+    [
+     0.3937,
+     0.20320000000000002,
+     0.0605028
+    ]
+   ]
+  },
+  {
+   "id": "Front_Wall_Left_1",
+   "name": "Front Wall Left:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.012700000000000001,
+     0.19685,
+     0.0031750000000000003
+    ],
+    [
+     0.12065,
+     0.20320000000000002,
+     0.0605028
+    ]
+   ]
+  },
+  {
+   "id": "Central_Top_Plate_1",
+   "name": "Central Top Plate:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.012700000000000001,
+     0.07423596,
+     0.04345155
+    ],
+    [
+     0.3937,
+     0.14022307,
+     0.06286992
+    ]
+   ]
+  },
+  {
+   "id": "Front_Top_Plate_Left_1",
+   "name": "Front Top Plate Left:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.012700000000000001,
+     0.127635,
+     0.0605028
+    ],
+    [
+     0.10795,
+     0.20320000000000002,
+     0.0620903
+    ]
+   ]
+  },
+  {
+   "id": "Front_Top_Plate_Right_1",
+   "name": "Front Top Plate Right:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.29845,
+     0.127635,
+     0.0605028
+    ],
+    [
+     0.3937,
+     0.20320000000000002,
+     0.0620903
+    ]
+   ]
+  },
+  {
+   "id": "Left_Bottom_Plate_1",
+   "name": "Left Bottom Plate:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.012700000000000001,
+     0.06349685000000001,
+     0.0015875000000000002
+    ],
+    [
+     0.120523,
+     0.22860001000000002,
+     0.0031750000000000003
+    ]
+   ]
+  },
+  {
+   "id": "Central_Bottom_Plate_1",
+   "name": "Central Bottom Plate:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.108204,
+     0.05151556,
+     0.0015875000000000002
+    ],
+    [
+     0.298196,
+     0.14351,
+     0.0031750000000000003
+    ]
+   ]
+  },
+  {
+   "id": "Rear_Side_Frame_Wall_Left_1",
+   "name": "Rear Side Frame Wall Left:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.012700000000000001,
+     0.08381999999999999,
+     0.0031750000000000003
+    ],
+    [
+     0.12065,
+     0.086995,
+     0.041275000000000006
+    ]
+   ]
+  },
+  {
+   "id": "Rear_Side_Frame_Wall_Right_1",
+   "name": "Rear Side Frame Wall Right:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.28575,
+     0.08381999999999999,
+     0.0031750000000000003
+    ],
+    [
+     0.3937,
+     0.086995,
+     0.041275000000000006
+    ]
+   ]
+  },
+  {
+   "id": "Welded_Structure_Bracket_Right_1",
+   "name": "Welded Structure Bracket Right:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.381,
+     0.06845214000000001,
+     0.03188085
+    ],
+    [
+     0.384175,
+     0.114935,
+     0.05539923
+    ]
+   ]
+  },
+  {
+   "id": "Welded_Structure_Bracket_Left_1",
+   "name": "Welded Structure Bracket Left:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.022225,
+     0.06845214000000001,
+     0.03188085
+    ],
+    [
+     0.025400000000000002,
+     0.114935,
+     0.05539923
+    ]
+   ]
+  },
+  {
+   "id": "Rear_Central_Frame_Rail_1",
+   "name": "Rear Central Frame Rail:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.10795,
+     0.0635,
+     0.0031750000000000003
+    ],
+    [
+     0.29845,
+     0.06667500000000001,
+     0.041275000000000006
+    ]
+   ]
+  },
+  {
+   "id": "Central_Frame_Rail_1",
+   "name": "Central Frame Rail:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.012700000000000001,
+     0.13716,
+     0.0015748000000000001
+    ],
+    [
+     0.3937,
+     0.14351,
+     0.0605028
+    ]
+   ]
+  },
+  {
+   "id": "Left_Bottom_Plate_Mirror_1",
+   "name": "Left Bottom Plate(Mirror):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.285877,
+     0.06349685000000001,
+     0.0015875000000000002
+    ],
+    [
+     0.3937,
+     0.22860001000000002,
+     0.0031750000000000003
+    ]
+   ]
+  },
+  {
+   "id": "Rhino_Fork_v13_v2_2",
+   "name": "Rhino Fork v13 v2:2",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.307975,
+     0.21663967936441003,
+     -0.0038003702404400055
+    ],
+    [
+     0.31432499999999997,
+     0.32314426208728003,
+     0.03746371884724
+    ]
+   ]
+  }
+ ],
+ "joints": [
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "Core_Upright_Rail_Right_1",
+   "child": "Revised-asymmetrical_weapon_v1_1",
+   "origin": [
+    0.425897,
+    0.284312,
+    -0.138262
+   ],
+   "axis": [
+    -1,
+    0,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  }
+ ]
+}
