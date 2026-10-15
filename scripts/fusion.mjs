@@ -4,6 +4,13 @@
 //   <out>/rig.json   { design, occurrences: [{ id, name, grounded, jointed, bbox }], joints } straight from the export
 //
 //   node scripts/fusion.mjs <exportDir> <outDir> [--ratio 0.15] [--error 0.002] [--min-size 0.004] [--skip regex]
+//                                               [--min-body 0.003] [--dedupe regex]
+//   --min-size   drop whole occurrences whose largest extent (m) is below this
+//   --min-body   drop single bodies (OBJ 'g' groups) inside any occurrence whose largest extent (m) is below this
+//                (screws and nuts that were merged into a bigger part)
+//   --dedupe     for occurrences matching the regex (usually the root component), drop bodies that lie inside the
+//                bounding box of another exported occurrence: some exports flatten every body of the design into
+//                the root mesh, which would leave a frozen copy of each moving part behind
 //
 // Export format notes (checked against the files, the bundled viewer.html gets this wrong):
 //   - OBJ vertices are in the occurrence's LOCAL frame, in centimetres.
@@ -27,6 +34,8 @@ const RATIO = Number(opt('ratio', 0.15));
 const ERROR = Number(opt('error', 0.002));
 const MIN_SIZE = Number(opt('min-size', 0)); // drop parts whose largest extent (m) is below this
 const SKIP = opt('skip', null) ? new RegExp(opt('skip'), 'i') : null;
+const MIN_BODY = Number(opt('min-body', 0));
+const DEDUPE = opt('dedupe', null) ? new RegExp(opt('dedupe'), 'i') : null;
 if (!src || !out) { console.error('usage: node scripts/fusion.mjs <exportDir> <outDir> [--ratio 0.15]'); process.exit(1); }
 
 const asm = JSON.parse(await fsp.readFile(path.join(src, 'assembly.json'), 'utf8'));
@@ -42,13 +51,20 @@ async function readMtl(file) {
   return colors;
 }
 
-/** Streams an OBJ: returns { positions: number[] (cm), groups: Map<material, number[] triangle vertex indices> } */
+/**
+ * Streams an OBJ: returns { positions: number[] (cm), groups: Map<material, number[] triangle vertex indices>,
+ * bodies: Map<material, number[] body index per triangle> } (a body is an OBJ 'g' group)
+ */
 async function readObj(file) {
   const pos = [];
   const groups = new Map();
+  const bodies = new Map();
   let mat = 'default';
+  let body = 0;
   let tri = groups.get(mat) ?? [];
+  let bod = [];
   groups.set(mat, tri);
+  bodies.set(mat, bod);
   const rl = readline.createInterface({ input: fs.createReadStream(file), crlfDelay: Infinity });
   for await (const line of rl) {
     const c = line.charCodeAt(0);
@@ -64,14 +80,47 @@ async function readObj(file) {
         if (n < 0) n = pos.length / 3 + n + 1;
         idx.push(n - 1);
       }
-      for (let k = 1; k + 1 < idx.length; k++) tri.push(idx[0], idx[k], idx[k + 1]);
+      for (let k = 1; k + 1 < idx.length; k++) { tri.push(idx[0], idx[k], idx[k + 1]); bod.push(body); }
     } else if (line.startsWith('usemtl ')) {
       mat = line.slice(7).trim();
       tri = groups.get(mat) ?? [];
+      bod = bodies.get(mat) ?? [];
       groups.set(mat, tri);
+      bodies.set(mat, bod);
+    } else if (line.startsWith('g ')) {
+      body++;
     }
   }
-  return { positions: pos, groups };
+  return { positions: pos, groups, bodies };
+}
+
+/** World bounding box per body: Map<body, [lo, hi]> */
+function bodyBoxes(world, groups, bodies) {
+  const boxes = new Map();
+  for (const [name, idx] of groups) {
+    const bod = bodies.get(name);
+    for (let t = 0; t < idx.length; t++) {
+      const b = bod[(t / 3) | 0];
+      let box = boxes.get(b);
+      if (!box) boxes.set(b, (box = [[Infinity, Infinity, Infinity], [-Infinity, -Infinity, -Infinity]]));
+      const v = idx[t] * 3;
+      for (let r = 0; r < 3; r++) {
+        box[0][r] = Math.min(box[0][r], world[v + r]);
+        box[1][r] = Math.max(box[1][r], world[v + r]);
+      }
+    }
+  }
+  return boxes;
+}
+
+/** Keeps only the triangles whose body passes `keep(body)` */
+function filterBodies(groups, bodies, keep) {
+  for (const [name, idx] of groups) {
+    const bod = bodies.get(name);
+    const out = [];
+    for (let t = 0; t < bod.length; t++) if (keep(bod[t])) out.push(idx[t * 3], idx[t * 3 + 1], idx[t * 3 + 2]);
+    groups.set(name, out);
+  }
 }
 
 await MeshoptEncoder.ready;
@@ -92,11 +141,13 @@ const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
 
 const occOut = [];
 let tris = 0;
+// pass 1: read every occurrence in world space (the dedupe step needs all the bounding boxes first)
+const loaded = [];
 for (const occ of asm.occurrences) {
   if (SKIP && SKIP.test(occ.id)) continue;
   const file = path.join(src, occ.mesh_file ?? `models/${occ.id}.obj`);
   if (!fs.existsSync(file)) { console.warn('missing', occ.id); continue; }
-  const { positions, groups } = await readObj(file);
+  const { positions, groups, bodies } = await readObj(file);
   const M = occ.world_transform_row_major ?? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
   const world = new Float32Array(positions.length);
   const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
@@ -110,6 +161,33 @@ for (const occ of asm.occurrences) {
     }
   }
   if (MIN_SIZE && Math.max(hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]) < MIN_SIZE) continue;
+  loaded.push({ occ, world, groups, bodies, lo, hi });
+}
+
+// pass 2: drop duplicated / tiny bodies, build one mesh per occurrence
+const TOL = 0.0003;
+const inside = (box, o) => box[0].every((v, r) => v >= o.lo[r] - TOL) && box[1].every((v, r) => v <= o.hi[r] + TOL);
+for (const { occ, world, groups, bodies } of loaded) {
+  if (DEDUPE?.test(occ.id) || MIN_BODY) {
+    const boxes = bodyBoxes(world, groups, bodies);
+    const others = DEDUPE?.test(occ.id) ? loaded.filter((o) => o.occ !== occ) : [];
+    const drop = new Set();
+    for (const [b, box] of boxes) {
+      if (MIN_BODY && Math.max(box[1][0] - box[0][0], box[1][1] - box[0][1], box[1][2] - box[0][2]) < MIN_BODY) drop.add(b);
+      else if (others.some((o) => inside(box, o))) drop.add(b);
+    }
+    if (drop.size) filterBodies(groups, bodies, (b) => !drop.has(b));
+  }
+  // bounding box of what is left
+  const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+  for (const idx of groups.values()) {
+    for (const i of idx) {
+      for (let r = 0; r < 3; r++) {
+        lo[r] = Math.min(lo[r], world[i * 3 + r]);
+        hi[r] = Math.max(hi[r], world[i * 3 + r]);
+      }
+    }
+  }
   const mtl = await readMtl(path.join(src, occ.mtl_file ?? `models/${occ.id}.mtl`));
   const app = occ.appearance ?? occ.bodies?.find((b) => b.appearance)?.appearance;
   const mesh = doc.createMesh(occ.id);
