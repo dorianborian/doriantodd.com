@@ -24,13 +24,24 @@ export const projectUrl = (p: Project) => p.data.path ?? `/projects/${slugOf(p.i
 /** URL of a file stored next to a project's index.md (published by content-assets.mjs). */
 export const projectAsset = (p: Project, rel: string) => `/content-assets/projects/${slugOf(p.id)}/${rel.replace(/^\.\//, '')}`;
 
-/** Released projects in display order, with a project number and resolved 3D model info. */
+/** Released projects in display order, with a project number and resolved 3D model info.
+ *  Projects with `listed: false` (e.g. FCE, reached from the top nav) are left out and not numbered. */
 export async function getProjects() {
+  return (await resolveProjects()).filter((p) => p.entry.data.listed !== false);
+}
+
+/** Projects with `listed: false`: they keep their page but are not in any project list. */
+export async function getUnlistedProjects() {
+  return (await resolveProjects()).filter((p) => p.entry.data.listed === false);
+}
+
+async function resolveProjects() {
   const all = await getCollection('projects', (p) => import.meta.env.DEV || !p.data.draft);
   const bySlug = new Map(all.map((p) => [slugOf(p.id), p]));
+  let counter = 0;
   return all
     .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title))
-    .map((p, i) => {
+    .map((p) => {
       // modelFrom borrows another project's model and, unless overridden, its orientation
       const source = p.data.modelFrom ? bySlug.get(p.data.modelFrom) : p;
       const model = source?.data.model ? { url: projectAsset(source, source.data.model), up: p.data.modelUp ?? source.data.modelUp ?? 'y', rotation: p.data.modelRotation ?? source.data.modelRotation ?? [0, 0, 0] } : null;
@@ -38,7 +49,8 @@ export async function getProjects() {
         entry: p,
         slug: slugOf(p.id),
         url: projectUrl(p),
-        no: `PRJ-${String(i + 1).padStart(2, '0')}`,
+        // numbered in chronological (order) sequence, listed projects only
+        no: p.data.listed !== false ? `PRJ-${String(++counter).padStart(2, '0')}` : '',
         year: p.data.year ?? null,
         model,
         modelUrl: model?.url ?? null,

@@ -42,6 +42,10 @@ const projects = defineCollection({
       /** Interactive header in place of the model viewer (see src/scripts/widgets). */
       hero: z.string().optional(),
       draft: z.boolean().default(false),
+      /** Sub-project of another project (its folder name). Grouped with the parent on the home page. */
+      parent: z.string().optional(),
+      /** false keeps the page (at its path) but leaves it out of the project lists, numbering and home scene. */
+      listed: z.boolean().default(true),
       migratedFrom: z.string().optional(),
     }),
 });

@@ -1,4 +1,5 @@
 ---
+parent: redhex
 effect: scanner
 modelFrom: redhex
 title: "HEX-VISION"

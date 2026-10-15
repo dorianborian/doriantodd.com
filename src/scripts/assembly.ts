@@ -1,6 +1,8 @@
 // Home page: every project sits on the top plane as a 3D model with a sketch-style label.
 // Projects without a model yet show their cover image on a plate. Hover to preselect, click to
 // select, double-click (or Enter) to open. Renders on demand only.
+// Sub-projects (frontmatter `parent`) park as small ghosts at their parent's cell; clicking the group
+// splits it into one mini cell per project (see "groups" below).
 
 import * as THREE from './three-lite';
 import type { Effect, EffectContext, Interactive } from './effects/types';
@@ -12,6 +14,8 @@ type ModelRef = { url: string; up: 'y' | 'z'; rotation: [number, number, number]
 type Item = {
   slug: string; year: number | null; modelScale: number; title: string; summary: string; tags: string[]; status: string; url: string; no: string;
   thumb: string | null; aspect: number; model: ModelRef | null; effect: string | null;
+  /** slug of the parent project; `borrowed` = the effect is a sub-project's, shown while the group is collapsed */
+  parent: string | null; borrowed: boolean;
 };
 type Data = { parts: Item[]; logo: { src: string; aspect: number }; assets: { robot: ModelRef | null; photos: string[] } };
 type State = 'none' | 'preselect' | 'select';
@@ -22,6 +26,7 @@ const COLOR = {
   select: '#4a9bff',
   plate: 0x8a929e,
   edge: 0x0c0d0f,
+  ghost: 0x9db7d8,
 };
 const EMISSIVE: Record<State, number> = { none: 0x000000, preselect: 0x3a2a08, select: 0x0b2547 };
 
@@ -30,7 +35,12 @@ const MAX_H = 2.6;       // max model height
 const CELL_W = 4.6;
 const CELL_D = 5.0;
 const LABEL_H = 0.78;
-const LIFT = 1.4;
+// groups: ghost size and spots (parent cell local, x/z), size of each project once split, split duration
+const GHOST = 0.3;
+const GHOST_Y = 1.25;
+const GHOST_SPOTS: [number, number][] = [[1.75, -1.55], [-1.75, -1.55], [1.75, 0.55], [-1.75, 0.55]];
+const SPLIT = 0.68;
+const SPLIT_MS = 950;
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -111,8 +121,17 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   scene.add(camera);
 
   // ------------------------------------------------------------ layout
-  const n = data.parts.length;
-  const cols = n <= 4 ? n : n <= 9 ? 3 : 4;
+  // Only top-level projects get a grid cell; sub-projects sit as ghosts at their parent's cell.
+  const slugIndex = new Map(data.parts.map((p, i) => [p.slug, i]));
+  const parentOf = data.parts.map((p) => {
+    const j = p.parent ? slugIndex.get(p.parent) ?? -1 : -1;
+    return j >= 0 && !data.parts[j].parent ? j : -1;
+  });
+  const topLevel = data.parts.map((_, i) => i).filter((i) => parentOf[i] < 0);
+  // keyboard / tree order: each top-level project followed by its sub-projects
+  const navOrder = topLevel.flatMap((i) => [i, ...data.parts.map((_, j) => j).filter((j) => parentOf[j] === i)]);
+  const n = topLevel.length;
+  const cols = n <= 4 ? n : n <= 6 ? 3 : 4;
   const rows = Math.ceil(n / cols);
 
   const gridSize = Math.ceil(Math.max(cols * CELL_W, rows * CELL_D) + 16);
@@ -127,9 +146,16 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   type Part = {
     i: number;
     group: THREE.Group;       // cell origin on the ground
-    body: THREE.Group;        // model or plate; lifted by explode
+    body: THREE.Group;        // model or plate
     footprint: THREE.LineLoop;
-    mate: THREE.Line;
+    /** resting spot: the grid slot, or the ghost spot for a sub-project */
+    home: THREE.Vector3;
+    /** the group this project belongs to (as parent or sub-project) */
+    fam: Family | null;
+    /** sub-projects only: x-ray look while parked */
+    ghost: Ghost | null;
+    /** effect frozen (parked ghost, or a parent whose borrowed scene is handed over while split) */
+    paused: boolean;
     label: { mesh: THREE.Mesh; canvas: HTMLCanvasElement; tex: THREE.CanvasTexture };
     mats: THREE.MeshStandardMaterial[];
     edges: THREE.LineSegments[];
@@ -157,10 +183,12 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   }
 
   data.parts.forEach((p, i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
+    const slot = topLevel.indexOf(i);
+    const col = slot % cols;
+    const row = Math.floor(slot / cols);
     const group = new THREE.Group();
-    group.position.set((col - (cols - 1) / 2) * CELL_W, 0, (row - (rows - 1) / 2) * CELL_D - 0.6);
+    const home = slot >= 0 ? new THREE.Vector3((col - (cols - 1) / 2) * CELL_W, 0, (row - (rows - 1) / 2) * CELL_D - 0.6) : new THREE.Vector3();
+    group.position.copy(home);
     scene.add(group);
 
     const body = new THREE.Group();
@@ -186,15 +214,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     const footprint = footprintLoop(FOOT + 0.3, FOOT + 0.3);
     group.add(footprint);
 
-    const mate = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0)]),
-      new THREE.LineDashedMaterial({ color: COLOR.select, dashSize: 0.08, gapSize: 0.08 }),
-    );
-    mate.computeLineDistances();
-    mate.visible = false;
-    group.add(mate);
-
-    const part: Part = { i, group, body, footprint, mate, label: { mesh: label, canvas, tex }, mats: [], edges: [], state: null, tint: new CellTint(tintRegistry), clock: 0, speed: activeAll ? 1 : IDLE_SPEED };
+    const part: Part = { i, group, body, footprint, home, fam: null, ghost: null, paused: false, label: { mesh: label, canvas, tex }, mats: [], edges: [], state: null, tint: new CellTint(tintRegistry), clock: 0, speed: activeAll ? 1 : IDLE_SPEED };
     part.tint.sat.value = activeAll ? 1 : 0;
     label.userData.index = i;
     pickables.push(label);
@@ -233,6 +253,294 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     part.edges.push(edges);
     pickables.push(plate);
     part.tint.scan(part.group);
+  }
+
+  // ------------------------------------------------------------ groups (parent + sub-projects)
+  // Collapsed: the parent fills its cell and each sub-project hovers at a corner as a small x-ray ghost
+  // on a dashed tether, its scene not started yet (or frozen). Split: every member flies to its own mini
+  // cell in a row (same-row neighbours slide aside), a scan sheet passes over each one as it turns solid
+  // and a chain dimension spans the row. `t` runs 0..1 and the layout is a pure function of it, so
+  // collapsing is the same animation played backwards.
+  type Ghost = {
+    mat: THREE.MeshBasicMaterial;
+    real: Map<THREE.Mesh, THREE.Material | THREE.Material[]>;
+    hidden: Set<THREE.Object3D>;
+    on: boolean;
+    /** the scene may start (first split) */
+    wake: boolean;
+    phase: number;
+    dash: THREE.LineDashedMaterial;
+    solid: THREE.Material;
+  };
+  type Family = {
+    parent: Part; kids: Part[]; members: Part[];
+    t: number; target: number;
+    /** split offsets from the parent's slot, and how far same-row neighbours move aside */
+    opt: THREE.Vector3[]; shift: number;
+    /** tethers, scan sheets and the dimension: outside the cells so the greyscale tint leaves them alone */
+    ov: THREE.Group;
+    tethers: { line: THREE.LineSegments; pos: THREE.BufferAttribute; dist: THREE.BufferAttribute }[];
+    scans: THREE.Mesh[];
+    dim: THREE.Group; dimLines: THREE.Object3D; dimMats: THREE.Material[];
+    /** borrowed parents only: the parent's own model, shown in its mini cell while split */
+    alt: THREE.Group | null; altLoading: boolean;
+  };
+  const families: Family[] = [];
+  let expanded: Family | null = null;
+  /** sub-project scenes waiting for their first split */
+  const deferred = new Map<Part, () => void>();
+  // ?splitT=0.5 freezes every split at that progress (with &expand=<slug>, for screenshots)
+  const splitParam = new URLSearchParams(location.search).get('splitT');
+  const frozenT = splitParam === null ? null : THREE.MathUtils.clamp(Number(splitParam) || 0, 0, 1);
+  const scanGeo = new THREE.PlaneGeometry(FOOT + 0.3, 0.9).translate(0, 0.45, 0);
+  const scanColor = new THREE.Color(COLOR.select);
+  // scan sheet: bright at the floor, fading out upwards (additive, so black is invisible)
+  scanGeo.setAttribute('color', new THREE.Float32BufferAttribute([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1], 3));
+  const clamp01 = (x: number) => THREE.MathUtils.clamp(x, 0, 1);
+  const lerp = THREE.MathUtils.lerp;
+  // chain dimension in front of the split row's labels
+  const DIM_Z = (FOOT / 2 + 0.35 + LABEL_H + 0.25) * SPLIT + 0.45;
+
+  for (const i of topLevel) {
+    const kids = parts.filter((pt) => parentOf[pt.i] === i);
+    if (!kids.length) continue;
+    const parent = parts[i];
+    const members = [parent, ...kids];
+    const m = members.length;
+    const span = CELL_W * SPLIT;
+    const opt = members.map((_, k) => new THREE.Vector3((k - (m - 1) / 2) * span, 0, 0));
+    const ov = new THREE.Group();
+    scene.add(ov);
+    const fam: Family = { parent, kids, members, t: 0, target: 0, opt, shift: Math.max(0, (m * span - CELL_W) / 2), ov, tethers: [], scans: [], dim: new THREE.Group(), dimLines: new THREE.Group(), dimMats: [], alt: null, altLoading: false };
+    members.forEach((pt) => (pt.fam = fam));
+    kids.forEach((kid, k) => {
+      const [gx, gz] = GHOST_SPOTS[k % GHOST_SPOTS.length];
+      kid.home.set(parent.home.x + gx, GHOST_Y, parent.home.z + gz);
+      kid.group.position.copy(kid.home);
+      kid.group.scale.setScalar(GHOST);
+      kid.footprint.computeLineDistances();
+      kid.ghost = {
+        mat: new THREE.MeshBasicMaterial({ color: COLOR.ghost, transparent: true, opacity: 0.22, depthWrite: false }),
+        real: new Map(), hidden: new Set(), on: false, wake: false, phase: k * 1.9,
+        dash: new THREE.LineDashedMaterial({ color: COLOR.sketch, transparent: true, opacity: 0.35, dashSize: 0.22, gapSize: 0.16 }),
+        solid: kid.footprint.material as THREE.Material,
+      };
+      setGhost(kid, true);
+      // tether: parent centre -> ground under the ghost -> ghost
+      const pos = new THREE.BufferAttribute(new Float32Array(12), 3);
+      const dist = new THREE.BufferAttribute(new Float32Array(4), 1);
+      const line = new THREE.LineSegments(
+        new THREE.BufferGeometry().setAttribute('position', pos).setAttribute('lineDistance', dist),
+        new THREE.LineDashedMaterial({ color: COLOR.sketch, transparent: true, opacity: 0.3, dashSize: 0.12, gapSize: 0.1, depthWrite: false }),
+      );
+      line.frustumCulled = false;
+      ov.add(line);
+      fam.tethers.push({ line, pos, dist });
+    });
+    for (let k = 0; k < m; k++) {
+      const sc = new THREE.Mesh(scanGeo, new THREE.MeshBasicMaterial({
+        color: 0, vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false,
+        // additive, leaving destination alpha alone so it composites over the page like the effects' glows
+        blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor, blendSrcAlpha: THREE.ZeroFactor, blendDstAlpha: THREE.OneFactor,
+      }));
+      sc.visible = false;
+      ov.add(sc);
+      fam.scans.push(sc);
+    }
+    buildDimension(fam);
+    families.push(fam);
+  }
+
+  /** Chain dimension behind the split row: extension lines, slash ticks and the group name. */
+  function buildDimension(f: Family) {
+    const y = 0.01;
+    const x0 = f.opt[0].x, x1 = f.opt[f.opt.length - 1].x;
+    const front = DIM_Z - 0.4; // starts just past each mini cell's label
+    const pts: THREE.Vector3[] = [new THREE.Vector3(x0 - 0.25, y, DIM_Z), new THREE.Vector3(x1 + 0.25, y, DIM_Z)];
+    for (const o of f.opt) {
+      // extension line at each project's centre, through the dimension line
+      pts.push(new THREE.Vector3(o.x, y, front), new THREE.Vector3(o.x, y, DIM_Z + 0.18));
+      pts.push(new THREE.Vector3(o.x - 0.12, y, DIM_Z + 0.12), new THREE.Vector3(o.x + 0.12, y, DIM_Z - 0.12));
+    }
+    const lineMat = new THREE.LineBasicMaterial({ color: COLOR.sketch, transparent: true, opacity: 0, depthWrite: false });
+    const lines = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), lineMat);
+    f.dimLines = lines;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 96;
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = COLOR.sketch;
+    ctx.font = '500 46px ui-monospace, Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${data.parts[f.parent.i].title.toUpperCase()} / ${f.members.length} PROJECTS`, 512, 50, 1000);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = maxAniso;
+    const textMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0, depthWrite: false });
+    const text = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 0.45), textMat);
+    text.rotation.x = -Math.PI / 2;
+    text.position.set(0, 0.012, DIM_Z + 0.34);
+    f.dim.add(lines, text);
+    f.dimMats = [lineMat, textMat];
+    f.dim.visible = false;
+    f.ov.add(f.dim);
+  }
+
+  /** X-ray look for a parked sub-project: one translucent material, lines and points hidden. Idempotent. */
+  function setGhost(part: Part, on: boolean) {
+    const g = part.ghost!;
+    if (on) {
+      part.body.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        const first = mesh.isMesh ? ((Array.isArray(mesh.material) ? mesh.material[0] : mesh.material) as THREE.Material) : null;
+        // glows (shader or additive materials) would read as solid slabs: hide them
+        const overlay = !!first && first !== g.mat && ((first as THREE.ShaderMaterial).isShaderMaterial || first.blending !== THREE.NormalBlending);
+        if (mesh.isMesh && !overlay) {
+          if (mesh.material !== g.mat) { g.real.set(mesh, mesh.material); mesh.material = g.mat; }
+        } else if ((overlay || (o as THREE.Line).isLine || (o as THREE.Points).isPoints || (o as THREE.Sprite).isSprite) && o.visible) {
+          o.visible = false;
+          g.hidden.add(o);
+        }
+      });
+    } else {
+      // an effect that swapped a material while starting up keeps its own
+      for (const [mesh, mat] of g.real) if (mesh.material === g.mat) mesh.material = mat;
+      for (const o of g.hidden) o.visible = true;
+      g.real.clear();
+      g.hidden.clear();
+    }
+    g.on = on;
+    part.footprint.material = on ? g.dash : g.solid;
+    (part.label.mesh.material as THREE.MeshBasicMaterial).opacity = on ? 0.5 : 1;
+  }
+
+  /** Start a sub-project's scene the first time its group splits. */
+  function wake(kid: Part) {
+    const g = kid.ghost;
+    if (!g || g.wake) return;
+    g.wake = true;
+    const run = deferred.get(kid);
+    deferred.delete(kid);
+    run?.();
+  }
+
+  /** Borrowed parents (red.HEX shows HEX-VISION's scene) get their own static model for the split. */
+  async function ensureAlt(f: Family) {
+    const p = data.parts[f.parent.i];
+    if (!p.borrowed || !p.model || f.alt || f.altLoading) return;
+    f.altLoading = true;
+    try {
+      const { outer, model } = await orient(p.model);
+      const pivot = new THREE.Group();
+      pivot.add(outer);
+      pivot.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(pivot, true);
+      const size = box.getSize(new THREE.Vector3());
+      pivot.scale.setScalar(Math.min(FOOT / Math.max(size.x, size.z, 1e-6), MAX_H / Math.max(size.y, 1e-6)));
+      pivot.updateMatrixWorld(true);
+      box.setFromObject(pivot, true);
+      const c = box.getCenter(new THREE.Vector3());
+      pivot.position.set(-c.x, -box.min.y, -c.z);
+      model.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const list = (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).map((m) => (m as THREE.MeshStandardMaterial).clone());
+        mesh.material = Array.isArray(mesh.material) ? list : list[0];
+        f.parent.mats.push(...(list.filter((m) => 'emissive' in m) as THREE.MeshStandardMaterial[]));
+      });
+      const alt = new THREE.Group();
+      alt.add(pivot);
+      alt.scale.setScalar(p.modelScale ?? 1);
+      alt.visible = false;
+      f.parent.group.add(alt);
+      f.parent.tint.scan(f.parent.group);
+      f.alt = alt;
+      f.parent.state = null;
+      paint();
+    } catch (err) {
+      console.warn(`model failed for ${p.title}`, err);
+    }
+  }
+
+  /** Same-row neighbours slide aside while a group is split. */
+  function rowShift(home: THREE.Vector3, skip: Family | null) {
+    let dx = 0;
+    for (const f of families) {
+      if (f === skip || f.t <= 0 || Math.abs(f.parent.home.z - home.z) > 0.01 || home.x === f.parent.home.x) continue;
+      dx += Math.sign(home.x - f.parent.home.x) * f.shift * ease(f.t);
+    }
+    return dx;
+  }
+
+  /** Progress of one member: the parent leads, sub-projects follow a little staggered. */
+  const memberT = (f: Family, k: number) => (k === 0 ? clamp01(f.t / 0.8) : clamp01((f.t - 0.12 * (k - 1)) / (1 - 0.12 * Math.max(0, f.members.length - 2))));
+
+  function layout(now: number) {
+    for (const i of topLevel) {
+      const p = parts[i];
+      if (!p.fam) p.group.position.set(p.home.x + rowShift(p.home, null), 0, p.home.z);
+    }
+    for (const f of families) {
+      const bx = f.parent.home.x + rowShift(f.parent.home, f), bz = f.parent.home.z;
+      f.ov.visible = f.parent.group.visible;
+      f.members.forEach((pt, k) => {
+        const l = memberT(f, k);
+        const e = ease(l);
+        const ox = bx + f.opt[k].x, oz = bz + f.opt[k].z;
+        if (k === 0) {
+          pt.group.position.set(lerp(bx, ox, e), 0, bz);
+          pt.group.scale.setScalar(lerp(1, SPLIT, e));
+          // a borrowed scene hands over to the parent's own model as the scan passes
+          const own = !!f.alt && l >= 0.6;
+          pt.body.visible = !own;
+          if (f.alt) f.alt.visible = own;
+          pt.paused = own;
+        } else {
+          const g = pt.ghost!;
+          const drift = reducedMotion ? 0 : now * 0.001 + g.phase;
+          const gx = bx + (pt.home.x - f.parent.home.x) + Math.cos(drift * 0.5) * 0.08;
+          const gz = pt.home.z + Math.sin(drift * 0.5) * 0.08;
+          const gy = GHOST_Y + Math.sin(drift * 1.3) * 0.06;
+          pt.group.position.set(lerp(gx, ox, e), lerp(gy, 0, e) + Math.sin(Math.PI * e) * 0.6, lerp(gz, oz, e));
+          pt.group.scale.setScalar(lerp(GHOST, SPLIT, e));
+          const ghosted = l < 0.6;
+          // re-applied while moving: a scene that starts mid-flight is ghosted too
+          if (ghosted !== g.on || (ghosted && l > 0)) setGhost(pt, ghosted);
+          pt.paused = ghosted;
+          (pt.label.mesh.material as THREE.MeshBasicMaterial).opacity = ghosted ? lerp(0.5, 0.8, e) : 1;
+          // tether
+          const tt = f.tethers[k - 1];
+          const a = f.parent.group.position, b = pt.group.position;
+          tt.pos.setXYZ(0, a.x, 0.01, a.z);
+          tt.pos.setXYZ(1, b.x, 0.01, b.z);
+          tt.pos.setXYZ(2, b.x, 0.01, b.z);
+          tt.pos.setXYZ(3, b.x, b.y, b.z);
+          const d1 = Math.hypot(b.x - a.x, b.z - a.z);
+          tt.dist.setX(1, d1);
+          tt.dist.setX(2, d1);
+          tt.dist.setX(3, d1 + b.y);
+          tt.pos.needsUpdate = tt.dist.needsUpdate = true;
+          (tt.line.material as THREE.LineDashedMaterial).opacity = 0.3 * (1 - e) + 0.6 * Math.sin(Math.PI * e);
+          tt.line.visible = e < 0.999;
+        }
+        // scan sheet sweeps each project as it turns solid
+        const sc = f.scans[k];
+        const s = clamp01((l - 0.4) / 0.45);
+        sc.visible = s > 0 && s < 1;
+        if (sc.visible) {
+          const sz = pt.group.scale.x;
+          sc.position.set(pt.group.position.x, pt.group.position.y, pt.group.position.z + lerp(-1, 1, s) * ((FOOT + 0.3) / 2) * sz);
+          sc.scale.setScalar(sz);
+          (sc.material as THREE.MeshBasicMaterial).color.copy(scanColor).multiplyScalar(Math.sin(Math.PI * s) * 0.5);
+        }
+      });
+      const grow = ease(clamp01((f.t - 0.45) / 0.55));
+      f.dim.visible = grow > 0.001;
+      f.dim.position.set(bx, 0, bz);
+      f.dimLines.scale.x = Math.max(grow, 0.001);
+      for (const m of f.dimMats) m.opacity = grow * 0.8;
+    }
   }
 
   // ------------------------------------------------------------ models + effects
@@ -320,6 +628,8 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   const controls3d: { object: THREE.Object3D; part: Part; on: Interactive }[] = [];
 
   async function startEffect(part: Part, p: Item, holder: THREE.Group, modelScale: number) {
+    // grouping: a parked sub-project starts its scene on its group's first split (see wake())
+    if (part.ghost && !part.ghost.wake) { deferred.set(part, () => void startEffect(part, p, holder, modelScale)); return; }
     const { loadEffect } = await import('./effects/index');
     const make = await loadEffect(p.effect!);
     if (!make) return;
@@ -372,20 +682,9 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   scene.add(sketch);
 
   // ------------------------------------------------------------ state
-  let explode = Number(document.querySelector<HTMLInputElement>('[data-explode]')?.value ?? 0) / 100;
   let hovered = -1;
   let selected = -1;
   let mode: 'shaded' | 'wire' = 'shaded';
-
-  function applyExplode() {
-    for (const p of parts) {
-      const lift = explode * LIFT;
-      p.body.position.y = lift;
-      p.mate.visible = lift > 0.03;
-      p.mate.scale.y = Math.max(lift, 0.001);
-    }
-    requestRender();
-  }
 
   function paint() {
     for (const p of parts) {
@@ -404,6 +703,11 @@ export function mountAssembly(root: HTMLElement, data: Data) {
         m.wireframe = mode === 'wire';
       }
       for (const e of p.edges) (e.material as THREE.LineBasicMaterial).color.set(state === 'none' ? COLOR.edge : color);
+      if (p.ghost?.on) {
+        setGhost(p, true); // picks up meshes that loaded since
+        p.ghost.mat.color.set(state === 'none' ? COLOR.ghost : color);
+        p.ghost.mat.wireframe = mode === 'wire';
+      }
     }
     document.querySelectorAll<HTMLElement>('a[data-part]').forEach((el) => {
       el.classList.toggle('is-preselect', el.dataset.part === String(hovered));
@@ -435,14 +739,66 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     propsPart.querySelector<HTMLElement>('[data-row="tags"]')!.hidden = !p.tags.length;
   }
 
+  // camera pose before a group split, restored when it collapses back with nothing else selected
+  let camBefore: [THREE.Vector3, THREE.Vector3] | null = null;
+  let lastSplitTick = performance.now();
+  let splitAt = -Infinity;
+
+  /** Split one group (collapsing any other), or collapse with null. Returns true if anything changed. */
+  function setExpanded(f: Family | null) {
+    if (f === expanded) return false;
+    lastSplitTick = performance.now();
+    if (expanded) expanded.target = 0;
+    if (f && !camBefore) camBefore = [controls.target.clone(), camera.position.clone()];
+    expanded = f;
+    if (f) {
+      f.target = 1;
+      splitAt = performance.now();
+      f.kids.forEach(wake);
+      void ensureAlt(f);
+    }
+    if (frozenT !== null) for (const g of families) g.t = g.target * frozenT;
+    requestRender();
+    return true;
+  }
+
+  /** Camera on a split group: the row of mini cells and its dimension, from the current direction. */
+  function frameFamily(f: Family, animate = !reducedMotion && frozenT === null) {
+    const bounds = new THREE.Box3();
+    const cell = new THREE.Box3();
+    const half = (FOOT / 2 + 0.15) * SPLIT;
+    for (const o of f.opt) {
+      const x = f.parent.home.x + o.x, z = f.parent.home.z + o.z;
+      cell.min.set(x - half, 0, z - half);
+      cell.max.set(x + half, MAX_H * SPLIT, z + DIM_Z + 0.6);
+      bounds.union(cell);
+    }
+    // current direction, but looking down at least ~50 degrees so the row in front does not crowd it
+    const dir = camera.position.clone().sub(controls.target).normalize();
+    const flat = Math.hypot(dir.x, dir.z) || 1;
+    if (dir.y < 0.77) dir.set((dir.x / flat) * 0.64, 0.77, (dir.z / flat) * 0.64);
+    fitBox(bounds, dir, animate, 0.72, SPLIT_MS);
+  }
+
   function select(i: number, focus = false) {
+    const fam = i >= 0 ? parts[i].fam : null;
+    const changed = setExpanded(fam);
     selected = i;
     paint();
     showProps(i);
-    if (i >= 0 && focus) {
-      const target = parts[i].group.position.clone().add(new THREE.Vector3(0, 0.8, 0.6));
-      const offset = camera.position.clone().sub(controls.target);
-      flyTo(target, target.clone().add(offset.setLength(Math.min(offset.length(), 13))));
+    if (fam) {
+      if (changed) frameFamily(fam);
+    } else if (i >= 0) {
+      camBefore = null;
+      if (focus) {
+        const target = parts[i].home.clone().add(new THREE.Vector3(0, 0.8, 0.6));
+        const offset = camera.position.clone().sub(controls.target);
+        flyTo(target, target.clone().add(offset.setLength(Math.min(offset.length(), 13))));
+      }
+    } else if (changed && camBefore) {
+      // collapsed with nothing selected: back to where the camera was before the split
+      flyTo(camBefore[0], camBefore[1], SPLIT_MS);
+      camBefore = null;
     }
   }
 
@@ -467,11 +823,17 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     for (const p of parts) {
       if (!p.group.visible) continue;
       const c = p.group.position;
-      cell.min.set(c.x - FOOT / 2, 0, c.z - FOOT / 2);
-      cell.max.set(c.x + FOOT / 2, MAX_H + explode * LIFT, c.z + FOOT / 2 + LABEL_H + 0.4);
+      const s = p.group.scale.x; // groups: ghosts and split cells are scaled
+      cell.min.set(c.x - (FOOT / 2) * s, c.y, c.z - (FOOT / 2) * s);
+      cell.max.set(c.x + (FOOT / 2) * s, c.y + MAX_H * s, c.z + (FOOT / 2 + LABEL_H + 0.4) * s);
       bounds.union(cell);
     }
     bounds.expandByObject(sketch);
+    fitBox(bounds, dir, animate);
+  }
+
+  /** Camera along `dir` with the box filling `fill` of the view. */
+  function fitBox(bounds: THREE.Box3, dir: THREE.Vector3, animate = !reducedMotion, fill = 0.9, dur = 520) {
     // Fit the actual box corners on screen (tighter than a bounding sphere).
     const center = bounds.getCenter(new THREE.Vector3());
     const unit = dir.clone().normalize();
@@ -489,7 +851,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
         const p = c.clone().project(probe);
         extent = Math.max(extent, Math.abs(p.x), Math.abs(p.y));
       }
-      dist *= extent / 0.9;
+      dist *= extent / fill;
     }
     // Re-centre: the box centre isn't the centre of its projection under perspective
     for (let it = 0; it < 3; it++) {
@@ -505,9 +867,9 @@ export function mountAssembly(root: HTMLElement, data: Data) {
       const right = new THREE.Vector3().setFromMatrixColumn(probe.matrixWorld, 0);
       const up = new THREE.Vector3().setFromMatrixColumn(probe.matrixWorld, 1);
       center.addScaledVector(right, ((x0 + x1) / 2) * halfH * probe.aspect).addScaledVector(up, ((y0 + y1) / 2) * halfH);
-      dist *= Math.max(x1 - x0, y1 - y0) / 2 / 0.92;
+      dist *= Math.max(x1 - x0, y1 - y0) / 2 / (fill + 0.02);
     }
-    flyTo(center, center.clone().addScaledVector(unit, dist), 520, animate);
+    flyTo(center, center.clone().addScaledVector(unit, dist), dur, animate);
   }
 
   const VIEWS: Record<string, THREE.Vector3> = {
@@ -569,7 +931,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     let moving = false;
     let interactive = false;
     if (flight) {
-      const t = Math.min((now - flight.t0) / flight.dur, 1);
+      const t = THREE.MathUtils.clamp((now - flight.t0) / flight.dur, 0, 1); // rAF time can trail performance.now()
       const k = ease(t);
       controls.target.lerpVectors(flight.from[0], flight.to[0], k);
       camera.position.lerpVectors(flight.from[1], flight.to[1], k);
@@ -588,6 +950,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     }
     if (controls.update()) { moving = true; interactive = true; }
     if (intro) interactive = true;
+    if (frozenT === null && families.some((f) => f.t !== f.target)) { moving = true; interactive = true; } // group split
     if (!interactive && effects.length && now - lastRender < 31 && !forceEffects) {
       requestRender(); // skip this frame, keep the loop alive
       return;
@@ -599,8 +962,18 @@ export function mountAssembly(root: HTMLElement, data: Data) {
       if (slowFrames > 20 && dpr > 1) { dpr = Math.max(1, dpr - 0.25); renderer.setPixelRatio(dpr); resize(); slowFrames = 0; }
       if (fastFrames > 240 && dpr < maxDpr) { dpr = Math.min(maxDpr, dpr + 0.25); renderer.setPixelRatio(dpr); resize(); fastFrames = 0; }
     }
-    const dt = Math.min((now - last) / 1000, 0.1);
+    const dt = THREE.MathUtils.clamp((now - last) / 1000, 0, 0.1); // rAF time can trail performance.now() on the first frames
     last = now;
+    // groups: advance any split / collapse, then place every cell (ghosts drift, so this runs each frame)
+    // own clock (dt above is capped at 0.1 s): a frame stalled by shader compiles must not slow the split down
+    const splitDt = THREE.MathUtils.clamp(now - lastSplitTick, 0, 400);
+    lastSplitTick = now;
+    for (const f of families) {
+      if (frozenT !== null || f.t === f.target) continue;
+      const step = reducedMotion ? 1 : splitDt / SPLIT_MS;
+      f.t = f.target > f.t ? Math.min(f.target, f.t + step) : Math.max(f.target, f.t - step);
+    }
+    layout(now);
     // colour and speed ease toward full for the hovered / selected cell, and back to slow grey for the rest
     const k = 1 - Math.exp(-dt * 6);
     let tinting = false;
@@ -618,6 +991,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     if (tinting) moving = true;
     if (effects.length && ((effectsVisible && !document.hidden) || forceEffects)) {
       for (const { part: p, effect } of effects) {
+        if (p.paused) continue; // parked ghost, or a borrowed scene handed over while split
         const step = reducedMotion ? 0 : dt * p.speed;
         p.clock += step;
         effect.update(reducedMotion ? 2 : p.clock, step);
@@ -654,14 +1028,26 @@ export function mountAssembly(root: HTMLElement, data: Data) {
     if (!pendingMove) requestAnimationFrame(() => { const ev = pendingMove!; pendingMove = null; hover(ev); });
     pendingMove = e;
   });
+  // hovering a group fetches what its split needs (sub-project scene code, the parent's own model)
+  const warmed = new WeakSet<Family>();
+  function warm(f: Family) {
+    if (warmed.has(f)) return;
+    warmed.add(f);
+    void ensureAlt(f);
+    void import('./effects/index').then(({ loadEffect }) => f.kids.forEach((k) => data.parts[k.i].effect && loadEffect(data.parts[k.i].effect!)));
+  }
   function hover(e: PointerEvent) {
     const i = pick(e);
     if (i !== hovered) { hovered = i; paint(); }
+    const fam = i >= 0 ? parts[i].fam : null;
+    if (fam) warm(fam);
     if (tip) {
       tip.hidden = i < 0 || e.pointerType === 'touch';
       if (i >= 0) {
         const r = root.getBoundingClientRect();
-        tip.replaceChildren(data.parts[i].title, Object.assign(document.createElement('small'), { textContent: data.parts[i].no }));
+        // collapsed groups say what is inside; parked ghosts say whose they are
+        const extra = fam && fam !== expanded ? (i === fam.parent.i ? `+${fam.kids.length} inside, click to split` : `in ${data.parts[fam.parent.i].title}`) : '';
+        tip.replaceChildren(data.parts[i].title, Object.assign(document.createElement('small'), { textContent: extra ? `${data.parts[i].no} · ${extra}` : data.parts[i].no }));
         tip.style.left = `${e.clientX - r.left + 14}px`;
         tip.style.top = `${e.clientY - r.top + 16}px`;
       }
@@ -670,12 +1056,14 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   canvas.addEventListener('pointerleave', () => { hovered = -1; if (tip) tip.hidden = true; paint(); });
   canvas.addEventListener('pointerup', (e) => {
     if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5 || e.button !== 0) return;
+    // the second click of a double-click on a group that just split keeps the selection (dblclick opens it)
+    if (e.pointerType !== 'touch' && performance.now() - splitAt < 450) return;
     const i = pick(e);
     if (i >= 0 && i === selected && e.pointerType === 'touch') location.href = data.parts[i].url;
     else select(i, i >= 0);
   });
   canvas.addEventListener('dblclick', (e) => {
-    const i = pick(e);
+    const i = performance.now() - splitAt < 700 ? selected : pick(e);
     if (i >= 0) location.href = data.parts[i].url;
   });
 
@@ -722,8 +1110,10 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   root.addEventListener('keydown', (e) => {
     if ((e.target as HTMLElement).closest('input')) return;
     const k = e.key;
-    if (k === 'ArrowRight' || k === 'ArrowDown') { select((selected + 1) % n, true); e.preventDefault(); }
-    else if (k === 'ArrowLeft' || k === 'ArrowUp') { select((selected - 1 + n) % n, true); e.preventDefault(); }
+    // tree order: each project followed by its sub-projects
+    const at = navOrder.indexOf(selected), len = navOrder.length;
+    if (k === 'ArrowRight' || k === 'ArrowDown') { select(navOrder[(at + 1) % len], true); e.preventDefault(); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp') { select(navOrder[at < 0 ? len - 1 : (at - 1 + len) % len], true); e.preventDefault(); }
     else if (k === 'Enter' && selected >= 0) location.href = data.parts[selected].url;
     else if (k === 'Escape') select(-1);
     else if (k === 'f' || k === 'F') setView('fit');
@@ -752,18 +1142,18 @@ export function mountAssembly(root: HTMLElement, data: Data) {
       paint();
     }),
   );
-  document.querySelector<HTMLInputElement>('[data-explode]')?.addEventListener('input', (e) => {
-    explode = Number((e.target as HTMLInputElement).value) / 100;
-    applyExplode();
-  });
 
   const filter = document.querySelector<HTMLInputElement>('[data-filter]');
   filter?.addEventListener('input', () => {
     const term = filter.value.trim().toLowerCase();
+    const match = (i: number) => !term || data.parts[i].title.toLowerCase().includes(term);
     document.querySelectorAll<HTMLElement>('a[data-part]').forEach((a) => {
-      const match = !term || a.dataset.title!.includes(term);
-      a.hidden = !match;
-      parts[Number(a.dataset.part)].group.visible = match;
+      const i = Number(a.dataset.part);
+      const fam = parts[i].fam;
+      // a group stays whole in the scene if any member matches; the tree keeps the parent of a match
+      const any = fam ? fam.members.some((m) => match(m.i)) : match(i);
+      a.hidden = !(match(i) || (fam && any && (i === fam.parent.i || match(fam.parent.i))));
+      parts[i].group.visible = any;
     });
     requestRender();
   });
@@ -779,9 +1169,12 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   }
   new ResizeObserver(resize).observe(root);
   resize();
+  layout(performance.now());
   fitDirection(VIEWS.iso, false);
-  applyExplode();
   paint();
+  // ?expand=<slug> splits that project's group on load (add &splitT=0..1 to freeze the animation)
+  const expandSlug = new URLSearchParams(location.search).get('expand');
+  if (expandSlug && slugIndex.has(expandSlug)) select(slugIndex.get(expandSlug)!, true);
   const focusSlug = new URLSearchParams(location.search).get('view');
   loadModels().then(() => {
     const i = focusSlug ? data.parts.findIndex((p) => p.slug === focusSlug) : -1;

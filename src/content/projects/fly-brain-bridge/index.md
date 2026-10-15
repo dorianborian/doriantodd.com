@@ -1,4 +1,5 @@
 ---
+parent: sesame
 effect: flybrain
 hero: flybrain
 modelFrom: sesame
