@@ -197,6 +197,8 @@ export async function buildRig(load: (url: string) => Promise<THREE.Object3D>, s
 
   return {
     root,
+    /** the millimetre rig space (STL coordinates, Y up, forward -x); things added here ride the body */
+    mm: inner as THREE.Object3D,
     size,
     placeFace,
     scale,
