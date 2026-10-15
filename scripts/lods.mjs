@@ -30,7 +30,7 @@ const MANIFEST = path.join(ROOT, 'src', 'scripts', 'lods.json');
 const MIN_BYTES = 100_000;
 // Consumers that copy the geometry out of the file (so a later swap could not reach it) get no levels.
 const EXCLUDE = new Set(['public/sesame/rig.glb']); // effects/sesame-rig.ts bakes its own geometry copies
-const MIN_TRIS = 120;
+const MIN_TRIS = 200; // small parts stay whole: effects measure some of them (e.g. the mosaic plane-fits its clear panel)
 const LEVELS = [
   { ratio: 0.035, error: 0.15, sloppy: true }, // lod0: the silhouette, a few percent of the triangles
   { ratio: 0.3, error: 0.03 }, // lod1: close to the real thing at home page sizes

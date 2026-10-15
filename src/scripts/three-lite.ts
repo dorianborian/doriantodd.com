@@ -60,7 +60,11 @@ export {
   TextureLoader,
   Vector2,
   Vector3,
+  Vector4, // reveal.ts
   WebGLRenderer,
+  WebGLRenderTarget, // assembly.ts environment warm-up
+  HalfFloatType,
+  BackSide,
 } from 'three';
 export type { Material, ShaderMaterialParameters } from 'three';
 export { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';

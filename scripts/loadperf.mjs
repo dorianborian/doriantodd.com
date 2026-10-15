@@ -4,6 +4,7 @@
 //   PORT=4403 node scripts/loadperf.mjs                       plain run
 //   PORT=4403 node scripts/loadperf.mjs --net=4g --cpu=4      throttled: fast 4G, 4x slower CPU
 //   PORT=4403 node scripts/loadperf.mjs --path="/?debug" --runs=3 --wait=20
+//   PORT=4403 node scripts/loadperf.mjs --shots=500,1000,2000 --prefix=load   real-time screenshots into shots/
 //
 // Prints: first contentful paint, when the WebGL canvas appears and first draws, when the scene's draw-call
 // count settles (every model on screen), bytes by type, long main-thread tasks and the worst frame gaps.
@@ -93,7 +94,18 @@ async function once() {
   const profiling = process.argv.includes('--profile');
   if (profiling) { await c.send('Profiler.enable'); await c.send('Profiler.setSamplingInterval', { interval: 250 }); await c.send('Profiler.start'); }
   await c.send('Page.navigate', { url: `http://localhost:${port}${pagePath}` });
-  await new Promise((r) => setTimeout(r, waitS * 1000));
+  // --shots=800,1500,3000 saves real-time screenshots that many ms after navigation (shots/load-<ms>.png)
+  const shots = arg('shots', '').split(',').filter(Boolean).map(Number);
+  const t0 = Date.now();
+  for (const ms of shots) {
+    await new Promise((r) => setTimeout(r, Math.max(0, ms - (Date.now() - t0))));
+    if (arg('pre')) { await c.send('Runtime.evaluate', { expression: arg('pre') }); await new Promise((r) => setTimeout(r, 300)); }
+    const { data } = (await c.send('Page.captureScreenshot', { format: 'png' })).result;
+    fs.mkdirSync('shots', { recursive: true });
+    fs.writeFileSync(path.join('shots', `${arg('prefix', 'load')}-${ms}.png`), Buffer.from(data, 'base64'));
+  }
+  await new Promise((r) => setTimeout(r, Math.max(0, waitS * 1000 - (Date.now() - t0))));
+  if (arg('eval')) console.log('eval:', JSON.stringify((await c.send('Runtime.evaluate', { expression: arg('eval'), returnByValue: true })).result).slice(0, 3000));
   if (profiling) {
     // self time per function, to see what blocks the main thread
     const { profile } = (await c.send('Profiler.stop')).result;

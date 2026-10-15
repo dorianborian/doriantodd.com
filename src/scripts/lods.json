@@ -6,13 +6,13 @@
    "/content-assets/projects/digital-mosaic/model-lite.glb"
   ],
   "tris": [
-   1036,
-   9094,
+   1148,
+   9182,
    30330
   ],
   "bytes": [
-   20328,
-   105800,
+   21632,
+   106740,
    311272
   ]
  },
@@ -23,13 +23,13 @@
    "/content-assets/projects/executioner/model-lite.glb"
   ],
   "tris": [
-   3350,
-   28652,
+   3485,
+   28718,
    93174
   ],
   "bytes": [
-   76968,
-   324196,
+   78520,
+   324948,
    966244
   ]
  },
@@ -57,13 +57,13 @@
    "/content-assets/projects/matrix-game-board/model-lite.glb"
   ],
   "tris": [
-   2874,
-   22545,
+   3542,
+   22861,
    73814
   ],
   "bytes": [
-   72104,
-   247712,
+   78568,
+   250344,
    711132
   ]
  },
@@ -91,13 +91,13 @@
    "/content-assets/projects/penbot/model-lite.glb"
   ],
   "tris": [
-   2348,
-   16104,
+   2586,
+   16260,
    53503
   ],
   "bytes": [
-   64144,
-   203340,
+   66740,
+   205060,
    544004
   ]
  },
@@ -125,13 +125,13 @@
    "/content-assets/projects/sesame/model-lite.glb"
   ],
   "tris": [
-   2361,
-   16562,
+   2646,
+   16684,
    52667
   ],
   "bytes": [
-   67988,
-   212988,
+   71948,
+   215020,
    607200
   ]
  }
