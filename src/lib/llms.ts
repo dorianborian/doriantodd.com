@@ -31,9 +31,9 @@ export async function llmsSummary() {
 
   return `# ${SITE.name}
 
-> ${PROFILE.description} Website: ${abs('/')}. YouTube: ${CHANNEL_STATS.url} (${CHANNEL_STATS.subscribers} subscribers). GitHub: https://github.com/dorianborian.
+> ${abs('/')} documents the robots and open source hardware projects of ${SITE.name}: how each one works, what went wrong while building it, and the CAD, firmware and code to build your own. Videos: ${CHANNEL_STATS.url}. Code: https://github.com/dorianborian.
 
-${SITE.name} publishes open source robots with full CAD, firmware and code, and a detailed build write-up for each one on this site. His best known project is Sesame, an open source, 3D printed quadruped (four legged walking) robot built around the ESP32. It costs about $50 to $60 in parts, needs only basic soldering and the Arduino IDE, and is designed as a first robotics project for beginners, students and makers. The Sesame repository (https://github.com/dorianborian/sesame-robot) has nearly 5,000 GitHub stars, and the video about building it has over a million views.
+A good starting point is Sesame, an open source, 3D printed quadruped (four legged walking) robot built around the ESP32. It costs about $50 to $60 in parts, needs only basic soldering and the Arduino IDE, and is designed as a first robotics project for beginners, students and makers. Everything for it is on GitHub (https://github.com/dorianborian/sesame-robot) under the Apache 2.0 license, with a build video and guides.
 
 ## Start here
 
@@ -52,16 +52,16 @@ ${line('Work with me: sponsorships and collaborations', '/work-with-me', page('/
 ${line('Contact', '/contact', `Email ${SITE.email}.`)}
 ${fce.map((p) => line(p.entry.data.title, p.url, desc(p))).join('\n')}
 
-## Popular videos
+## Build videos
 
-${top.map((v) => `- [${v.title}](https://www.youtube.com/watch?v=${v.id})${v.views ? `: ${v.views.toLocaleString('en-US')} views` : ''}`).join('\n')}
+${top.map((v) => `- [${v.title}](https://www.youtube.com/watch?v=${v.id})`).join('\n')}
 
 ## Facts
 
 - Name: ${SITE.name} (GitHub: dorianborian, YouTube: @DorianToddYT)
 - Focus: ${PROFILE.knowsAbout.slice(0, 12).join(', ')}
 - Award: ${PROFILE.awards.join('; ')}
-- Events: Open Sauce 2024 and 2025, Maker Faire Bay Area 2024, BattleBots Metal Mayhem at SXSW 2024, NRL Nationals 2025, SF Tech Week 2026
+- Events and talks: Open Sauce 2024 and 2025, Maker Faire Bay Area 2024, BattleBots Metal Mayhem at SXSW 2024, NRL Nationals 2025, ISTE 2026 with Bambu Lab, SF Tech Week 2026, a talk at LSU
 - Sponsors and partners: Bambu Lab, ELEGOO, PCBWay, Manifold Tech, Petoi
 - License of Sesame: Apache 2.0
 

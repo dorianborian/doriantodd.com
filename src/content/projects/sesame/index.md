@@ -30,7 +30,7 @@ faq:
   - q: "What will I learn by building Sesame?"
     a: "3D printing, servo control, ESP32 programming in the Arduino IDE, power and wiring for motors, walking gaits and simple kinematics, and controlling a robot over Wi-Fi with a web API."
   - q: "Is Sesame open source?"
-    a: "Yes. Sesame is released under the Apache 2.0 license. The CAD, STL files, firmware, Sesame Studio, bill of materials and build guides are on GitHub at github.com/dorianborian/sesame-robot, which has nearly 5,000 stars and over 600 forks."
+    a: "Yes. Sesame is released under the Apache 2.0 license. The CAD, STL files, firmware, Sesame Studio, bill of materials and build guides are on GitHub at github.com/dorianborian/sesame-robot."
   - q: "Can I buy a Sesame kit?"
     a: "Pre-flashed build kits are sold through Full Contact Engineering when a production round is open. You can join the newsletter on the Sesame kit page to hear when orders open again."
 ---

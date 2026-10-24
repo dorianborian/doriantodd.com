@@ -9,7 +9,6 @@ import { Resvg } from '@resvg/resvg-js';
 import sharp from 'sharp';
 import { getCollection } from 'astro:content';
 import { getProjects, getUnlistedProjects, SITE } from '../../lib/site';
-import { CHANNEL_STATS } from '../../lib/seo';
 
 const ROOT = process.cwd();
 const FONTS = ['Inter-Bold.ttf', 'Inter-SemiBold.ttf', 'Inter-Regular.ttf', 'JetBrainsMono-Medium.ttf'].map((f) => path.join(ROOT, 'src/assets/fonts', f));
@@ -54,9 +53,9 @@ export const getStaticPaths = (async () => {
     const key = d.path === '/' ? 'home' : d.path.replace(/^\//, '');
     cards.push({
       key,
-      kicker: key === 'home' ? 'OPEN SOURCE ROBOTS  /  BUILD GUIDES  /  VIDEOS' : 'DORIANTODD.COM',
+      kicker: key === 'home' ? 'OPEN SOURCE ROBOTS  /  BUILD GUIDES  /  VIDEOS' : (d.keywords[0] ?? '').toUpperCase(),
       title: key === 'home' ? SITE.name : d.title,
-      subtitle: short(key === 'home' ? `Open source robotics developer and YouTuber. Creator of Sesame, the open source ESP32 quadruped robot. ${CHANNEL_STATS.subscribers} subscribers on YouTube.` : (d.description ?? d.summary ?? ''), 400),
+      subtitle: short(key === 'home' ? 'Robots, build logs, CAD and code. Open source projects to learn from and build yourself.' : (d.description ?? d.summary ?? ''), 400),
       chips: key === 'home' ? ['Robotics', 'Open source', 'YouTube'] : d.keywords.slice(0, 3),
       image: (await coverOf(file)) ?? homeCover,
     });
@@ -93,16 +92,17 @@ async function render(c: Card) {
   let size = 76, title: string[] = [];
   for (size of [76, 68, 60, 54, 48]) { title = wrap(c.title, size, textW); if (title.length <= 2) break; }
   if (title.length > 3) title = [...title.slice(0, 2), title.slice(2).join(' ')];
-  let sub = wrap(c.subtitle, 25, textW);
-  if (sub.length > 3) {
-    // end on a whole word with an ellipsis instead of a cut-off line
-    sub = sub.slice(0, 3);
-    let last = sub[2];
-    while (width(`${last}...`, 25) > textW) last = last.slice(0, last.lastIndexOf(' '));
-    sub[2] = `${last.replace(/[,.;:]$/, '')}...`;
-  }
   const titleTop = 168 + size * 0.98;
-  const subTop = titleTop + title.length * size * 1.08 + 26;
+  const subTop = titleTop + (title.length - 1) * size * 1.08 + 58;
+  // as many description lines as fit above the tag row, ending on a whole word
+  const maxSub = Math.max(1, Math.min(3, Math.floor((488 - subTop) / 34) + 1));
+  let sub = wrap(c.subtitle, 25, textW);
+  if (sub.length > maxSub) {
+    sub = sub.slice(0, maxSub);
+    let last = sub[maxSub - 1];
+    while (width(`${last}...`, 25) > textW) last = last.slice(0, last.lastIndexOf(' '));
+    sub[maxSub - 1] = `${last.replace(/[,.;:]$/, '')}...`;
+  }
 
   let photo = '';
   if (c.image) {
@@ -137,12 +137,11 @@ async function render(c: Card) {
     <rect width="${W}" height="${H}" fill="url(#g)"/>
     <rect width="8" height="${H}" fill="#4a9bff"/>
     <image href="data:image/png;base64,${gear}" x="64" y="62" width="40" height="40"/>
-    <text x="118" y="91" font-family="Inter" font-weight="700" font-size="26" fill="#e4e6ea">${esc(SITE.name)}</text>
+    <text x="118" y="90" font-family="JetBrains Mono" font-size="22" fill="#c9d0da">doriantodd.com</text>
     <text x="64" y="160" font-family="JetBrains Mono" font-size="19" letter-spacing="1.5" fill="#4a9bff">${esc(c.kicker)}</text>
     ${title.map((l, i) => `<text x="64" y="${titleTop + i * size * 1.08}" font-family="Inter" font-weight="700" font-size="${size}" fill="#f2f4f7">${esc(l)}</text>`).join('')}
     ${sub.map((l, i) => `<text x="64" y="${subTop + i * 34}" font-family="Inter" font-size="25" fill="#a4aab3">${esc(l)}</text>`).join('')}
     ${chips}
-    <text x="64" y="596" font-family="JetBrains Mono" font-size="17" fill="#6f7580">doriantodd.com</text>
     ${photo}
   </svg>`;
   const png = new Resvg(svg, { font: { fontFiles: FONTS, loadSystemFonts: false, defaultFontFamily: 'Inter' }, fitTo: { mode: 'width', value: W } }).render().asPng();

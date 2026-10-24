@@ -12,7 +12,7 @@ keywords: ["open source robots", "robotics projects", "DIY robots", "robotics Yo
 
 <!-- Shown in the Properties panel on the home page when nothing is selected. Keep it short. -->
 
-I design and build robots, open source everything, and document the builds on [YouTube](https://www.youtube.com/@DorianToddYT). My best known project is [Sesame](/sesame), a 3D printed ESP32 quadruped that makers all over the world build as their first robot. New to robotics? [Start here](/start-robotics).
+This is where I document my projects: how each robot works, what went wrong along the way, and the CAD and code to build your own. Builds are also on [YouTube](https://www.youtube.com/@DorianToddYT). New to robotics? [Sesame](/sesame) was designed as a first robot, and there is a short guide on [getting started](/start-robotics).
 
 ## Newest video
 

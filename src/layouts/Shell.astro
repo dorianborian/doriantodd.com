@@ -27,8 +27,8 @@ interface Props {
 
 const { title, seoTitle, description = `${SITE.name}: ${SITE.tagline}.`, ogKey = 'home', ogAlt, ogType = 'website', keywords = [], jsonld, modified, noindex = false, leftTitle = 'Features', rightTitle = 'Properties' } = Astro.props;
 const base = seoTitle ?? title;
-// the brand goes last, unless the title already leads with the name
-const pageTitle = !base ? `${SITE.name} | ${SITE.tagline}` : base.includes(SITE.name) ? base : `${base} | ${SITE.name}`;
+// page titles stand on their own; the site name is carried by og:site_name and the home page
+const pageTitle = base ?? `${SITE.name} | ${SITE.tagline}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL(`/og/${ogKey}.jpg`, Astro.site).href;
 const GA_ID = 'G-9R1Y855NBE';

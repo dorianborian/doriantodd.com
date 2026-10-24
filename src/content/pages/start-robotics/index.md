@@ -47,7 +47,7 @@ This is what I would tell anyone starting today, and it is why I designed [Sesam
 | Control | Built-in Wi-Fi control panel on your phone, a JSON API, and a serial command line |
 | License | Apache 2.0: CAD, STLs, firmware and guides are all on [GitHub](https://github.com/dorianborian/sesame-robot) |
 
-It is also one of the most popular open source robot projects on GitHub, with thousands of stars and hundreds of forks, so when you get stuck, someone has usually hit the same problem. The [Discord](https://discord.gg/XDXkhQd8bC) is active, and people have built a browser physics simulator and machine learning tooling for it.
+Lots of people have built one, so when you get stuck, someone has usually hit the same problem. The [Discord](https://discord.gg/XDXkhQd8bC) is active, and people have built a browser physics simulator and machine learning tooling for it.
 
 https://www.youtube.com/watch?v=NIgoQVQF_Ng
 

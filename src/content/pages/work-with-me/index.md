@@ -1,50 +1,46 @@
 ---
 title: "Work With Me"
 path: "/work-with-me"
-seoTitle: "Sponsor a Robotics YouTuber: Work With Dorian Todd"
-summary: "Sponsorships, collaborations and events with Dorian Todd, an open source robotics developer and YouTuber."
-description: "Sponsor or collaborate with Dorian Todd, a robotics YouTuber and open source developer: 25K+ YouTube subscribers, a 1.1M view build video, and Sesame, an open source robot with thousands of GitHub stars."
-cover: "../home/portrait.png"
-keywords: ["robotics YouTuber", "maker YouTuber", "sponsor a YouTuber", "YouTube sponsorship", "open source hardware", "engineering creator", "brand partnership", "product integration", "maker events"]
+seoTitle: "Work With Me: Sponsorships, Talks and Collaborations"
+summary: "Sponsorships, talks, events and hardware collaborations."
+description: "Sponsorships, talks and collaborations with Dorian Todd, who builds open source robots and documents each build on YouTube and in detailed write-ups on this site."
+cover: "../../projects/fridge-tank/fashion-portrait.jpg"
+keywords: ["robotics sponsorship", "maker YouTube sponsorship", "robotics talk", "STEM speaker", "open source hardware", "product integration", "maker events"]
 faq:
-  - q: "What kind of sponsorships does Dorian Todd do?"
-    a: "Integrated sponsorships where the product is genuinely used in a build: 3D printers, PCBs, sensors, motors and tools. The product appears in the video and in a sponsor section of the project article on doriantodd.com, with a link."
-  - q: "Which companies has Dorian Todd worked with?"
-    a: "Bambu Lab, ELEGOO, PCBWay, Manifold Tech and Petoi have provided products or services used in his builds, and his projects have been shown at Open Sauce, Maker Faire Bay Area, BattleBots Metal Mayhem at SXSW, NRL Nationals and SF Tech Week."
-  - q: "How do I contact Dorian Todd about a partnership?"
-    a: "Email contact@doriantodd.com, or use the message form on the contact page. Include the product, the timeline and what you have in mind."
+  - q: "What kind of sponsorships do you do?"
+    a: "Integrated sponsorships where the product is genuinely used in a build: 3D printers, PCBs, sensors, motors and tools. The product appears in the video and in a sponsor section of the project write-up on doriantodd.com, with a link."
+  - q: "Do you give talks?"
+    a: "Yes. I have given a talk at LSU and I am open to talks, presentations and workshops about building robots, open source hardware and documenting engineering projects."
+  - q: "How do I get in touch?"
+    a: "Email contact@doriantodd.com, or use the message form on the contact page. Include what you have in mind and your timeline."
 ---
 
-I'm Dorian Todd. I design open source robots, build them on camera, and publish everything: CAD, firmware, code and a write-up on this site. If your product helps people build things, I would like to hear from you.
+I build robots, open source the designs, and document each build on [YouTube](https://www.youtube.com/@DorianToddYT) and in a write-up on this site. If your product helps people build things, or you are looking for a speaker or a robot for your event, I would be glad to hear from you.
 
-## The numbers
+## What we could do together
 
-| | |
-|---|---|
-| YouTube | [@DorianToddYT](https://www.youtube.com/@DorianToddYT): 25.3K subscribers, 46 videos |
-| Top video | [How I Made This Tiny Walking Robot From Scratch](https://www.youtube.com/watch?v=1UDsWkcQZhc): 1.1M views |
-| Other hits | [50,000 people came to my science fair](https://www.youtube.com/watch?v=5Y21THNFZWg): 320K views. [I Taught my Spider Robot to Chase People](https://www.youtube.com/watch?v=2j9Mnt1yF1U): 125K views |
-| Open source | [Sesame](/sesame) on [GitHub](https://github.com/dorianborian/sesame-robot): about 4,800 stars and 650 forks |
-| Events | Open Sauce 2024 and 2025, Maker Faire Bay Area 2024, BattleBots Metal Mayhem at SXSW 2024, NRL Nationals 2025, SF Tech Week 2026 |
+- **Sponsorships.** Your product is used in a build for real, shown in the video, and credited in a sponsor section of the project write-up. Examples: [ELEGOO on PenBot Mini](/projects/penbot-mini), [PCBWay on Sesame](/sesame), [Manifold Tech on the Fridge Tank](/projects/fridge-tank) and [Bambu Lab on Live Robot Soccer](/projects/auto-producer).
+- **Talks and presentations.** Building robots from idea to working hardware, open source hardware, and making engineering approachable. I have spoken at LSU and am happy to do talks, panels and workshops.
+- **Events.** Interactive robot booths with [Full Contact Engineering](/FCE), and appearances at conferences and showcases.
+- **Hardware collaborations.** Robots, kits and boards built around your parts, open sourced so other people can build them too.
 
-Numbers as of October 2026.
+## Where I have been
 
-https://www.youtube.com/watch?v=1UDsWkcQZhc
+- Open Sauce 2024 and 2025
+- Maker Faire Bay Area 2024
+- BattleBots Metal Mayhem at SXSW 2024 and NRL Nationals 2025, with the [Executioner](/executioner)
+- ISTE 2026 with Bambu Lab
+- SF Tech Week 2026, where the [Fridge Tank](/projects/fridge-tank) took the audience award at the DaiDai Labs robot contest
+- A talk at LSU
 
-## Who watches
+## Partners
 
-My videos follow a build from idea to working robot, including the parts that go wrong. They are made for makers, engineering students, hobbyists and working hardware engineers: people who own 3D printers, order PCBs, and buy the parts they see used in a build. Sesame has grown a community of builders who contribute simulators, machine learning tools and new hardware of their own.
+Bambu Lab, ELEGOO, PCBWay, Manifold Tech and Petoi have provided products or services used in my builds.
 
-## What a partnership looks like
+## Channel
 
-- **Integrated sponsorships.** Your product is used in the build for real, shown in the video, and credited in a sponsor section of the project article on this site. A few examples: [ELEGOO on PenBot Mini](/projects/penbot-mini), [PCBWay on Sesame](/sesame), [Manifold Tech on the Fridge Tank](/projects/fridge-tank) and [Bambu Lab on Live Robot Soccer](/projects/auto-producer).
-- **Hardware collaborations.** Robots, kits and boards built around your parts, open sourced so other people build them too.
-- **Events.** Interactive robot booths with [Full Contact Engineering](/FCE) at maker events, and showcases like the SF Tech Week robot contest, where the [Fridge Tank](/projects/fridge-tank) won the audience award.
-
-## Past partners
-
-Bambu Lab, ELEGOO, PCBWay, Manifold Tech and Petoi have all provided products or services that ended up inside a build.
+[@DorianToddYT](https://www.youtube.com/@DorianToddYT) has about 25K subscribers as of October 2026. The videos follow a build from idea to working robot, including the parts that go wrong, and are made for makers, engineering students, hobbyists and hardware engineers.
 
 ## Get in touch
 
-Email [contact@doriantodd.com](mailto:contact@doriantodd.com) or send a message from the [contact page](/contact). Tell me about the product, the timeline and what you have in mind.
+Email [contact@doriantodd.com](mailto:contact@doriantodd.com) or send a message from the [contact page](/contact).
