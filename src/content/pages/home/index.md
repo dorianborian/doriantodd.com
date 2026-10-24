@@ -1,7 +1,7 @@
 ---
 title: "Dorian Todd"
 tagline: "Open Source Hardware R&D"
-summary: "Open source robots, build guides and videos. Creator of Sesame, the open source ESP32 walking robot."
+summary: "Open source robots, build guides and videos."
 cover: "./portrait.png"
 path: "/"
 migratedFrom: "https://www.doriantodd.com/"
@@ -12,7 +12,7 @@ keywords: ["open source robots", "robotics projects", "DIY robots", "robotics Yo
 
 <!-- Shown in the Properties panel on the home page when nothing is selected. Keep it short. -->
 
-This is where I document my projects: how each robot works, what went wrong along the way, and the CAD and code to build your own. Builds are also on [YouTube](https://www.youtube.com/@DorianToddYT). New to robotics? [Sesame](/sesame) was designed as a first robot, and there is a short guide on [getting started](/start-robotics).
+This is where I document my projects: how each robot works, what went wrong along the way, and the CAD and code to build your own. Builds are also on [YouTube](https://www.youtube.com/@DorianToddYT).
 
 ## Newest video
 

@@ -37,7 +37,7 @@ A good starting point is Sesame, an open source, 3D printed quadruped (four legg
 
 ## Start here
 
-${line('Start robotics: a first robot you can actually finish', '/start-robotics', page('/start-robotics')?.data.description)}
+${line('Getting started with robotics', '/start-robotics', page('/start-robotics')?.data.description)}
 ${sesame ? line('Sesame robot project', sesame.url, desc(sesame)) : ''}
 ${line('Sesame robot kits', '/sesame/kit', 'Pre-flashed Sesame Distro Board kits, sold in production rounds through Full Contact Engineering.')}
 

@@ -29,6 +29,8 @@ const { title, seoTitle, description = `${SITE.name}: ${SITE.tagline}.`, ogKey =
 const base = seoTitle ?? title;
 // page titles stand on their own; the site name is carried by og:site_name and the home page
 const pageTitle = base ?? `${SITE.name} | ${SITE.tagline}`;
+// browser tabs get the short page title; search results and link previews get the descriptive one
+const tabTitle = title ?? SITE.name;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL(`/og/${ogKey}.jpg`, Astro.site).href;
 const GA_ID = 'G-9R1Y855NBE';
@@ -49,7 +51,7 @@ const searchIndex = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>{pageTitle}</title>
+    <title>{tabTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />

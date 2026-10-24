@@ -1,5 +1,5 @@
 ---
-title: "Start Robotics: A First Robot You Can Actually Finish"
+title: "Getting Started with Robotics"
 path: "/start-robotics"
 seoTitle: "Best First Robotics Project for Beginners: Build a Walking Robot"
 summary: "A practical guide to starting robotics: what makes a good first project, why a small open source walking robot like Sesame is a great one, what it costs, what you need, and what to build next."

@@ -55,7 +55,7 @@ const assets = {
   photos,
 };
 const logoImg = await getImage({ src: logo, width: 1600, format: 'png' });
-const portrait = home.data.cover ? await getImage({ src: home.data.cover, width: 560, format: 'webp' }) : null;
+const starter = items.find((p) => p.slug === 'sesame');
 ---
 <Shell
   seoTitle={home.data.seoTitle}
@@ -119,11 +119,21 @@ const portrait = home.data.cover ? await getImage({ src: home.data.cover, width:
   <Fragment slot="right">
     <div class="props" id="props-default">
       <div>
-        {portrait && <div class="prop-thumb" style="aspect-ratio:4/3;margin-bottom:12px"><img src={portrait.src} alt="Dorian Todd" width="560" height="420" /></div>}
-        <h1 class="prop-title">{home.data.title}</h1>
-        <p class="prop-sub">{home.data.tagline}. {home.data.summary}</p>
+        <h1 class="prop-title home-title">Welcome to doriantodd.com!</h1>
+        <p class="prop-sub">{home.data.summary}</p>
       </div>
       <div class="btn-row"><a class="btn btn-primary" href="/projects"><Icon name="bom" />All projects</a><a class="btn" href="/contact">Contact</a></div>
+      {starter && (
+        <a class="starter" href="/start-robotics">
+          {starter.thumb && <img src={starter.thumb} alt="Sesame, a small orange 3D printed walking robot" width="96" height="72" loading="lazy" />}
+          <span>
+            <small>New to robotics?</small>
+            <strong>Build your first robot</strong>
+            <em>Sesame is a walking robot designed as a first build. Start with the guide.</em>
+          </span>
+          <Icon name="arrowRight" size={14} />
+        </a>
+      )}
       <div class="prose" style="font-size:13.5px"><Content /></div>
     </div>
 
