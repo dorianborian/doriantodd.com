@@ -22,9 +22,9 @@ Most drawing robots lean on the same playbook: Cartesian rigs borrowed straight 
 
 ## PenBot history
 
-PenBot didn't start as a clean, finished machine. It took four or five major revisions to get anywhere close to working right. The inspiration came from a couple of places: the commercial Line-us robot, and a bit of family history. My dad helped invent the WaterColorBot, which was famously demoed to former President Barack Obama. PenBot picked up that torch with a two-link planar mechanism and coaxial motors, trading Cartesian precision for a much weirder linkage-based approach.
+PenBot didn't start as a clean, finished machine. It took four or five major revisions to get anywhere close to working right. The inspiration came from a couple of places: the commercial Line-us robot, and a bit of family history. My dad made major contributions to drawing plotter tech through [TN42](https://tn42.com). PenBot picked up that torch with a two-link planar mechanism and coaxial motors, trading Cartesian precision for a much weirder linkage-based approach.
 
-By Open Sauce 2025, PenBot MK4.5 had drawn over 50 vector portraits of attendees. Under the hood it was running a Raspberry Pi 5 with an OpenCV pipeline: grab a face from the webcam, extract the features, convert it all into vector paths the robot could actually draw. It worked, but it wasn't graceful about it. In a high-traffic booth environment, both the Pi and the motors ran hot, and the thing straight-up crashed in front of fellow creator Code Mo. That was the moment it became obvious that big linkage robots can hide a lot of mechanical sloppiness behind software, but they're heavy and a pain to haul around.
+By Open Sauce 2025, PenBot MK4.5 had drawn over 50 vector portraits of attendees. Under the hood it was running a Raspberry Pi 5 with an OpenCV pipeline: grab a face from the webcam, extract the features, convert it all into vector paths the robot could actually draw. It worked, but it wasn't graceful about it. In a high-traffic booth environment, both the Pi and the motors ran hot, and the thing straight-up crashed in front of twitch streamer Code Miko. That was the moment it became obvious that big linkage robots can hide a lot of mechanical sloppiness behind software, but they're heavy and a pain to haul around.
 
 ![](./img-7467f754.png)
 
