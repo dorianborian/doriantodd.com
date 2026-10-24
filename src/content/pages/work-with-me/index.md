@@ -37,9 +37,16 @@ I build robots, open source the designs, and document each build on [YouTube](ht
 
 Bambu Lab, ELEGOO, PCBWay, Manifold Tech and Petoi have provided products or services used in my builds.
 
-## Channel
+## Reach
 
-[@DorianToddYT](https://www.youtube.com/@DorianToddYT) has about 25K subscribers as of October 2026. The videos follow a build from idea to working robot, including the parts that go wrong, and are made for makers, engineering students, hobbyists and hardware engineers.
+| | |
+|---|---|
+| doriantodd.com | 42K+ visitors and 350K+ interactions in 2026 so far |
+| YouTube | [@DorianToddYT](https://www.youtube.com/@DorianToddYT): about 25K subscribers |
+| Most watched build | [How I Made This Tiny Walking Robot From Scratch](https://www.youtube.com/watch?v=1UDsWkcQZhc): 1.1M views |
+| Open source | [Sesame on GitHub](https://github.com/dorianborian/sesame-robot): about 4,800 stars and 650 forks |
+
+Numbers as of October 2026. The videos follow a build from idea to working robot, including the parts that go wrong, and are made for makers, engineering students, hobbyists and hardware engineers.
 
 ## Get in touch
 
