@@ -12,6 +12,9 @@ repoNote: "Streaming app and display software"
 order: 0
 year: 2023
 tags: ["LED","Raspberry Pi","Open source"]
+seoTitle: "LED Digital Mosaic: A 15x15 Pixel Art Display"
+description: "A digital mosaic: a 15x15 LED display behind frosted acrylic shards that shows images and video like a living mosaic. Open source build."
+keywords: ["LED mosaic", "pixel art display", "LED project", "Raspberry Pi LED", "DIY LED display"]
 ---
 
 ## What is a digital mosaic?

@@ -4,7 +4,7 @@ modelUp: z
 effect: soccer
 model: "./model.glb"
 title: "Live Robot Soccer!"
-summary: "During my efforts to teach small quadruped robots to play soccer, I embarked on a side project to develop a live media production system. By integrating mini pan-tilt camera robots with an overhead tracking array, I created Autoproducer—a virtual director capable of autonomously broadcasting matches in real-time."
+summary: "During my efforts to teach small quadruped robots to play soccer, I embarked on a side project to develop a live media production system. By integrating mini pan-tilt camera robots with an overhead tracking array, I created Autoproducer, a virtual director capable of autonomously broadcasting matches in real-time."
 cover: "./img-c7d82e45.png"
 migratedFrom: "https://www.doriantodd.com/projects/auto-producer"
 repo: "dorianborian/auto-producer"
@@ -12,6 +12,9 @@ repoNote: "Python production engine, CamBot firmware and scoreboard overlay"
 order: 10
 year: 2026
 tags: ["Python","Computer vision","ESP32","Autonomy"]
+seoTitle: "Live Robot Soccer: Tiny Walking Robots and Auto-Directed Cameras"
+description: "Tiny Sesame robots playing soccer, broadcast live by Autoproducer: pan-tilt camera robots and an overhead tracking array that direct the match on their own in real time."
+keywords: ["robot soccer", "robot camera system", "automated camera director", "computer vision", "ArUco tracking", "pan tilt camera robot"]
 ---
 
 ![](./img-81ea4579.png)

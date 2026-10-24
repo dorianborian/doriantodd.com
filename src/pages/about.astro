@@ -5,6 +5,7 @@ import Shell from '../layouts/Shell.astro';
 import Icon from '../components/Icon.astro';
 import SketchTools from '../components/SketchTools.astro';
 import { SITE } from '../lib/site';
+import { lastModified, pageGraph } from '../lib/seo';
 import '../styles/sketch.css';
 
 const page = (await getEntry('pages', 'about'))!;
@@ -27,7 +28,18 @@ const links = [
 ].map((l, i, all) => ({ ...l, cx: W / 2 + (i - (all.length - 1) / 2) * pill.pitch }));
 const ext = (url: string) => (url.startsWith('http') ? { target: '_blank', rel: 'me noopener' } : {});
 ---
-<Shell title="About" description={`About ${SITE.name}: ${page.data.summary}`} leftTitle="Sketch 1" rightTitle="Properties">
+<Shell
+  title="About"
+  seoTitle={page.data.seoTitle}
+  description={page.data.description ?? `About ${SITE.name}: ${page.data.summary}`}
+  keywords={page.data.keywords}
+  ogKey="about"
+  ogType="profile"
+  ogAlt={`Portrait of ${SITE.name}`}
+  jsonld={pageGraph({ url: '/about/', title: page.data.seoTitle ?? 'About', description: page.data.description ?? '', image: '/og/about.jpg', portrait: '/dorian-todd.jpg', modified: lastModified(page.filePath), profile: true })}
+  leftTitle="Sketch 1"
+  rightTitle="Properties"
+>
   <Fragment slot="toolbar">
     <SketchTools />
   </Fragment>

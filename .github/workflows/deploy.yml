@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history: sitemap and structured data use each page's last commit date
 
       - uses: actions/setup-node@v4
         with:
@@ -55,3 +57,14 @@ jobs:
       url: https://www.doriantodd.com
     steps:
       - uses: actions/deploy-pages@v4
+
+      # IndexNow: tells Bing (which powers ChatGPT search and Copilot), Yandex, Seznam and Naver what changed.
+      - name: Notify search engines
+        continue-on-error: true
+        env:
+          KEY: af658f9067c0de69b7aa73f808e53657
+        run: |
+          sleep 30
+          urls=$(curl -s https://www.doriantodd.com/sitemap-0.xml | grep -o '<loc>[^<]*' | sed 's/<loc>//' | jq -R . | jq -s -c .)
+          body=$(jq -n -c --arg key "$KEY" --argjson urls "$urls" '{host: "www.doriantodd.com", key: $key, keyLocation: ("https://www.doriantodd.com/" + $key + ".txt"), urlList: $urls}')
+          curl -s -o /dev/null -w 'IndexNow %{http_code}\n' -X POST https://api.indexnow.org/indexnow -H 'Content-Type: application/json; charset=utf-8' -d "$body"

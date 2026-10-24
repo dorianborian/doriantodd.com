@@ -11,6 +11,9 @@ repoNote: "ROS 2 packages, ESP32 drive firmware and the web control UI"
 order: 9
 year: 2026
 tags: ["ROS 2","Jetson","ESP32","Computer vision","Autonomy","Events"]
+seoTitle: "Autonomous Fridge Tank: A Self-Driving Mini Fridge Robot"
+description: "A mini fridge on tank treads that follows you or runs away on its own: ROS 2 Jazzy, a Jetson Orin Nano, YOLO person tracking, Nav2 and an ESP32 drive. SF Tech Week audience award winner."
+keywords: ["autonomous robot", "self-driving robot", "person following robot", "ROS 2 project", "Jetson Orin Nano project", "YOLO robot", "Nav2", "mini fridge robot", "tank tread robot"]
 ---
 
 ![](./img-8d478ece.png)

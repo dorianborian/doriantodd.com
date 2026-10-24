@@ -10,6 +10,9 @@ order: 11
 year: 2026
 tags: ["Sesame","Simulation","Neuroscience","Python","Machine learning","Quadruped"]
 links: [{ "label": "MaleCNS connectome", "url": "https://www.janelia.org/project-team/flyem/male-cns-connectome" }, { "label": "Shiu et al. 2024", "url": "https://www.nature.com/articles/s41586-024-07763-9" }, { "label": "Sesame", "url": "/sesame" }]
+seoTitle: "Fly Brain Bridge: A Whole Fruit Fly Brain Controlling a Robot"
+description: "A complete simulated fruit fly nervous system (166,700 neurons, 25.6 million connections from the MaleCNS connectome) wired to a Sesame robot. The fly decides how the robot walks."
+keywords: ["connectome", "fruit fly brain simulation", "Drosophila", "spiking neural network", "embodied AI", "neurorobotics", "MaleCNS", "leaky integrate and fire"]
 ---
 
 ![The brain view running the Demo: looming shadow, Giant Fiber, escape](./individual-brain.mp4)

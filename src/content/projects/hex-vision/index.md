@@ -11,6 +11,9 @@ repoNote: "YOLOv8 vision and control scripts"
 order: 7
 year: 2026
 tags: ["Hexapod","Computer vision","Python","Autonomy"]
+seoTitle: "HEX-VISION: Real-Time YOLO Tracking for a Hexapod Robot"
+description: "Real-time object segmentation and tracking with YOLOv8 and a control-focused UI, built as the automation pipeline that lets the red.HEX hexapod chase targets."
+keywords: ["YOLOv8 robot", "object tracking robot", "computer vision project", "robot vision", "hexapod automation"]
 ---
 
 ![](./img-2d9af7f1.png)

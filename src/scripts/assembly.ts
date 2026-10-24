@@ -6,6 +6,7 @@
 
 import * as THREE from './three-lite';
 import type { Effect, EffectContext, Interactive } from './effects/types';
+import { track } from './track';
 import { CellTint } from './desaturate';
 import { CellReveal, lodStep } from './reveal';
 import { createLodLoader, detailCap, FrameProbe, idle, sleep, type LodAsset } from './progressive';
@@ -975,6 +976,7 @@ export function mountAssembly(root: HTMLElement, data: Data) {
   function select(i: number, focus = false) {
     const fam = i >= 0 ? parts[i].fam : null;
     const changed = setExpanded(fam);
+    if (i >= 0 && i !== selected) track('select_project', { project: data.parts[i].slug, split: !!fam });
     selected = i;
     paint();
     showProps(i);

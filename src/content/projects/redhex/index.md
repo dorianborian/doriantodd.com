@@ -8,6 +8,9 @@ order: 5
 year: 2025
 tags: ["Hexapod","Servos","3D printing"]
 modelScale: 0.62
+seoTitle: "red.HEX: An 18-Servo 3D Printed Hexapod Robot"
+description: "red.HEX is a medium-scale, 18-servo walking hexapod robot with a redesigned head unit and custom electronics, built on the open source Chica hexapod design."
+keywords: ["hexapod robot", "six legged robot", "spider robot", "3D printed hexapod", "servo robot", "walking robot"]
 ---
 
 ## Overview

@@ -4,6 +4,7 @@ import Shell from '../layouts/Shell.astro';
 import Icon from '../components/Icon.astro';
 import SketchTools from '../components/SketchTools.astro';
 import { SITE } from '../lib/site';
+import { lastModified, pageGraph } from '../lib/seo';
 import '../styles/sketch.css';
 
 const page = await getEntry('pages', 'contact');
@@ -27,7 +28,15 @@ const icons: Record<string, string> = {
   x: '<path d="M-14 -14 L14 14 M14 -14 L-14 14"/>',
 };
 ---
-<Shell title="Contact" description={`Contact ${SITE.name}: ${SITE.email}`} leftTitle="Sketch 1" rightTitle="Message">
+<Shell
+  title="Contact"
+  description={page?.data.description ?? `Contact ${SITE.name}: ${SITE.email}`}
+  keywords={page?.data.keywords}
+  ogKey="contact"
+  jsonld={pageGraph({ url: '/contact/', title: 'Contact', description: page?.data.description ?? '', image: '/og/contact.jpg', portrait: '/dorian-todd.jpg', modified: lastModified(page?.filePath) })}
+  leftTitle="Sketch 1"
+  rightTitle="Message"
+>
   <Fragment slot="toolbar">
     <SketchTools />
   </Fragment>

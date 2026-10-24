@@ -2,6 +2,7 @@
 import { getEntry, render } from 'astro:content';
 import { getImage } from 'astro:assets';
 import Shell from '../layouts/Shell.astro';
+import { lastModified, pageGraph } from '../lib/seo';
 import Icon from '../components/Icon.astro';
 import { SITE, getProjects, slugOf } from '../lib/site';
 import logo from '../assets/logo-sketch.png';
@@ -56,7 +57,13 @@ const assets = {
 const logoImg = await getImage({ src: logo, width: 1600, format: 'png' });
 const portrait = home.data.cover ? await getImage({ src: home.data.cover, width: 560, format: 'webp' }) : null;
 ---
-<Shell description={`${SITE.name}: ${SITE.tagline}. ${home.data.summary}`} leftTitle="Projects">
+<Shell
+  seoTitle={home.data.seoTitle}
+  description={home.data.description ?? `${SITE.name}: ${SITE.tagline}. ${home.data.summary}`}
+  keywords={home.data.keywords}
+  jsonld={pageGraph({ url: '/', title: home.data.seoTitle ?? SITE.name, description: home.data.description ?? '', image: '/og/home.jpg', portrait: '/dorian-todd.jpg', modified: lastModified(home.filePath), body: home.body, itemList: items.filter((p) => !p.parent).map((p) => ({ name: p.title, url: p.url })) })}
+  leftTitle="Projects"
+>
   <Fragment slot="toolbar">
     <span class="tool-group-label hide-mobile">View</span>
     <button class="tool" data-view="iso" title="Isometric (0)"><Icon name="iso" /><span class="hide-mobile">Iso</span></button>

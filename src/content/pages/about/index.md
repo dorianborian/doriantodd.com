@@ -4,6 +4,9 @@ path: "/about"
 cover: "./portrait.png"
 summary: "Open source robotics researcher and developer."
 migratedFrom: "https://www.doriantodd.com/about"
+seoTitle: "About Dorian Todd"
+description: "Dorian Todd is an open source robotics developer and YouTuber, creator of the Sesame robot and other open source robots, build guides and videos."
+keywords: ["Dorian Todd", "robotics YouTuber", "open source robotics"]
 ---
 
 Hello, I'm Dorian, an open source robotics researcher and developer with a passion for building systems that push the boundaries of what's possible. I actively develop and contribute to robotics projects on a global scale, collaborating with engineers and makers worldwide to advance open, accessible technology. My work spans mechanical design, systems integration, and hands-on hardware development, driven by a belief that open source innovation accelerates progress for everyone.

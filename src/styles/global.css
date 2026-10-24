@@ -681,3 +681,12 @@ cad-viewer { display: block; position: relative; aspect-ratio: 4 / 3; min-height
   .fb-behavior { margin: 0; font-size: 11px; }
   .fb-hz { display: none; }
 }
+
+/* ------------------------------------------------------------------ FAQ (also published as FAQPage structured data) */
+.prose .faq { margin-top: 2.6em; clear: both; }
+.prose .faq details { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); margin: 0 0 8px; }
+.prose .faq summary { cursor: pointer; padding: 11px 14px; font-weight: 600; color: var(--text); list-style: none; display: flex; gap: 10px; align-items: baseline; }
+.prose .faq summary::-webkit-details-marker { display: none; }
+.prose .faq summary::before { content: '+'; font: 600 14px var(--mono); color: var(--accent); width: 12px; flex: none; }
+.prose .faq details[open] summary::before { content: '-'; }
+.prose .faq details p { margin: 0; padding: 0 14px 13px 36px; color: var(--text-2); }

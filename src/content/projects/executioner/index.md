@@ -10,6 +10,9 @@ migratedFrom: "https://www.doriantodd.com/executioner"
 order: 3
 year: 2024
 tags: ["Combat robotics","Fusion 360","Events"]
+seoTitle: "Executioner: A 15 lb Combat Robot for BattleBots Metal Mayhem"
+description: "The Executioner is a 15 pound combat robot with a vertical beater bar, built for BattleBots Metal Mayhem at SXSW 2024 and remastered for NRL Nationals 2025."
+keywords: ["combat robot", "15 lb combat robot", "BattleBots", "NRL", "vertical spinner", "robot fighting"]
 ---
 
 ## Quick overview

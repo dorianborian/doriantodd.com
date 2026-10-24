@@ -13,6 +13,26 @@ migratedFrom: "https://www.doriantodd.com/sesame"
 order: 6
 year: 2026
 tags: ["ESP32","Quadruped","Servos","3D printing","Fusion 360","Open source"]
+seoTitle: "Sesame: Open Source ESP32 Quadruped Robot You Can Build"
+description: "Sesame is a free, open source, 3D printed walking robot: ESP32, eight servos, an animated OLED face and a Wi-Fi app, for about $50 to $60 in parts. A great first robotics project."
+keywords: ["beginner robotics project", "first robotics project", "DIY robot", "robot dog", "open source quadruped robot", "ESP32 robot", "3D printed robot", "walking robot", "robot kit", "Arduino robot", "STEM project", "servo robot"]
+faq:
+  - q: "Is Sesame a good first robotics project?"
+    a: "Yes, it was designed to be one. It costs about $50 to $60 in parts, the frame prints in PLA with minimal supports, the electronics need only basic soldering, and the firmware is flashed from the Arduino IDE. There is a step by step build video, a bill of materials, wiring guides and an active Discord community, and pre-flashed Sesame Distro Board kits remove most of the wiring."
+  - q: "How much does it cost to build Sesame?"
+    a: "About $50 to $60 in parts: eight MG90 servos, an ESP32 (a Lolin S2 Mini, or the Sesame Distro Board), a 128x64 OLED display and a 5 V 3 A power source, plus PLA filament for the frame."
+  - q: "What tools do I need to build Sesame?"
+    a: "A 3D printer (or a printing service), a soldering iron, small screwdrivers, and a computer with the Arduino IDE and the ESP32 boards package. No app or Bluetooth pairing is needed to control it."
+  - q: "How long does it take to build?"
+    a: "Printing the frame takes about an afternoon, and most people assemble, wire and flash it over a weekend. With a pre-flashed Distro Board kit the wiring takes about twenty minutes."
+  - q: "What can the Sesame robot do?"
+    a: "It walks, turns, waves, dances, points, does push-ups and the worm, and shows animated faces on its OLED. It is controlled from a phone through its own Wi-Fi control panel, and it has a JSON API so Python, JavaScript or home automation can drive it. Sesame Studio lets you design new animations visually."
+  - q: "What will I learn by building Sesame?"
+    a: "3D printing, servo control, ESP32 programming in the Arduino IDE, power and wiring for motors, walking gaits and simple kinematics, and controlling a robot over Wi-Fi with a web API."
+  - q: "Is Sesame open source?"
+    a: "Yes. Sesame is released under the Apache 2.0 license. The CAD, STL files, firmware, Sesame Studio, bill of materials and build guides are on GitHub at github.com/dorianborian/sesame-robot, which has nearly 5,000 stars and over 600 forks."
+  - q: "Can I buy a Sesame kit?"
+    a: "Pre-flashed build kits are sold through Full Contact Engineering when a production round is open. You can join the newsletter on the Sesame kit page to hear when orders open again."
 ---
 
 https://www.youtube.com/watch?v=1UDsWkcQZhc
@@ -21,7 +41,7 @@ https://www.youtube.com/watch?v=1UDsWkcQZhc
 
 Sesame is an open-source walking robot for makers and engineers of every skill level. It's small, it's expressive, and it's cheap enough that building one is a weekend project rather than a financial decision: about $50 to $60 in parts, a 3D printer, some basic soldering, and the Arduino IDE.
 
-It's also grown well past the robot I launched in February 2026. The repository has passed 4,000 stars and roughly 600 forks, there's a community on Discord, pre-flashed build kits, a physics simulator and machine-learning tooling contributed by other people, and a companion app that turns Sesame into a voice assistant with a face.
+It's also grown well past the robot I launched in February 2026. The repository has nearly 5,000 stars and about 650 forks, there's a community on Discord, pre-flashed build kits, a physics simulator and machine-learning tooling contributed by other people, and a companion app that turns Sesame into a voice assistant with a face.
 
 ![](./img-51e64dea.png)
 

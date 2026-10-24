@@ -10,6 +10,9 @@ links: [{ "label": "fullcontactengineering.com", "url": "https://www.fullcontact
 order: 1
 year: 2023
 tags: ["Events","Open source"]
+seoTitle: "Full Contact Engineering: Interactive Robots at Maker Faires"
+description: "Full Contact Engineering is a hands-on showcase of interactive robots at Open Sauce and Maker Faire Bay Area, and the maker of Sesame robot kits."
+keywords: ["Open Sauce", "Maker Faire", "maker booth", "robot kits"]
 ---
 
 ## What is Full Contact Engineering?

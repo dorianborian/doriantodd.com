@@ -3,6 +3,8 @@ title: "Contact"
 summary: "Business inquiries, collaborations, and events."
 path: "/contact"
 migratedFrom: "https://www.doriantodd.com/contact"
+description: "Contact Dorian Todd for sponsorships, collaborations, events and press: contact@doriantodd.com."
+keywords: ["contact", "sponsorship", "collaboration"]
 ---
 
 ### Business email

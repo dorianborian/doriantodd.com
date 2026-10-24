@@ -5,7 +5,8 @@ import { getCollection, render } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
 import Shell from '../layouts/Shell.astro';
 import Icon from '../components/Icon.astro';
-import { SITE, CUSTOM_ROUTES, getProjects, getUnlistedProjects, type Project, type Page } from '../lib/site';
+import { SITE, CUSTOM_ROUTES, getProjects, getUnlistedProjects, slugOf, type Project, type Page } from '../lib/site';
+import { lastModified, pageGraph, projectGraph } from '../lib/seo';
 
 export async function getStaticPaths() {
   const projects = await getProjects();
@@ -34,17 +35,40 @@ const { kind, entry, no, year, modelUrl, model, prev, next } = Astro.props;
 const { Content, headings } = await render(entry);
 const d = entry.data as Project['data'] & Page['data'];
 const isProject = kind === 'project';
-const outline = headings.filter((h) => h.depth <= 3);
-const og = d.cover ? await getImage({ src: d.cover, width: 1200, format: 'jpg' }) : null;
+const outline = [...headings.filter((h) => h.depth <= 3), ...((entry.data as { faq?: unknown[] }).faq?.length ? [{ depth: 2, slug: 'faq', text: 'Frequently asked questions' }] : [])];
 const words = entry.body?.split(/\s+/).length ?? 0;
 const readMin = Math.max(1, Math.round(words / 230));
 const allProjects = isProject ? await getProjects() : [];
 const icon = (depth: number) => (depth === 1 ? 'extrude' : depth === 2 ? 'sketch' : 'plane');
+
+// search, link previews and structured data
+const url = Astro.url.pathname;
+const ogKey = url.replace(/^\/|\/$/g, '') || 'home';
+const description = d.description ?? d.summary ?? `${d.title}, by ${SITE.name}.`;
+const keywords = [...d.tags ?? [], ...d.keywords];
+const modified = lastModified(entry.filePath);
+const portrait = '/dorian-todd.jpg';
+const coverImg = d.cover ? await getImage({ src: d.cover, width: 1600, format: 'jpg' }) : null;
+const parentEntry = isProject && d.parent ? allProjects.find((p) => slugOf(p.entry.id) === d.parent) : null;
+const jsonld = isProject
+  ? projectGraph({
+      url, title: d.title, headline: d.seoTitle ?? d.title, description, image: `/og/${ogKey}.jpg`,
+      images: [coverImg?.src, `/og/${ogKey}.jpg`].filter(Boolean) as string[], tags: d.tags ?? [], keywords: d.keywords,
+      year, modified, repo: d.repo, body: entry.body, faq: d.faq, links: d.links, portrait,
+      parent: parentEntry ? { name: parentEntry.entry.data.title, url: parentEntry.url } : null,
+    })
+  : pageGraph({ url, title: d.seoTitle ?? d.title, description, image: `/og/${ogKey}.jpg`, portrait, modified, faq: d.faq, body: entry.body });
 ---
 <Shell
   title={d.title}
-  description={d.summary ?? `${d.title}, by ${SITE.name}.`}
-  ogImage={og?.src}
+  seoTitle={d.seoTitle}
+  description={description}
+  ogKey={ogKey}
+  ogAlt={`${d.title}${isProject ? `, a project by ${SITE.name}` : ''}`}
+  ogType="article"
+  keywords={keywords}
+  jsonld={jsonld}
+  modified={modified}
   leftTitle="Contents"
 >
   <Fragment slot="toolbar">
@@ -108,6 +132,12 @@ const icon = (depth: number) => (depth === 1 ? 'extrude' : depth === 2 ? 'sketch
 
       <div class="prose">
         <Content />
+        {d.faq.length > 0 && (
+          <section class="faq" aria-labelledby="faq">
+            <h2 id="faq">Frequently asked questions</h2>
+            {d.faq.map((f) => <details><summary>{f.q}</summary><p>{f.a}</p></details>)}
+          </section>
+        )}
       </div>
 
       {(prev || next) && (

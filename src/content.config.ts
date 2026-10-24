@@ -46,6 +46,13 @@ const projects = defineCollection({
       parent: z.string().optional(),
       /** false keeps the page (at its path) but leaves it out of the project lists, numbering and home scene. */
       listed: z.boolean().default(true),
+      /** Search and link-preview fields (see src/lib/seo.ts). Title for search results, if different from `title`. */
+      seoTitle: z.string().optional(),
+      /** Meta description, about 150 characters. Falls back to `summary`. */
+      description: z.string().optional(),
+      keywords: z.array(z.string()).default([]),
+      /** Questions and answers shown at the end of the page and published as FAQ structured data. */
+      faq: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
       migratedFrom: z.string().optional(),
     }),
 });
@@ -60,6 +67,13 @@ const pages = defineCollection({
       tagline: z.string().optional(),
       cover: image().optional(),
       links: z.array(z.object({ label: z.string(), url: z.string() })).default([]),
+      /** Search and link-preview fields (see src/lib/seo.ts). Title for search results, if different from `title`. */
+      seoTitle: z.string().optional(),
+      /** Meta description, about 150 characters. Falls back to `summary`. */
+      description: z.string().optional(),
+      keywords: z.array(z.string()).default([]),
+      /** Questions and answers shown at the end of the page and published as FAQ structured data. */
+      faq: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
       migratedFrom: z.string().optional(),
     }),
 });

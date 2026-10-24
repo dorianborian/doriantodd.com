@@ -12,6 +12,9 @@ repoNote: "Face-to-vector pipeline and plotter control"
 order: 4
 year: 2025
 tags: ["Raspberry Pi","Computer vision","Python","Linkage","Events"]
+seoTitle: "PenBot: A Linkage Drawing Robot That Draws Portraits"
+description: "PenBot is a pen plotting robot with a same-axis dual motor linkage. It drew 50+ portraits at Open Sauce 2025 using a Python face-to-vector converter."
+keywords: ["drawing robot", "pen plotter", "linkage robot", "five bar linkage", "portrait robot", "Raspberry Pi robot"]
 ---
 
 PenBot is a linkage-based drawing robot (plotter) with coaxial motors that converts human faces into vector portraits. Loosely inspired by the [Line-us robot](https://www.line-us.com/) and early line-us clone projects, it evolved through multiple iterations to become a unique artistic machine.

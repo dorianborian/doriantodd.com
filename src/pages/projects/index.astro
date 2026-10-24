@@ -3,11 +3,20 @@ import { Image } from 'astro:assets';
 import Shell from '../../layouts/Shell.astro';
 import Icon from '../../components/Icon.astro';
 import { getProjects } from '../../lib/site';
+import { pageGraph } from '../../lib/seo';
 
 const projects = await getProjects();
 const tags = [...new Set(projects.flatMap((p) => p.entry.data.tags))].sort();
 ---
-<Shell title="Projects" description="Every project by Dorian Todd: robots, tools, and open source hardware." leftTitle="Filter">
+<Shell
+  title="Projects"
+  seoTitle="Robotics Projects: Open Source Robots, CAD and Code"
+  description="Every project by Dorian Todd: open source walking robots, a hexapod, drawing robots, a combat robot, a self-driving fridge and more, with CAD, code and build logs."
+  keywords={['robotics projects', 'open source robots', 'DIY robot projects', ...tags]}
+  ogKey="projects"
+  jsonld={pageGraph({ url: '/projects/', title: 'Robotics projects', description: 'Every project by Dorian Todd.', image: '/og/projects.jpg', portrait: '/dorian-todd.jpg', modified: new Date().toISOString(), itemList: projects.map((p) => ({ name: p.entry.data.title, url: p.url })) })}
+  leftTitle="Filter"
+>
   <Fragment slot="toolbar">
     <a class="tool" href="/"><Icon name="assembly" />3D view</a>
     <span class="tool-sep"></span>

@@ -1,4 +1,5 @@
 // App chrome behaviour shared by every page: panels, search palette, video facades, outline tracking.
+import { track } from './track';
 
 const shell = document.getElementById('shell')!;
 const store = {
@@ -91,7 +92,7 @@ palette.addEventListener('click', (e) => { if (e.target === palette) closePalett
 input.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowDown') { active = (active + 1) % Math.max(results.length, 1); render(); e.preventDefault(); }
   if (e.key === 'ArrowUp') { active = (active - 1 + results.length) % Math.max(results.length, 1); render(); e.preventDefault(); }
-  if (e.key === 'Enter' && results[active]) location.href = results[active].u;
+  if (e.key === 'Enter' && results[active]) { track('search', { search_term: input.value }); location.href = results[active].u; }
 });
 
 document.addEventListener('keydown', (e) => {
@@ -105,6 +106,7 @@ document.addEventListener('click', (e) => {
   const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.embed.yt button');
   if (!btn) return;
   const id = btn.parentElement!.dataset.yt;
+  track('play_video', { video_id: id, page: location.pathname });
   const iframe = document.createElement('iframe');
   iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
   iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen';
@@ -181,6 +183,7 @@ document.addEventListener('click', (e) => {
   if (!btn) return;
   const list = btn.closest('.playlist')!;
   const id = btn.dataset.play!;
+  track('play_video', { video_id: id, page: location.pathname, from: 'playlist' });
   list.querySelectorAll('.playlist-list button').forEach((b) => b.setAttribute('aria-current', String(b === btn)));
   const stage = list.querySelector('.playlist-stage')!;
   const iframe = document.createElement('iframe');
@@ -213,4 +216,14 @@ document.addEventListener('click', (e) => {
   box.addEventListener('click', close);
   document.addEventListener('keydown', onKey);
   document.body.append(box);
+});
+
+// ---------------------------------------------------------------- analytics: sponsor, repository and kit links
+document.addEventListener('click', (e) => {
+  const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a');
+  if (!a) return;
+  if (a.classList.contains('sponsor-cta')) track('sponsor_click', { sponsor: a.closest('.sponsor')?.getAttribute('aria-label')?.replace('Sponsored by ', '') ?? '', page: location.pathname });
+  else if (a.classList.contains('repo-card') || /github\.com\/dorianborian\//.test(a.href)) track('repo_click', { repo: a.href.replace('https://github.com/', ''), page: location.pathname });
+  else if (a.pathname === '/sesame/kit' || /fullcontactengineering\.com/.test(a.href)) track('kit_interest', { page: location.pathname });
+  else if (a.href.startsWith('mailto:')) track('email_click', { page: location.pathname });
 });

@@ -7,14 +7,32 @@ import gear from '../assets/gear.png';
 
 interface Props {
   title?: string;
+  /** Title for search results and link previews, if it should differ from the on-page title. */
+  seoTitle?: string;
   description?: string;
-  ogImage?: string;
+  /** Key of the generated preview card, /og/<key>.jpg (see src/pages/og). Defaults to the home card. */
+  ogKey?: string;
+  ogAlt?: string;
+  /** 'article' for projects and guides, 'profile' for the about page. */
+  ogType?: 'website' | 'article' | 'profile';
+  keywords?: string[];
+  /** schema.org JSON-LD for this page (see src/lib/seo.ts). */
+  jsonld?: object;
+  modified?: string;
+  /** Keep this page out of search results (the 404 page). */
+  noindex?: boolean;
   leftTitle?: string;
   rightTitle?: string;
 }
 
-const { title, description = `${SITE.name}: ${SITE.tagline}.`, ogImage, leftTitle = 'Features', rightTitle = 'Properties' } = Astro.props;
-const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} | ${SITE.tagline}`;
+const { title, seoTitle, description = `${SITE.name}: ${SITE.tagline}.`, ogKey = 'home', ogAlt, ogType = 'website', keywords = [], jsonld, modified, noindex = false, leftTitle = 'Features', rightTitle = 'Properties' } = Astro.props;
+const base = seoTitle ?? title;
+// the brand goes last, unless the title already leads with the name
+const pageTitle = !base ? `${SITE.name} | ${SITE.tagline}` : base.includes(SITE.name) ? base : `${base} | ${SITE.name}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL(`/og/${ogKey}.jpg`, Astro.site).href;
+const GA_ID = 'G-9R1Y855NBE';
+const xHandle = '@' + (SITE.social.find((s) => s.label === 'X')?.handle ?? '');
 const here = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isCurrent = (href: string) => (href === '/' ? here === '/' : here === href);
 
@@ -33,16 +51,57 @@ const searchIndex = [
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'} />
+    <meta name="author" content={SITE.name} />
+    {keywords.length > 0 && <meta name="keywords" content={keywords.join(', ')} />}
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#202125" />
-    <meta property="og:type" content="website" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="Site summary for language models" />
+    {SITE.social.map((s) => <link rel="me" href={s.url} />)}
+    <link rel="me" href="https://www.youtube.com/@DorianToddYT" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.site)} />}
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:secure_url" content={ogImage} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogAlt ?? pageTitle} />
+    {ogType === 'article' && <meta property="article:author" content={new URL('/about/', Astro.site).href} />}
+    {ogType === 'article' && modified && <meta property="article:modified_time" content={modified} />}
+    {ogType === 'article' && keywords.slice(0, 6).map((k) => <meta property="article:tag" content={k} />)}
+    {ogType === 'profile' && <meta property="profile:first_name" content="Dorian" />}
+    {ogType === 'profile' && <meta property="profile:last_name" content="Todd" />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={xHandle} />
+    <meta name="twitter:creator" content={xHandle} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogAlt ?? pageTitle} />
+    {jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
+    {import.meta.env.PROD && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
+        <script is:inline define:vars={{ GA_ID }}>
+          // Google Analytics 4 (the same property the old Google Sites site used). Only on the real domain.
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function () { dataLayer.push(arguments); };
+          if (/(^|\.)doriantodd\.com$/.test(location.hostname)) {
+            gtag('js', new Date());
+            gtag('config', GA_ID);
+          }
+        </script>
+      </>
+    )}
     <slot name="head" />
   </head>
   <body>

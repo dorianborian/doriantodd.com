@@ -13,6 +13,9 @@ repoNote: "Firmware and game software"
 order: 2
 year: 2024
 tags: ["ESP32","LED","3D printing","Events"]
+seoTitle: "Matrix Game Board: Tic-Tac-Toe on Nine LED Matrices"
+description: "An interactive tic-tac-toe board built from nine 8x8 LED matrix displays that are both the screen and the input, made for a design competition."
+keywords: ["LED matrix project", "tic tac toe game", "ESP32 project", "electronics project", "interactive game"]
 ---
 
 ## Overview

@@ -11,6 +11,9 @@ repoNote: "Firmware, desktop app and CAD"
 order: 8
 year: 2026
 tags: ["ESP32","Linkage","Servos","Python","3D printing","Open source"]
+seoTitle: "PenBot Mini: A Credit Card Sized Drawing Robot"
+description: "PenBot Mini is a credit card sized five-bar linkage drawing robot on an ESP32 that copies what you draw. Open source, 3D printed, and small enough for a pocket."
+keywords: ["drawing robot", "mini pen plotter", "five bar linkage", "ESP32 robot", "pocket robot", "3D printed robot"]
 ---
 
 ![](./img-bc35755a.png)

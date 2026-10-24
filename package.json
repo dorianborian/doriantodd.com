@@ -12,7 +12,8 @@
     "migrate": "node migration/migrate.mjs",
     "models": "node scripts/models.mjs",
     "lods": "node scripts/lods.mjs",
-    "loadperf": "node scripts/loadperf.mjs"
+    "loadperf": "node scripts/loadperf.mjs",
+    "youtube": "node scripts/youtube-meta.mjs --all"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",
@@ -25,6 +26,7 @@
     "@gltf-transform/core": "^4.5.0",
     "@gltf-transform/extensions": "^4.5.0",
     "@gltf-transform/functions": "^4.5.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@types/three": "^0.186.0",
     "cheerio": "^1.2.0",
     "ffmpeg-static": "^5.3.0",

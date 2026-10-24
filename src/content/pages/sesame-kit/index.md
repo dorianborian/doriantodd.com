@@ -2,6 +2,9 @@
 title: "Sesame Robot Kit"
 path: "/sesame/kit"
 migratedFrom: "https://www.doriantodd.com/sesame/kit"
+seoTitle: "Sesame Robot Kit: Pre-Flashed Parts to Build Sesame"
+description: "Sesame robot build kits with a pre-flashed Sesame Distro Board. Join the newsletter to hear when the next production round opens."
+keywords: ["Sesame robot kit", "robot kit", "ESP32 robot kit"]
 ---
 
 ## Round 2 Pre-orders are sold out! 

@@ -2,6 +2,7 @@
 // add lines, rectangles and circles with snapping and live dimensions. Their sketch is kept in
 // localStorage. The message dialog composes a mailto: link (the site has no server).
 
+import { track } from './track';
 const EMAIL = 'contact@doriantodd.com';
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -329,6 +330,7 @@ document.querySelectorAll<HTMLElement>('[data-entity]').forEach((node) => {
 // ---------------------------------------------------------------- copy email
 const copyLabel = document.querySelector<HTMLElement>('[data-copy-label]');
 async function copyEmail() {
+  track('copy_email', {});
   try {
     await navigator.clipboard.writeText(EMAIL);
     if (copyLabel) { copyLabel.textContent = 'Copied'; setTimeout(() => (copyLabel.textContent = 'Copy email address'), 1600); }
@@ -350,6 +352,7 @@ form?.addEventListener('submit', (e) => {
   const name = String(fd.get('name') || '').trim();
   const subject = String(fd.get('subject') || '').trim() || `${topic} inquiry from ${name}`;
   const body = `${String(fd.get('message') || '').trim()}\n\n- ${name}`;
+  track('contact_compose', { topic });
   location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(`[${topic}] ${subject}`)}&body=${encodeURIComponent(body)}`;
 });
 
