@@ -1,0 +1,2537 @@
+{
+ "design": {
+  "name": "Sesame-DRONE",
+  "upVector": [
+   0,
+   0,
+   1
+  ],
+  "units": {
+   "fusion_native": "centimeters",
+   "export_length": "meters",
+   "scale_to_meters": 0.01
+  }
+ },
+ "occurrences": [
+  {
+   "id": "root_base",
+   "name": "Root Component Base",
+   "grounded": true,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.013592829927802086,
+     -0.0010322399903088808,
+     -0.031656768172979355
+    ],
+    [
+     0.06606370955705643,
+     0.060155611485242844,
+     0.036423228681087494
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.1_Pea:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.00937699992209673,
+     0.006167999934405088,
+     0.02158300019800663
+    ],
+    [
+     0.0227230004966259,
+     0.036118000745773315,
+     0.03398299962282181
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.2_Pea:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.010411410592496395,
+     0.033018000423908234,
+     0.02433299645781517
+    ],
+    [
+     0.004973003175109625,
+     0.0368180014193058,
+     0.0397174097597599
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1_1",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.1_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.00937699992209673,
+     0.006167999934405088,
+     -0.02921699918806553
+    ],
+    [
+     0.0227230004966259,
+     0.036118000745773315,
+     -0.01681699976325035
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1_1",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.2_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.010411410592496395,
+     0.033018000423908234,
+     -0.03495141118764877
+    ],
+    [
+     0.004973003175109625,
+     0.0368180014193058,
+     -0.01956699602305889
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1_2",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.1_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.02872299961745739,
+     0.006167999934405088,
+     -0.02921699918806553
+    ],
+    [
+     0.060823000967502594,
+     0.036118000745773315,
+     -0.01681699976325035
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1_2",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.2_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.04647299647331238,
+     0.033018000423908234,
+     -0.03495141118764877
+    ],
+    [
+     0.06185740977525711,
+     0.0368180014193058,
+     -0.01956699602305889
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1_3",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.1_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.02872299961745739,
+     0.006167999934405088,
+     0.02158300019800663
+    ],
+    [
+     0.060823000967502594,
+     0.036118000745773315,
+     0.03398299962282181
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1_3",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.2_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.04647299647331238,
+     0.033018000423908234,
+     0.02433299645781517
+    ],
+    [
+     0.06185740977525711,
+     0.0368180014193058,
+     0.0397174097597599
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1_4",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.1_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.06546422094106674,
+     0.009027999825775623,
+     -0.06423443555831909
+    ],
+    [
+     0.10020513087511063,
+     0.021428000181913376,
+     -0.03210287168622017
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1_4",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.2_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.05570066720247269,
+     0.011777999810874462,
+     -0.06041651964187622
+    ],
+    [
+     0.0721755251288414,
+     0.018678000196814537,
+     -0.04563871771097183
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1_5",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.1_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.06546422094106674,
+     0.009027999825775623,
+     0.036869872361421585
+    ],
+    [
+     0.10020513087511063,
+     0.021428000181913376,
+     0.06900143623352051
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1_5",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.2_Pea:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.05570066720247269,
+     0.011777999810874462,
+     0.05040472000837326
+    ],
+    [
+     0.0721755251288414,
+     0.018678000196814537,
+     0.06518252193927765
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_1",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.1_Pea(Mirror) (1):1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.04898113012313843,
+     0.009216000325977802,
+     0.036647871136665344
+    ],
+    [
+     -0.014240219257771969,
+     0.021616000682115555,
+     0.06877943873405457
+    ]
+   ]
+  },
+  {
+   "id": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_2",
+   "name": "SG90 - Micro Servo 9g - Tower Pro.1_Pea(Mirror) (1):2",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.049104128032922745,
+     0.009216000325977802,
+     -0.06389043480157852
+    ],
+    [
+     -0.014363219030201435,
+     0.021616000682115555,
+     -0.0317588709294796
+    ]
+   ]
+  },
+  {
+   "id": "femur-joint-R1_1",
+   "name": "femur-joint-R1:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.023842299357056618,
+     0.008877759799361229,
+     -0.06288955360651016
+    ],
+    [
+     0.009703217074275017,
+     0.039357759058475494,
+     -0.016670331358909607
+    ]
+   ]
+  },
+  {
+   "id": "foot-joint-R3_1",
+   "name": "foot-joint-R3:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.06600949913263321,
+     0.0008107600151561201,
+     -0.0799587219953537
+    ],
+    [
+     -0.013516394421458244,
+     0.02907905913889408,
+     -0.027465611696243286
+    ]
+   ]
+  },
+  {
+   "id": "SPDT_Mini_Slide_Switch_2",
+   "name": "SPDT Mini Slide Switch:2",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.0576389878988266,
+     0.04103529080748558,
+     -0.007416999898850918
+    ],
+    [
+     0.06817874312400818,
+     0.05157504603266716,
+     0.012183000333607197
+    ]
+   ]
+  },
+  {
+   "id": "WYanHua-Motor_Micro_1104_Brushless_1-2S_4300KV_v1_1",
+   "name": "WYanHua-Motor Micro 1104 Brushless 1-2S 4300KV v1:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.05941399931907654,
+     0.02462569996714592,
+     -0.06807687878608704
+    ],
+    [
+     -0.04511446878314018,
+     0.04171900078654289,
+     -0.053777121007442474
+    ]
+   ]
+  },
+  {
+   "id": "40mm_1mm_prop_1",
+   "name": "40mm 1mm prop:1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.0857793390750885,
+     0.03641900047659874,
+     -0.08499792218208313
+    ],
+    [
+     -0.016499320045113564,
+     0.041418999433517456,
+     -0.022359570488333702
+    ]
+   ]
+  },
+  {
+   "id": "BETAFPV_F4_2-3S_20A_AIO_FC_V1.0_1",
+   "name": "BETAFPV F4 2-3S 20A AIO FC V1.0:1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.005125990137457848,
+     0.024167999625205994,
+     -0.01821701042354107
+    ],
+    [
+     0.053326018154621124,
+     0.030767999589443207,
+     0.022983010858297348
+    ]
+   ]
+  },
+  {
+   "id": "femur-joint-R1_Mirror_1",
+   "name": "femur-joint-R1(Mirror):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.023842299357056618,
+     0.008877759799361229,
+     0.021436331793665886
+    ],
+    [
+     0.009703217074275017,
+     0.039357759058475494,
+     0.06765555590391159
+    ]
+   ]
+  },
+  {
+   "id": "foot-joint-R3_Mirror_1",
+   "name": "foot-joint-R3(Mirror):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.06600949913263321,
+     0.0008107600151561201,
+     0.032231610268354416
+    ],
+    [
+     -0.013516394421458244,
+     0.02907905913889408,
+     0.08472471684217453
+    ]
+   ]
+  },
+  {
+   "id": "WYanHua-Motor_Micro_1104_Brushless_1-2S_4300KV_v1_v2_Mirror_1",
+   "name": "WYanHua-Motor Micro 1104 Brushless 1-2S 4300KV v1 v2(Mirror):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     -0.05941399931907654,
+     0.02462569996714592,
+     0.058543119579553604
+    ],
+    [
+     -0.04511446878314018,
+     0.04171900078654289,
+     0.07284288108348846
+    ]
+   ]
+  },
+  {
+   "id": "40mm_1mm_prop_Mirror_1",
+   "name": "40mm 1mm prop(Mirror):1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     -0.0857793390750885,
+     0.03641900047659874,
+     0.02712557092308998
+    ],
+    [
+     -0.016499320045113564,
+     0.041418999433517456,
+     0.08976391702890396
+    ]
+   ]
+  },
+  {
+   "id": "femur-joint-R1_Mirror_1_1",
+   "name": "femur-joint-R1(Mirror) (1):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.041658781468868256,
+     0.008877759799361229,
+     -0.06288955360651016
+    ],
+    [
+     0.07520429790019989,
+     0.039357759058475494,
+     -0.016670331358909607
+    ]
+   ]
+  },
+  {
+   "id": "foot-joint-R3_Mirror_1_1",
+   "name": "foot-joint-R3(Mirror) (1):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.06487839668989182,
+     0.0008107600151561201,
+     -0.0799587219953537
+    ],
+    [
+     0.11737149953842163,
+     0.02907905913889408,
+     -0.027465611696243286
+    ]
+   ]
+  },
+  {
+   "id": "WYanHua-Motor_Micro_1104_Brushless_1-2S_4300KV_v1_v2_Mirror_1_1",
+   "name": "WYanHua-Motor Micro 1104 Brushless 1-2S 4300KV v1 v2(Mirror) (1):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.09647546708583832,
+     0.02462569996714592,
+     -0.06807687878608704
+    ],
+    [
+     0.11077500134706497,
+     0.04171900078654289,
+     -0.053777121007442474
+    ]
+   ]
+  },
+  {
+   "id": "40mm_1mm_prop_Mirror_1_1",
+   "name": "40mm 1mm prop(Mirror) (1):1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     0.06786032021045685,
+     0.03641900047659874,
+     -0.08499792218208313
+    ],
+    [
+     0.13714033365249634,
+     0.041418999433517456,
+     -0.022359570488333702
+    ]
+   ]
+  },
+  {
+   "id": "femur-joint-R1_Mirror_Mirror_1",
+   "name": "femur-joint-R1(Mirror)(Mirror):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.041658781468868256,
+     0.008877759799361229,
+     0.021436331793665886
+    ],
+    [
+     0.07520429790019989,
+     0.039357759058475494,
+     0.06765555590391159
+    ]
+   ]
+  },
+  {
+   "id": "foot-joint-R3_Mirror_Mirror_1",
+   "name": "foot-joint-R3(Mirror)(Mirror):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.06487839668989182,
+     0.0008107600151561201,
+     0.032231610268354416
+    ],
+    [
+     0.11737149953842163,
+     0.02907905913889408,
+     0.08472471684217453
+    ]
+   ]
+  },
+  {
+   "id": "WYanHua-Motor_Micro_1104_Brushless_1-2S_4300KV_v1_v2_Mirror_Mirror_1",
+   "name": "WYanHua-Motor Micro 1104 Brushless 1-2S 4300KV v1 v2(Mirror)(Mirror):1",
+   "grounded": false,
+   "jointed": false,
+   "bbox": [
+    [
+     0.09647546708583832,
+     0.02462569996714592,
+     0.058543119579553604
+    ],
+    [
+     0.11077500134706497,
+     0.04171900078654289,
+     0.07284288108348846
+    ]
+   ]
+  },
+  {
+   "id": "40mm_1mm_prop_Mirror_Mirror_1",
+   "name": "40mm 1mm prop(Mirror)(Mirror):1",
+   "grounded": false,
+   "jointed": true,
+   "bbox": [
+    [
+     0.06786032021045685,
+     0.03641900047659874,
+     0.02712557092308998
+    ],
+    [
+     0.13714033365249634,
+     0.041418999433517456,
+     0.08976391702890396
+    ]
+   ]
+  }
+ ],
+ "joints": [
+  {
+   "id": "Rigid_2",
+   "name": "Rigid 2",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": null,
+   "origin": [
+    0,
+    0,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_3",
+   "name": "Rigid 3",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": null,
+   "origin": [
+    0,
+    0,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_4",
+   "name": "Rigid 4",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Internal-Frame_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "origin": [
+    -0.000553,
+    0.038786,
+    -0.046034
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_7",
+   "name": "Rigid 7",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Internal-Frame_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "origin": [
+    -0.000553,
+    0.038786,
+    0.055566
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_9",
+   "name": "Rigid 9",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "child": null,
+   "origin": [
+    0.034268,
+    0.073636,
+    -0.027164
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_10",
+   "name": "Rigid 10",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "child": null,
+   "origin": [
+    0.030898,
+    0.073636,
+    0.02856
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_11",
+   "name": "Rigid 11",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "origin": [
+    0.103691,
+    -0.047516,
+    0.120922
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_12",
+   "name": "Rigid 12",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": null,
+   "origin": [
+    0,
+    0,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_13",
+   "name": "Rigid 13",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "origin": [
+    0.103691,
+    -0.042749,
+    -0.116155
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_14",
+   "name": "Rigid 14",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "origin": [
+    0.124525,
+    -0.026061,
+    -0.108705
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_15",
+   "name": "Rigid 15",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": null,
+   "origin": [
+    0.124525,
+    -0.030828,
+    0.113471
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_16",
+   "name": "Rigid 16",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": null,
+   "origin": [
+    0,
+    0,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_17",
+   "name": "Rigid 17",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": null,
+   "origin": [
+    0,
+    0,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_20",
+   "name": "Rigid 20",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Internal-Frame_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "origin": [
+    -0.0139,
+    0.038786,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_21",
+   "name": "Rigid 21",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Internal-Frame_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "origin": [
+    0.0139,
+    0.038786,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_22",
+   "name": "Rigid 22",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "child": "femur-joint-R1_1",
+   "origin": [
+    0.034074,
+    0.037834,
+    0.009534
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_23",
+   "name": "Rigid 23",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "child": null,
+   "origin": [
+    0.022246,
+    0.073636,
+    0.046352
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_24",
+   "name": "Revolute 24",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_1",
+   "origin": [
+    -0.009568,
+    0.075179,
+    0.049782
+   ],
+   "axis": [
+    0.707107,
+    0,
+    0.707107
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": -1.570796
+   }
+  },
+  {
+   "id": "Revolute_25",
+   "name": "Revolute 25",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "femur-joint-R1_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_2",
+   "origin": [
+    -0.009654,
+    0.070361,
+    -0.044856
+   ],
+   "axis": [
+    -0.707107,
+    0,
+    0.707107
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": -1.570796
+   }
+  },
+  {
+   "id": "Rigid_26",
+   "name": "Rigid 26",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_2",
+   "child": "foot-joint-R3_1",
+   "origin": [
+    0.06181,
+    0.015603,
+    0.007152
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_27",
+   "name": "Rigid 27",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_1",
+   "child": null,
+   "origin": [
+    -0.008468,
+    0.061249,
+    0.048682
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_28",
+   "name": "Rigid 28",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": null,
+   "origin": [
+    0,
+    0,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_29",
+   "name": "Rigid 29",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "femur-joint-R1_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_6",
+   "origin": [
+    -0.02523,
+    0.015141,
+    -0.051924
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_30",
+   "name": "Rigid 30",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "femur-joint-R1_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_8",
+   "origin": [
+    -0.039027,
+    0.007059,
+    -0.054291
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_31",
+   "name": "Rigid 31",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_13",
+   "origin": [
+    0.113054,
+    0.015141,
+    -0.015546
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_32",
+   "name": "Rigid 32",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_14",
+   "origin": [
+    0.126852,
+    0.007059,
+    -0.017913
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_33",
+   "name": "Rigid 33",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_12",
+   "origin": [
+    0.084047,
+    -0.042778,
+    -0.003279
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_34",
+   "name": "Rigid 34",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_11",
+   "origin": [
+    0.097844,
+    -0.05086,
+    -0.005646
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_35",
+   "name": "Rigid 35",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_15",
+   "origin": [
+    0.030431,
+    0.065941,
+    0.00103
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_36",
+   "name": "Rigid 36",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_1",
+   "origin": [
+    0.016633,
+    0.074023,
+    0.003397
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_37",
+   "name": "Rigid 37",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_2",
+   "origin": [
+    0.057394,
+    0.065941,
+    -0.035348
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_38",
+   "name": "Rigid 38",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_5",
+   "origin": [
+    0.071191,
+    0.074023,
+    -0.032981
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_39",
+   "name": "Rigid 39",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_7",
+   "origin": [
+    0.011123,
+    0.081315,
+    0.097134
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_40",
+   "name": "Rigid 40",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_4",
+   "origin": [
+    0.008756,
+    0.073233,
+    0.083337
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_41",
+   "name": "Rigid 41",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_10",
+   "origin": [
+    0.021156,
+    0.008669,
+    0.104872
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_42",
+   "name": "Rigid 42",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_16",
+   "origin": [
+    0.018788,
+    0.000587,
+    0.118669
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_43",
+   "name": "Rigid 43",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "femur-joint-R1_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_3",
+   "origin": [
+    -0.054135,
+    0.021787,
+    -0.024814
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_44",
+   "name": "Rigid 44",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "femur-joint-R1_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_9",
+   "origin": [
+    -0.067933,
+    0.029869,
+    -0.027182
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_45",
+   "name": "Rigid 45",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_2",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_16",
+   "origin": [
+    -0.094239,
+    0.053565,
+    -0.028082
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_46",
+   "name": "Rigid 46",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_2",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_9",
+   "origin": [
+    -0.060681,
+    0.033908,
+    -0.022324
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_47",
+   "name": "Rigid 47",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_7",
+   "origin": [
+    0.123916,
+    -0.074024,
+    -0.006515
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_48",
+   "name": "Rigid 48",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_15",
+   "origin": [
+    0.090359,
+    -0.054366,
+    -0.000757
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_49",
+   "name": "Rigid 49",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_6",
+   "origin": [
+    0.031854,
+    0.10448,
+    0.103343
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_50",
+   "name": "Rigid 50",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_5",
+   "origin": [
+    0.026097,
+    0.084822,
+    0.069786
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_51",
+   "name": "Rigid 51",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_8",
+   "origin": [
+    -0.002455,
+    -0.022612,
+    0.124632
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_52",
+   "name": "Rigid 52",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_Mirror_1_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_1",
+   "origin": [
+    0.003303,
+    -0.002954,
+    0.091075
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_54",
+   "name": "Rigid 54",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_13",
+   "origin": [
+    -0.014453,
+    0.050715,
+    0.003315
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_55",
+   "name": "Rigid 55",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_14",
+   "origin": [
+    0.061747,
+    0.050715,
+    0.003315
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_56",
+   "name": "Rigid 56",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_12",
+   "origin": [
+    0.117347,
+    0.050715,
+    0.003315
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_57",
+   "name": "Rigid 57",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_11",
+   "origin": [
+    0.117347,
+    -0.000085,
+    -0.047485
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_58",
+   "name": "Rigid 58",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_4",
+   "origin": [
+    0.061747,
+    -0.000085,
+    -0.047485
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_59",
+   "name": "Rigid 59",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_2",
+   "origin": [
+    0.041147,
+    -0.000085,
+    -0.047485
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_60",
+   "name": "Rigid 60",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "92000A011_Passivated_18-8_Stainless_Steel_Pan_Head_Phillips_Screws_3",
+   "origin": [
+    -0.014453,
+    -0.000085,
+    -0.047485
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_61",
+   "name": "Rigid 61",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Internal-Frame_1",
+   "child": "93655A090_Male-Female_Threaded_Hex_Standoff_1",
+   "origin": [
+    0.004138,
+    0.011905,
+    -0.032031
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_62",
+   "name": "Rigid 62",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Internal-Frame_1",
+   "child": "93655A090_Male-Female_Threaded_Hex_Standoff_2",
+   "origin": [
+    0.004011,
+    0.03667,
+    -0.007266
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_63",
+   "name": "Rigid 63",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Bottom-Cover_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_21",
+   "origin": [
+    0.061522,
+    0.026626,
+    -0.019905
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_64",
+   "name": "Rigid 64",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Bottom-Cover_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_22",
+   "origin": [
+    0.041202,
+    0.026491,
+    -0.02004
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_65",
+   "name": "Rigid 65",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Bottom-Cover_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_18",
+   "origin": [
+    0.113381,
+    -0.002185,
+    0.001381
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_66",
+   "name": "Rigid 66",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Bottom-Cover_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_17",
+   "origin": [
+    -0.006873,
+    -0.002185,
+    0.001381
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_67",
+   "name": "Rigid 67",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Bottom-Cover_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_20",
+   "origin": [
+    0.061522,
+    -0.023766,
+    0.029898
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_68",
+   "name": "Rigid 68",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Bottom-Cover_1",
+   "child": "91420A001_Steel_Phillips_Flat_Head_Screws_19",
+   "origin": [
+    0.041202,
+    -0.023982,
+    0.029682
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_69",
+   "name": "Rigid 69",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "Internal-Frame_1",
+   "child": null,
+   "origin": [
+    0,
+    0,
+    0
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_71",
+   "name": "Rigid 71",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": null,
+   "origin": [
+    0.055304,
+    0.053645,
+    0.002383
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Rigid_72",
+   "name": "Rigid 72",
+   "type": "fixed",
+   "is_as_built": false,
+   "parent": "root_base",
+   "child": "V3-distro-footprint_1",
+   "origin": [
+    0.06189,
+    0.014594,
+    -0.01737
+   ],
+   "axis": [
+    0,
+    0,
+    1
+   ],
+   "limits": {
+    "min": null,
+    "max": null,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_73",
+   "name": "Revolute 73",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "WYanHua-Motor_Micro_1104_Brushless_1-2S_4300KV_v1_1",
+   "child": "40mm_1mm_prop_1",
+   "origin": [
+    -0.104528,
+    -0.022008,
+    -0.097846
+   ],
+   "axis": [
+    0,
+    -1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_74",
+   "name": "Revolute 74",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "WYanHua-Motor_Micro_1104_Brushless_1-2S_4300KV_v1_v2_Mirror_1",
+   "child": "40mm_1mm_prop_Mirror_1",
+   "origin": [
+    -0.104528,
+    -0.026774,
+    0.102613
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_75",
+   "name": "Revolute 75",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "WYanHua-Motor_Micro_1104_Brushless_1-2S_4300KV_v1_v2_Mirror_Mirror_1",
+   "child": "40mm_1mm_prop_Mirror_Mirror_1",
+   "origin": [
+    0,
+    0.104613,
+    0.102613
+   ],
+   "axis": [
+    0,
+    -1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_76",
+   "name": "Revolute 76",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "WYanHua-Motor_Micro_1104_Brushless_1-2S_4300KV_v1_v2_Mirror_1_1",
+   "child": "40mm_1mm_prop_Mirror_1_1",
+   "origin": [
+    0,
+    0.099846,
+    -0.097847
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "origin": [
+    0.022246,
+    0.069836,
+    0.046352
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0.785398
+   }
+  },
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "origin": [
+    0.018876,
+    0.069836,
+    -0.038215
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": -0.785398
+   }
+  },
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "origin": [
+    0.030898,
+    0.069836,
+    0.02856
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0.785398
+   }
+  },
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "origin": [
+    0.034268,
+    0.069836,
+    -0.027164
+   ],
+   "axis": [
+    0,
+    1,
+    0
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": -0.785398
+   }
+  },
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "origin": [
+    0.105591,
+    -0.040062,
+    -0.118055
+   ],
+   "axis": [
+    -0.707107,
+    0,
+    -0.707107
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  },
+  {
+   "id": "Revolute_1",
+   "name": "Revolute 1",
+   "type": "revolute",
+   "is_as_built": false,
+   "parent": "SG90_-_Micro_Servo_9g_-_Tower_Pro.1_Pea_1",
+   "child": "SG90_-_Micro_Servo_9g_-_Tower_Pro.2_Pea_1",
+   "origin": [
+    0.105591,
+    -0.044829,
+    0.122822
+   ],
+   "axis": [
+    -0.707107,
+    0,
+    0.707107
+   ],
+   "limits": {
+    "min": 0,
+    "max": 0,
+    "min_enabled": false,
+    "max_enabled": false,
+    "rest": 0,
+    "current_value": 0
+   }
+  }
+ ]
+}

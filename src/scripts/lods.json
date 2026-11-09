@@ -118,6 +118,23 @@
    906816
   ]
  },
+ "/content-assets/projects/sesame-drone/model-lite.glb": {
+  "levels": [
+   "/content-assets/projects/sesame-drone/model-lite.lod0.glb",
+   "/content-assets/projects/sesame-drone/model-lite.lod1.glb",
+   "/content-assets/projects/sesame-drone/model-lite.glb"
+  ],
+  "tris": [
+   1820,
+   9690,
+   30400
+  ],
+  "bytes": [
+   30720,
+   61564,
+   132420
+  ]
+ },
  "/content-assets/projects/sesame/model-lite.glb": {
   "levels": [
    "/content-assets/projects/sesame/model-lite.lod0.glb",
@@ -167,6 +184,23 @@
    48500,
    105924,
    244556
+  ]
+ },
+ "/rigs/sesame-drone/rig.glb": {
+  "levels": [
+   "/rigs/sesame-drone/rig.lod0.glb",
+   "/rigs/sesame-drone/rig.lod1.glb",
+   "/rigs/sesame-drone/rig.glb"
+  ],
+  "tris": [
+   2669,
+   18195,
+   58212
+  ],
+  "bytes": [
+   75000,
+   137956,
+   279060
   ]
  }
 }

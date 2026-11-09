@@ -667,6 +667,34 @@ cad-viewer { display: block; position: relative; aspect-ratio: 4 / 3; min-height
 .fb-legend { position: absolute; left: 14px; bottom: 12px; display: flex; flex-wrap: wrap; gap: 4px 12px; font: 10.5px var(--mono); color: var(--text-3); max-width: 60%; }
 .fb-legend span::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--c); margin-right: 5px; }
 .fb-hint { position: absolute; right: 14px; bottom: 12px; font: 10.5px var(--mono); color: var(--text-3); }
+
+/* Sesame Drone header: the posable rig */
+.sheet-view .widget-hero.sd-hero { background: radial-gradient(ellipse at 55% 40%, #1c2331 0%, #121318 72%); }
+.sd-stage { position: absolute; inset: 0; }
+.sd-stage canvas { width: 100%; height: 100%; display: block; cursor: grab; }
+.sd-panel, .sd-readout { position: absolute; top: 14px; padding: 10px 12px; display: grid; gap: 8px; border: 1px solid var(--line); border-radius: 6px; background: rgba(22,23,26,.78); backdrop-filter: blur(4px); }
+.sd-panel { left: 14px; width: 214px; }
+.sd-panel .widget-seg { gap: 4px; }
+.sd-panel .widget-seg button { padding: 3px 9px; font-size: 11.5px; }
+.sd-title, .sd-readout small { font: 10px var(--mono); color: var(--text-3); text-transform: uppercase; letter-spacing: .1em; }
+.sd-readout { right: 14px; width: 236px; gap: 5px; }
+.sd-readout small { color: var(--text); font-weight: 600; }
+.sd-row { display: grid; grid-template-columns: 52px 38px 1fr; align-items: baseline; gap: 6px; font-size: 12px; color: var(--text-2); }
+.sd-row b { font: 600 12px var(--mono); color: var(--text); }
+.sd-row i { font-style: normal; font-size: 11.5px; color: var(--text-3); }
+.sd-row i.ok { color: #4fd18b; }
+.sd-row i.warn { color: #f2b84b; }
+.sd-row i.bad { color: #ff6b5a; }
+.sd-hint { position: absolute; right: 14px; bottom: 12px; font: 10.5px var(--mono); color: var(--text-3); }
+@media (max-width: 760px) {
+  /* phones: buttons across the bottom, the three sliders side by side under them */
+  .sd-panel { left: 0; right: 0; top: auto; bottom: 0; width: auto; border: 0; border-radius: 0; padding: 26px 10px 8px; gap: 6px 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); background: linear-gradient(transparent, rgba(18,19,24,.94) 30%); backdrop-filter: none; }
+  .sd-panel .widget-seg { grid-column: 1 / -1; }
+  .sd-panel .widget-slider { font-size: 11px; }
+  .sd-panel .widget-slider output { font-size: 11px; }
+  .sd-title, .sd-hint { display: none; }
+  .sd-readout { left: 10px; right: 10px; top: 10px; width: auto; padding: 7px 10px; }
+}
 @media (max-width: 760px) {
   .cal-grid { grid-template-columns: 1fr; }
   /* phones: a taller header, readout as a slim strip on top, circuits as a swipeable row underneath */

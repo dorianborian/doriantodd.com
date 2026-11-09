@@ -14,6 +14,8 @@ const loaders: Record<string, () => Promise<{ default: EffectFactory }>> = {
   // PenBot and PenBot Mini plotting line art from their Fusion rigs
   penbot: () => import('./penbot'),
   'penbot-mini': () => import('./penbot-mini'),
+  // Sesame Drone walking, folding its legs into propeller arms and flying, from its Fusion rig
+  drone: () => import('./drone'),
 };
 
 export async function loadEffect(name: string): Promise<EffectFactory | null> {
