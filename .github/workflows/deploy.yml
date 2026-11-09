@@ -31,7 +31,9 @@ jobs:
       - name: Cache optimized images
         uses: actions/cache@v4
         with:
-          path: node_modules/.astro
+          # only the image cache: node_modules/.astro also holds the rendered Markdown store, and restoring it would
+          # keep serving old HTML for unchanged articles after a Markdown plugin change
+          path: node_modules/.astro/assets
           key: astro-assets-${{ hashFiles('src/content/**/*.png', 'src/content/**/*.jpg', 'src/content/**/*.jpeg', 'src/content/**/*.webp', 'src/assets/**') }}
           restore-keys: astro-assets-
 

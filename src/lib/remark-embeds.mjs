@@ -26,7 +26,7 @@ const IMAGE = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
 const SPONSORS = {
   bambu: { name: 'Bambu Lab', url: 'https://tidd.ly/4xSSB8V', cta: 'Shop Bambu Lab', color: '#00ae42', affiliate: true },
   elegoo: { name: 'ELEGOO', url: 'https://tidd.ly/3RG2OG0', cta: 'Shop ELEGOO', color: '#3b82f6', affiliate: true },
-  makera: { name: 'Makera', url: 'https://www.makera.com/', cta: 'See the Makera Z1', color: '#14b8a6', affiliate: false },
+  makera: { name: 'Makera', url: 'https://makerainc.sjv.io/k4J6vn', cta: 'See the Makera Z1', color: '#14b8a6', affiliate: true },
   manifold: { name: 'Manifold Tech', url: 'https://store.3dmanifold.com/products/odin1-spatial-memory-module-for-robotics', cta: 'See the ODIN 1', color: '#22d3ee', affiliate: true },
   pcbway: { name: 'PCBWay', url: 'https://www.pcbway.com/', cta: 'Visit PCBWay', color: '#16a34a', affiliate: false },
 };
