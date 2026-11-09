@@ -7,7 +7,6 @@ const loaders: Record<string, () => Promise<{ default: (el: HTMLElement) => void
   calibration: () => import('./calibration'),
   forage: () => import('./forage'),
   'sesame-drone': () => import('./sesame-drone'),
-  'thrust-margin': () => import('./thrust-margin'),
   'infill-holes': () => import('./infill-holes'),
 };
 

@@ -1,6 +1,8 @@
 import { defineConfig } from 'astro/config';
 import { unified } from '@astrojs/markdown-remark';
 import remarkEmbeds from './src/lib/remark-embeds.mjs';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import contentAssets from './src/lib/content-assets.mjs';
 import sitemap from '@astrojs/sitemap';
 import fs from 'node:fs';
@@ -36,7 +38,9 @@ export default defineConfig({
   server: { port: Number(process.env.PORT) || 4321 },
   build: { format: 'directory' },
   markdown: {
-    processor: unified({ remarkPlugins: [remarkEmbeds] }),
+    // $$math$$ (inline, or fenced on its own lines for a block), rendered at build time to native MathML (no client
+    // script, CSS or fonts). Single dollars stay plain text, so prices like $50 to $60 are safe.
+    processor: unified({ remarkPlugins: [[remarkMath, { singleDollarTextMath: false }], remarkEmbeds], rehypePlugins: [[rehypeKatex, { output: 'mathml' }]] }),
   },
   integrations: [
     contentAssets(),

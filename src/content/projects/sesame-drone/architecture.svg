@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" font-family="Inter, 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#a4aab3"/></marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f2b84b"/></marker>
+  </defs>
+  <rect width="900" height="470" fill="#202125"/>
+
+  <!-- battery -->
+  <rect x="380" y="24" width="140" height="44" rx="6" fill="#26282d" stroke="#f2b84b" stroke-width="1.5"/>
+  <text x="450" y="44" text-anchor="middle" fill="#e4e6ea" font-size="15" font-weight="600">LiPo</text>
+  <text x="450" y="60" text-anchor="middle" fill="#a4aab3" font-size="11" font-family="Consolas, monospace">2S, 7.4 V nominal</text>
+
+  <!-- flying brain -->
+  <text x="40" y="112" fill="#4a9bff" font-size="11" font-family="Consolas, monospace" letter-spacing="1.5">FLYING BRAIN</text>
+  <rect x="40" y="122" width="330" height="150" rx="6" fill="#26282d" stroke="#34363c"/>
+  <text x="58" y="148" fill="#e4e6ea" font-size="15" font-weight="600">All-in-one flight controller</text>
+  <text x="58" y="166" fill="#a4aab3" font-size="11.5" font-family="Consolas, monospace">BETAFPV F4 2-3S 20A AIO</text>
+  <g font-size="13" fill="#e4e6ea">
+    <rect x="58" y="182" width="90" height="34" rx="4" fill="#202125" stroke="#34363c"/><text x="103" y="204" text-anchor="middle">Receiver</text>
+    <rect x="160" y="182" width="70" height="34" rx="4" fill="#202125" stroke="#34363c"/><text x="195" y="204" text-anchor="middle">IMU</text>
+    <rect x="242" y="182" width="110" height="34" rx="4" fill="#202125" stroke="#34363c"/><text x="297" y="204" text-anchor="middle">4 × ESC</text>
+  </g>
+  <text x="58" y="250" fill="#a4aab3" font-size="12">It flies the robot as an ordinary quad: it has no idea it has legs.</text>
+
+  <rect x="40" y="330" width="330" height="56" rx="6" fill="#26282d" stroke="#34363c"/>
+  <text x="58" y="354" fill="#e4e6ea" font-size="14" font-weight="600">4 × 1104 brushless motors</text>
+  <text x="58" y="373" fill="#a4aab3" font-size="11.5" font-family="Consolas, monospace">7,200 KV, ~78 mm props, on the feet</text>
+  <line x1="297" y1="272" x2="297" y2="326" stroke="#a4aab3" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="306" y="303" fill="#a4aab3" font-size="11" font-family="Consolas, monospace">3-phase</text>
+
+  <!-- walking brain -->
+  <text x="530" y="112" fill="#4a9bff" font-size="11" font-family="Consolas, monospace" letter-spacing="1.5">WALKING BRAIN</text>
+  <rect x="530" y="122" width="330" height="150" rx="6" fill="#26282d" stroke="#34363c"/>
+  <text x="548" y="148" fill="#e4e6ea" font-size="15" font-weight="600">Lolin S2 Mini (ESP32-S2)</text>
+  <text x="548" y="166" fill="#a4aab3" font-size="11.5" font-family="Consolas, monospace">Sesame firmware, drone fork</text>
+  <g font-size="12.5" fill="#e4e6ea">
+    <rect x="548" y="182" width="140" height="34" rx="4" fill="#202125" stroke="#34363c"/><text x="618" y="204" text-anchor="middle">Wi-Fi AP + web UI</text>
+    <rect x="700" y="182" width="142" height="34" rx="4" fill="#202125" stroke="#34363c"/><text x="771" y="204" text-anchor="middle">8 × LEDC @ 50 Hz</text>
+  </g>
+  <text x="548" y="250" fill="#a4aab3" font-size="12">Every PWM channel is spoken for by a servo.</text>
+
+  <rect x="530" y="330" width="200" height="56" rx="6" fill="#26282d" stroke="#34363c"/>
+  <text x="548" y="354" fill="#e4e6ea" font-size="14" font-weight="600">8 × SG90 servos</text>
+  <text x="548" y="373" fill="#a4aab3" font-size="11.5" font-family="Consolas, monospace">4 hips, 4 knees</text>
+  <rect x="744" y="330" width="116" height="56" rx="6" fill="#26282d" stroke="#34363c"/>
+  <text x="760" y="354" fill="#e4e6ea" font-size="14" font-weight="600">OLED face</text>
+  <text x="760" y="373" fill="#a4aab3" font-size="11.5" font-family="Consolas, monospace">SSD1306, I²C</text>
+  <line x1="640" y1="272" x2="640" y2="326" stroke="#a4aab3" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="648" y="303" fill="#a4aab3" font-size="11" font-family="Consolas, monospace">PWM</text>
+  <line x1="802" y1="272" x2="802" y2="326" stroke="#a4aab3" stroke-width="1.5" marker-end="url(#a)"/>
+  <text x="810" y="303" fill="#a4aab3" font-size="11" font-family="Consolas, monospace">I²C</text>
+
+  <!-- power -->
+  <path d="M410 68 V 92 H 205 V 118" fill="none" stroke="#f2b84b" stroke-width="1.5" marker-end="url(#p)"/>
+  <path d="M490 68 V 92 H 695 V 118" fill="none" stroke="#f2b84b" stroke-width="1.5" marker-end="url(#p)"/>
+  <text x="702" y="88" fill="#f2b84b" font-size="11" font-family="Consolas, monospace">regulated 5 V</text>
+  <text x="198" y="88" text-anchor="end" fill="#f2b84b" font-size="11" font-family="Consolas, monospace">battery voltage</text>
+
+  <!-- the gap between them -->
+  <line x1="450" y1="112" x2="450" y2="400" stroke="#6f7580" stroke-dasharray="5 6"/>
+  <text x="450" y="425" text-anchor="middle" fill="#a4aab3" font-size="12">No data link between the two: either one keeps working if the other dies.</text>
+
+  <!-- inputs -->
+  <text x="40" y="455" fill="#6f7580" font-size="11.5" font-family="Consolas, monospace">radio transmitter → receiver</text>
+  <text x="860" y="455" text-anchor="end" fill="#6f7580" font-size="11.5" font-family="Consolas, monospace">phone → Wi-Fi controller page</text>
+</svg>

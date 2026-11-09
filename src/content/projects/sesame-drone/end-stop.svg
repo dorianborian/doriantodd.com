@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" font-family="Inter, 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="t" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f2b84b"/></marker>
+    <marker id="g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#a4aab3"/></marker>
+    <marker id="d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6f7580"/></marker>
+    <marker id="m" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4a9bff"/></marker>
+  </defs>
+  <rect width="900" height="400" fill="#202125"/>
+  <text x="32" y="38" fill="#6f7580" font-size="11" font-family="Consolas, monospace" letter-spacing="1.5">ONE LEG IN DRONE MODE, LOOKING DOWN THE KNEE AXIS</text>
+
+  <!-- body side: femur and knee servo bracket -->
+  <rect x="60" y="150" width="190" height="96" rx="6" fill="#26282d" stroke="#34363c"/>
+  <text x="76" y="232" fill="#a4aab3" font-size="12">femur + knee bracket</text>
+  <text x="76" y="249" fill="#6f7580" font-size="11" font-family="Consolas, monospace">(swung by the hip servo)</text>
+
+  <!-- end stop tab on the femur, sitting on top of the arm -->
+  <path d="M250 150 H 318 V 172 H 268 Z" fill="#e5534b" fill-opacity="0.25" stroke="#e5534b" stroke-width="1.5"/>
+  <text x="330" y="132" fill="#e5534b" font-size="13" font-weight="600">end stop</text>
+  <path d="M330 138 L 300 152" stroke="#e5534b" stroke-width="1.2"/>
+
+  <!-- the foot / arm, horizontal, with its hook down at the tip -->
+  <path d="M232 172 H 560 V 196 H 520 L 528 268 H 504 L 494 196 H 232 Z" fill="#2e3036" stroke="#a4aab3" stroke-width="1.5"/>
+  <text x="300" y="190" fill="#e4e6ea" font-size="12">foot (rides on the knee servo)</text>
+
+  <!-- knee shaft -->
+  <circle cx="232" cy="184" r="12" fill="#202125" stroke="#4a9bff" stroke-width="2"/>
+  <circle cx="232" cy="184" r="3" fill="#4a9bff"/>
+  <text x="244" y="284" fill="#4a9bff" font-size="13" font-weight="600">knee servo shaft</text>
+  <path d="M250 272 L 236 197" stroke="#4a9bff" stroke-width="1.2"/>
+
+  <!-- motor and prop on top of the foot -->
+  <rect x="482" y="122" width="44" height="50" rx="4" fill="#3a3f48" stroke="#a4aab3"/>
+  <text x="540" y="150" fill="#a4aab3" font-size="12">motor</text>
+  <line x1="410" y1="114" x2="598" y2="114" stroke="#e4e6ea" stroke-width="4" stroke-linecap="round"/>
+  <text x="608" y="118" fill="#a4aab3" font-size="12">prop</text>
+
+  <!-- thrust -->
+  <line x1="504" y1="110" x2="504" y2="48" stroke="#f2b84b" stroke-width="3" marker-end="url(#t)"/>
+  <text x="516" y="62" fill="#f2b84b" font-size="14" font-weight="600">T ≈ 0.65 N</text>
+  <text x="516" y="80" fill="#a4aab3" font-size="11.5" font-family="Consolas, monospace">264 g ÷ 4 at hover</text>
+
+  <!-- arm weight -->
+  <line x1="420" y1="196" x2="420" y2="236" stroke="#a4aab3" stroke-width="2" marker-end="url(#g)"/>
+  <text x="410" y="230" text-anchor="end" fill="#a4aab3" font-size="11.5" font-family="Consolas, monospace">foot + motor weight</text>
+
+  <!-- lever arm dimension -->
+  <line x1="232" y1="300" x2="504" y2="300" stroke="#6f7580" marker-start="url(#d)" marker-end="url(#d)"/>
+  <line x1="232" y1="200" x2="232" y2="310" stroke="#6f7580" stroke-dasharray="3 4"/>
+  <line x1="504" y1="272" x2="504" y2="310" stroke="#6f7580" stroke-dasharray="3 4"/>
+  <text x="368" y="292" text-anchor="middle" fill="#e4e6ea" font-size="13" font-family="Consolas, monospace">28 mm</text>
+
+  <!-- moment arrow around the knee: thrust tries to keep folding the foot up, into the stop -->
+  <path d="M210 146 A 44 44 0 0 0 194 206" fill="none" stroke="#4a9bff" stroke-width="2" marker-end="url(#m)"/>
+  <text x="150" y="140" text-anchor="end" fill="#4a9bff" font-size="11.5" font-family="Consolas, monospace">thrust moment</text>
+  <path d="M154 136 L 196 160" stroke="#4a9bff" stroke-width="1" stroke-dasharray="2 3"/>
+
+  <!-- notes -->
+  <g font-size="13" fill="#e4e6ea">
+    <text x="640" y="200">M = T × 28 mm ≈ 18 mN·m</text>
+    <text x="640" y="220" fill="#a4aab3" font-size="12">≈ 0.18 kgf·cm, a tenth of an</text>
+    <text x="640" y="236" fill="#a4aab3" font-size="12">SG90's 1.8 kgf·cm stall torque</text>
+    <text x="640" y="272">Thrust only ever pushes up,</text>
+    <text x="640" y="290">so the foot is always pressed</text>
+    <text x="640" y="308">into the stop, not the gears.</text>
+  </g>
+  <text x="32" y="372" fill="#6f7580" font-size="11.5" font-family="Consolas, monospace">On the ground, before take-off, the servo only holds the foot's own weight. In the air, the stop takes the thrust.</text>
+</svg>

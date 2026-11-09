@@ -4,184 +4,324 @@ modelRotation: [0, 90, 0]
 effect: drone
 hero: sesame-drone
 title: "Sesame Drone"
-summary: "Sesame Drone is a Sesame robot that walks, folds its legs out into propeller arms, takes off, lands and walks again. The legs lock against 90 degree end stops in drone mode, an all-in-one flight controller flies it while an ESP32 runs the legs and face, and the whole robot weighs 264 grams."
+summary: "A Sesame quadruped whose legs fold out into propeller arms. Two independent brains (an all-in-one flight controller and an ESP32), one-sided end stops that carry the thrust instead of the servos, and a 264 gram flying weight. The engineering write-up: numbers, mechanism, firmware and test results."
 cover: "./cover.jpg"
 order: 12
 year: 2026
 status: in-progress
 tags: ["Sesame","Drone","Quadruped","ESP32","3D printing","Carbon fiber"]
 links: [{ "label": "Sesame", "url": "/sesame" }, { "label": "Sesame on GitHub", "url": "https://github.com/dorianborian/sesame-robot" }, { "label": "Discord", "url": "https://discord.gg/XDXkhQd8bC" }, { "label": "Makera Z1", "url": "https://www.makera.com/" }]
-seoTitle: "Sesame Drone: A Walking Robot That Folds Its Legs and Flies"
-description: "Sesame Drone is a 264 g quadruped robot that walks, folds its legs into propeller arms against 90 degree end stops, takes off, lands and walks again."
-keywords: ["walking drone", "flying robot", "quadruped drone", "transforming drone", "multi-terrain robot", "Sesame robot", "ESP32 robot", "micro drone build", "thrust to weight ratio", "PPA-CF"]
+seoTitle: "Sesame Drone: Engineering a Walking Robot That Folds Its Legs and Flies"
+description: "How Sesame Drone works: a 264 g quadruped with folding propeller legs, one-sided end stops, two independent controllers, and the math and firmware behind it."
+keywords: ["walking drone", "flying robot", "quadruped drone", "transforming drone", "multi-terrain robot", "Sesame robot", "ESP32-S2 servo PWM", "servo end stop", "thrust to weight ratio", "momentum theory hover power", "3D print infill holes", "PPA-CF"]
 faq:
-  - q: "Can Sesame Drone really walk and fly?"
-    a: "Yes. It walks like a regular Sesame, switches to drone mode by folding its legs out flat against hard end stops, takes off, and after landing it folds the legs back down and walks again. In the backyard test it walked, took off, landed hard enough to break a leg, and still walked away."
+  - q: "How does Sesame Drone switch between walking and flying?"
+    a: "Each leg has a hip servo that swings it and a knee servo that carries the foot, motor and prop. Drone mode drives all four knee servos to 90 degrees, which folds the feet out flat into propeller arms against hard end stops. Walking puts the knees back at 0 or 180 degrees so the feet point straight down."
+  - q: "Why does it need end stops if the servos are strong enough?"
+    a: "At hover each motor puts about 18 mN·m on its knee, roughly a tenth of an SG90's stall torque, so strength isn't the problem. Stiffness is: the servo ignores errors under about 0.8 degrees, its plastic gears have backlash, and a drooping arm tilts its thrust. Thrust only ever pushes the foot one way, so a one-sided printed stop holds it rigidly and the servo never carries the flight load."
+  - q: "Why are there two controllers instead of one?"
+    a: "Fault isolation and PWM budget. The all-in-one flight controller (receiver, IMU and four ESCs) flies it as an ordinary quad, and a Lolin S2 Mini runs the eight leg servos and the face. All eight of the ESP32-S2's PWM channels are already used by the servos, and adding ESC outputs to the walking firmware ran out of timers and killed its Wi-Fi."
   - q: "How much does Sesame Drone weigh?"
-    a: "264 grams with everything on board, 14 grams over the 250 gram target. 250 grams is the line where a hobby drone has to be registered with the FAA in the US."
-  - q: "Why does it need end stops on the legs?"
-    a: "A flight controller assumes every motor stays exactly where it thinks it is. If an arm droops, its thrust tilts and the controller has to fight it, which shows up as wobble. In drone mode the legs fold out to exactly 90 degrees and sit against a hard stop, so the stop carries the propeller's pull instead of the servo."
-  - q: "What flies it and what makes it walk?"
-    a: "Two separate brains. An all-in-one flight controller, with the receiver, the IMU and all four ESCs on one board, flies it. A Lolin S2 Mini ESP32 runs the eight leg servos and the OLED face. If one fails the other keeps working."
-  - q: "Why SG90 servos instead of the MG90S that Sesame uses?"
-    a: "Weight. An MG90S is about 13 grams with metal gears, an SG90 is 9 grams with plastic gears. Swapping all eight saves about 35 grams. The plastic gears strip more easily in a crash, but even then the robot still works as a walking Sesame."
+    a: "264 grams flying, against a 250 gram target. Hover power scales with weight to the 1.5 power, so those 14 grams cost about 8.5 percent more hover power. Swapping the MG90S servos for SG90s saved about 35 grams, which avoided roughly 20 percent more."
+  - q: "Can cutting holes in a 3D print add weight?"
+    a: "Yes. Every hole gets its own wall, and in a part filled with 15 percent infill and 0.9 mm walls, a round hole has to be more than about 21 mm across before the infill it removes outweighs the new wall. Hex holes save weight in thin shells that are all wall, not in chunky infilled parts."
 ---
 
-I've had this crazy idea for a while now: turn my tiny walking robot into a drone. And honestly, I didn't think it was even possible. That is, until I started testing it.
+Sesame Drone walks somewhere on its legs, folds them out flat into propeller arms, takes off, lands, and walks away again. It's built on [Sesame](/sesame), my open source quadruped. There's a video about the build that tells the story; this page is the engineering side of it: the numbers, the mechanism, the firmware, and what I'd change.
 
-![Walk, fold, take off: the backyard test](./walk-fold-fly.mp4)
+![Walk, drone mode, take off](./walk-fold-fly.mp4)
 
-Sesame Drone is a [Sesame](/sesame) that flies. It walks around on its legs like any other Sesame, then folds those legs out flat until they turn into propeller arms, takes off, lands somewhere else, and walks away again. Four tiny brushless motors ride on the feet, an all-in-one flight controller flies it, and an ESP32 still runs the legs and the face. The whole thing weighs 264 grams.
+The model at the top of the page is the real Fusion 360 assembly, rigged on the actual servo shafts. You can drive it through the same sequence or pose it by hand, and its thrust arrows show the one idea this whole design hangs on. The last section explains how it was built.
 
-The model at the top of this page is the real CAD, rigged with the actual servo shafts. Hit Walk, Drone mode or Take off, or grab the sliders and pose it yourself. Keep it in mind, because it'll make the part about end stops a lot more fun.
+## Specs
 
-## The one rule of drones
+| | |
+|---|---|
+| Flying weight | 264 g (target 250 g) |
+| Legs | 4, each with a hip servo (swing) and a knee servo (fold) |
+| Servos | 8 × SG90, 9 g, plastic gears |
+| Motors | 4 × 1104 brushless, 7,200 KV, mounted on the feet |
+| Props | about 78 mm (3 in) in the CAD |
+| Motor layout | 156 × 127 mm rectangle, 201 mm diagonal |
+| Span in drone mode | 223 × 175 mm over the props |
+| Flight controller | BETAFPV F4 2-3S 20A AIO: receiver, IMU and four ESCs on one board |
+| Walking controller | Lolin S2 Mini (ESP32-S2), a fork of the Sesame firmware |
+| Battery | 2S LiPo, 7.4 V nominal |
+| Face | 128 × 64 SSD1306 OLED on I²C |
+| Frame | PPA-CF printed parts on a CNC cut carbon fiber plate |
 
-If I wanted this thing to fly, I still had to follow the laws of physics, and for drones the big rule is simple: the props have to push down with more force than the robot weighs. That's called the thrust-to-weight ratio.
+## Two brains, no link between them
 
-A racing drone makes something like eight times its own weight in thrust. A camera drone, maybe two or three times. That extra margin isn't just for going fast. It's what lets the flight controller catch itself: every time the drone tips, it needs spare thrust on one side to push itself back level.
+![System architecture: the flight controller and the ESP32 run independently](./architecture.svg)
 
-My goal was way less ambitious. Get right around a 1:1 thrust-to-weight ratio, just enough to lift itself and kind of hover in the air. That leaves almost no spare thrust for corrections. Try it below: push the racing quad and it snaps back, push something right around 1 and watch where the correction comes from.
+The robot is two machines sharing a battery. An all-in-one flight controller flies it as an ordinary quad and has no idea it has legs. A Lolin S2 Mini runs the eight servos, the OLED face and the Wi-Fi controller page, exactly like a regular Sesame. Nothing connects them, on purpose: if the flight side browns out, the robot can still walk, and if the ESP32 crashes mid-flight, the flight controller doesn't notice.
 
-<div class="widget" data-widget="thrust-margin"></div>
+An all-in-one board was the only realistic choice for the flying side. It puts the radio receiver, the IMU that measures tilt, and the four ESCs that drive the motors on one small board, which saves the space and weight of four separate ESCs and the wiring between them. There isn't room for much else inside a Sesame body.
 
-Hold that thought, it's going to matter later.
+It also turns out the ESP32 couldn't run the motors anyway. The walking firmware drives the servos with the ESP32-S2's LEDC peripheral at 50 Hz:
 
-### Tiny props have it extra hard
+```cpp
+// firmware.ino: servo PWM setup
+ESP32PWM::allocateTimer(0);
+ESP32PWM::allocateTimer(1);
+ESP32PWM::allocateTimer(2);
+ESP32PWM::allocateTimer(3);
 
-Thrust grows with prop size to the fourth power, so a prop half the size makes a sixteenth of the thrust at the same speed. To keep up it has to spin four times as fast. These little motors are rated at 7,200 RPM per volt, and on a two-cell battery that's over 50,000 RPM.
+for (int i = 0; i < 8; i++) {
+  servos[i].setPeriodHertz(50);
+  servos[i].attach(servoPins[i], 732, 2929);  // 0 to 180 degrees, in microseconds
+}
+```
 
-## How much drone fits inside a Sesame?
+The S2 has eight LEDC channels and all eight are servos. I tried adding ESC outputs to this firmware early on, and it ran out of hardware timers and took the Wi-Fi captive portal down with it. A second, dedicated controller was cleaner than fighting that.
 
-I did a lot of research on motors, flight controllers and batteries, and the number I kept coming back to was 250 grams. Under that, I could use standard toothpick drone parts: tiny motors and batteries that are cheap and easy to get. Fun fact: 250 grams is also the line where a hobby drone in the US has to be registered with the FAA. So no legal paperwork, and I still get to build the whole robot.
+## The weight budget
 
-That research landed me on 1104 size brushless motors, a small LiPo, and an all-in-one flight controller. The all-in-one part is actually really important. Those boards have every single part a drone needs on one tiny board: a receiver for the radio, an IMU that senses which way the drone is tilting, and the ESCs that drive all four motors. There isn't much space inside a Sesame, so one board instead of four or five is a big deal.
+I set the target at 250 grams for two reasons. Under that, standard toothpick drone parts work: tiny brushless motors and small LiPos that are cheap and easy to find. And 250 g is the line where a recreational drone has to be registered with the FAA in the US.
 
-![The all-in-one flight controller in the frame, surrounded by servo wiring](./flight-controller.jpg)
+It came in at 264 g.
 
-Then there's the weight budget. The eight servos alone are about 72 grams, more than a quarter of the whole robot. The motors, props and battery take another big bite, and the frame, the electronics and the wiring make up the rest. So most of the design work was really optimizing.
+![264 g on the scale](./scale-264.jpg)
 
-## Cutting holes doesn't always save weight
+Fourteen grams sounds like nothing, but with fixed props, hover power scales with weight to the 1.5 power (more on why below):
 
-The original Sesame has a bunch of details that are purely cosmetic, so those got trimmed down, and I carved hexagon holes into the body. But there's something I didn't expect here.
+$$
+\frac{P_{264}}{P_{250}} = \left(\frac{264}{250}\right)^{1.5} \approx 1.085
+$$
 
-With 3D printing, cutting holes doesn't always save weight. A printed part usually isn't solid plastic. It's a thin outer wall, about a millimeter thick, wrapped around a mostly empty lattice called infill. At 15% infill the inside of a part is 85% air. And every time you cut a hole, the slicer has to wrap that hole in a brand new wall. So on a chunky part, a hole can actually add plastic instead of removing it.
+So those 14 grams cost about 8.5% more power just to hover, out of a margin that was thin to begin with.
 
-<div class="widget" data-widget="infill-holes"></div>
+The biggest single line item is the servos. The original Sesame uses MG90S servos: strong, metal gears, about 13 g each. RC planes use a lighter cousin, the SG90: 9 g, plastic gears. Swapping all eight saves about 35 g:
 
-Those walls are also where a part gets most of its strength. It's the same reason an I-beam is shaped like an I: the material out at the edges does most of the work. So the real trick is low infill on the thick parts, and saving the hex holes for the thin shells, where the part is really just walls anyway. For Sesame Drone this wasn't a huge factor, but in a lot of other designs it really comes into play.
+| | Mass |
+|---|---|
+| 8 × SG90 servos | 72 g |
+| Everything else: motors, props, battery, both controllers, frame, wiring | 192 g |
+| **Flying weight, measured** | **264 g** |
+| Same robot with 8 × MG90S | about 299 g: $$(299/264)^{1.5} \approx 1.2$$, so **20% more hover power** |
 
-## PPA-CF
-
-I also printed this in a material I'd never used before: PPA-CF. It's a high temperature nylon packed with chopped carbon fiber, and it's no joke. It prints at around 300 °C and it'll chew right through a normal brass nozzle.
-
-What makes it perfect here is the stiffness. It honestly feels less like a plastic and more like a metal. The trade-off is that it's a little brittle: it would rather crack than bend. You normally only get properties like that from something crazy expensive like PEEK, but PPA-CF gets surprisingly close on a regular printer.
-
-![A folded leg: SG90 servo, end-stop bracket, motor and prop](./leg-motor.jpg)
-
-Of course I didn't get it right on the first try. It took a couple of rounds of reprints, and I realized my motor mounts were just completely the wrong size, so that part got redesigned from scratch.
-
-> [!SPONSOR] makera
-> Speaking of carbon fiber: this build was sponsored by Makera, and a lot of this drone wouldn't exist without their desktop CNC, the Makera Z1. A 3D printer builds parts layer by layer, but the Z1 carves them out of a solid block of wood, acrylic, a circuit board or carbon fiber, so they come out stiffer and cleaner. On a drone that really matters, because a flexy frame means more vibration and a twitchier flight.
->
-> On Sesame Drone the Z1 cut the internal carbon fiber structure that holds everything together. What surprised me most is how little setup it takes: it measures the stock and levels itself, the quick tool changes mean no wrenches between cuts, and Makera Studio does the toolpaths and the machine control in one app, so I go straight from CAD to cutting.
-
-![The Z1 carving the hex pockets in the carbon fiber plate](./cnc-hex.mp4)
-
-![The finished carbon fiber plate](./cnc-plate.mp4)
-
-## SG90 instead of MG90S
-
-Then came a bigger decision. The original Sesame uses MG90S servos. They're strong and they have metal gears, but they weigh about 13 grams each, and they were the heaviest thing on the robot.
-
-RC planes use a lighter cousin: the SG90. Plastic gears, 9 grams. Swapping all eight servos saves about 35 grams, which is a lot when the margins are this small. The catch is that plastic gears are way weaker, so they're much more likely to strip, especially in a crash. But even if they broke eventually, I'd at least get a few flights out of them, and it would still work as a regular walking Sesame.
+The catch is that plastic gears strip, especially in a crash. I took that trade: even with stripped gears it's still a walking Sesame, and the end stops (below) mean the gears never carry the flight load.
 
 ![An SG90 in its PPA-CF bracket](./sg90.jpg)
 
-## Legs that move, arms that don't
+## Small props have to spin very fast
 
-With all that figured out, I built a first prototype just to see if the concept would work at all, and it ran straight into the interesting problem with a walking robot turning into a drone.
+For a propeller, static thrust goes roughly as
 
-A drone's arms need to be as rigid as possible. The flight controller assumes every motor stays exactly where it thinks it is. If an arm droops even a little, the thrust tilts, the controller has to fight it, and you see that as wobble. A walking robot's legs are the complete opposite: they move all the time, in a sequence that lets it crawl forward.
+$$
+T = C_T\,\rho\,n^2 D^4
+$$
 
-So, legs that move, and legs that also don't move. My fix was to add end stops on every leg. In drone mode the legs fold up and out to exactly 90 degrees and sit against a hard stop. When a propeller pulls up, the stop takes the load instead of the servo.
+where $$n$$ is the rotation rate and $$D$$ the diameter. Halve the prop and you get a sixteenth of the thrust at the same speed, so it has to spin four times as fast to make it back. That's why micro drone motors have such high KV ratings. These are 7,200 KV: on a 2S pack at 7.4 V that's 7,200 × 7.4 ≈ 53,000 RPM unloaded.
 
-![End stops: the legs fold to 90 degrees and the stop carries the thrust](./end-stops.mp4)
+You can also get a feel for the hover power from momentum theory. Each motor carries a quarter of the weight, $$T = 0.264 \times 9.81 / 4 \approx 0.65$$ N, through a disk of area $$A = \pi (0.039)^2 \approx 4.7 \times 10^{-3}$$ m². The ideal power is
 
-On the real robot the switch from walking to drone mode takes a fraction of a second, and the stop is a small printed bracket right above each knee servo.
+$$
+P = \frac{T^{3/2}}{\sqrt{2 \rho A}} \approx \frac{0.65^{1.5}}{\sqrt{2 \times 1.225 \times 0.0047}} \approx 4.8 \text{ W per motor}
+$$
+
+or about 19 W for all four. Real small props manage a figure of merit around 0.4 to 0.6, and the motors and ESCs lose some more, so a realistic estimate is somewhere around 45 to 70 W from the battery: roughly 6 to 9 A from a 2S pack, just to hover. This is also where the $$W^{1.5}$$ scaling above comes from.
+
+### Why a thin margin is hard to fly
+
+A flight controller corrects a tilt by speeding up the motors on the low side and slowing the ones on the high side. With a racing quad's eight to one thrust-to-weight ratio there's plenty of headroom for that. My target was only a little above one to one, so at hover the motors are already near full power. When the low side can't go any faster, the only way left to level out is to slow the high side, and the drone loses height while it corrects. That's the wobbly, sinking hover you see in the testing footage.
+
+## Legs into propeller arms
+
+Each leg has two servos. The firmware names them R1, R2, L1 and L2 for the hips and R3, R4, L3 and L4 for the knees. Standing puts the knees at 0 or 180 degrees, which points the feet straight down. Drone mode is the same stand with all four knees driven to 90, their midpoint, which folds each foot out flat:
+
+```cpp
+// movement-sequences.h
+inline void runStandPose(int face) {
+  setServoAngle(R1, 135); setServoAngle(R2, 45);   // hips
+  setServoAngle(L1, 45);  setServoAngle(L2, 135);
+  setServoAngle(R4, 0);   setServoAngle(R3, 180);  // knees: feet straight down
+  setServoAngle(L3, 0);   setServoAngle(L4, 180);
+  // ...
+}
+
+inline void runDronePose() {
+  runStandPose(0);
+  setFaceWithMode("drone", FACE_ANIM_BOOMERANG);
+  delayWithFace(200);
+  setServoAngle(R3, 90); setServoAngle(R4, 90);    // fold every foot out flat
+  setServoAngle(L3, 90); setServoAngle(L4, 90);
+}
+```
+
+Each foot carries its own knee servo (the horn is screwed to the femur), a motor and a prop. The knee axes are level and sit at 45 degrees across each corner of the body, so a 90 degree fold swings the foot from pointing at the ground to sticking straight out with the motor on top. Some numbers from the CAD:
+
+| | |
+|---|---|
+| Knee axis to the ground when walking | 47 mm |
+| Belly clearance when walking | 31 mm |
+| Knee axis to the motor axis, in drone mode | 28 mm out, 12.5 mm up |
+| Hip axis to the motor axis | 66 mm |
+| Body centre to each motor | 100 mm |
+
+## End stops: stiffness, not strength
+
+This is the core problem with a walking robot turning into a drone. A drone's arms need to be as rigid as possible, because the flight controller assumes every motor stays exactly where it thinks it is. A walking robot's legs are the opposite: they're supposed to move all the time.
+
+You might expect the problem to be servo strength. The numbers say otherwise. At hover each motor pushes up with about 0.65 N, 28 mm from the knee axis:
+
+$$
+M = 0.65 \text{ N} \times 0.028 \text{ m} \approx 18 \text{ mN·m} \approx 0.18 \text{ kgf·cm}
+$$
+
+An SG90 is rated at about 1.8 kgf·cm stall torque, so that's a tenth of what it can do. Strength isn't the problem. Stiffness is:
+
+- **Dead band.** The firmware maps 0 to 180 degrees onto 732 to 2929 µs, so one degree is about 12 µs of pulse. The SG90's datasheet dead band is 10 µs, so the servo doesn't even try to correct an error smaller than about 0.8 degrees.
+- **Backlash.** On top of that, plastic gears have play.
+- **Bandwidth.** The servo gets a new position every 20 ms (50 Hz). The props turn hundreds of times a second. Anything the servo does about vibration is far too slow.
+
+A drooping arm tilts its thrust. Every degree of tilt turns about 1.7% of that motor's thrust ($$\sin 1° \approx 0.017$$) into a sideways push, and the controller has to fight it, which shows up as wobble.
+
+The fix is an end stop on every leg. In drone mode the foot folds out to exactly 90 degrees and lands against a printed stop on the femur. Here's the trick that makes it work: thrust only ever pushes up. So the load always presses the foot into the stop, and a stop that only works in one direction is enough to hold it rigidly. The servo's job shrinks to putting the foot there and holding its own weight while it sits on the ground.
+
+![The forces on one leg in drone mode](./end-stop.svg)
+
+On the robot, the stop is a small printed tab above each knee servo, and the whole switch from walking to drone mode takes a fraction of a second:
 
 ![Walk to drone mode, slowed down](./fold-snap.mp4)
 
 ![The end stop above the knee servo](./end-stop-macro.jpg)
 
-The hips can still swing side to side, and I expected that to be a problem. It turns out it mostly isn't: a sideways wiggle doesn't tilt the props, they still push straight up. You can see both in the model at the top. Lower the leg fold below 90 degrees with some throttle and the thrust arrows tilt and turn red. Swing the hips instead and they stay straight.
+The hips are a different story, and I expected them to be a problem. They aren't locked in drone mode, so they wander a little. But the hip axis is vertical: a hip swing moves the motor around in the horizontal plane and the thrust still points straight up. Five degrees of hip wobble moves a motor $$0.066 \times 0.087 \approx 5.7$$ mm on a 100 mm arm. That changes the lever arms the mixer assumes by a few percent, which the PID loop absorbs without noticing. Testing backed this up: after a crash bent one leg out of place, the layout wasn't symmetric anymore and it still hovered fine.
 
-While I was designing this I kept thinking: if this works, there are some really interesting applications. Fly to a location, walk through the terrain, then fly away again. Kind of like a little reconnaissance robot.
+Both effects are in the model at the top: lower the leg fold below 90 degrees with some throttle and the arrows tilt and turn red, swing the hips instead and they stay straight up.
 
-## Prototype one
+## Printing it: walls, infill and hex holes
 
-The first prototype did kind of fly. Only briefly before crashing into the ground, but it was enough to prove the idea could actually work.
+To save weight I trimmed the purely cosmetic details off the original Sesame and carved hexagon holes into the body. Then I found out that holes don't always save weight.
 
-![Prototype one coming alive: the flight controller glowing in a nest of servo wires](./v1-alive.mp4)
+A printed part is a thin solid wall around a sparse infill lattice. When you cut a hole, the slicer wraps it in a new wall. For a round hole of radius $$r$$ in a region with infill fraction $$f$$ and wall thickness $$w$$:
 
-![Prototype one on the kitchen scale](./v1-scale.jpg)
+- infill removed: $$f \cdot \pi (r + w)^2$$
+- wall added: $$\pi\left((r + w)^2 - r^2\right) = \pi (2 r w + w^2)$$
 
-And then I took a long break. I flew to Shenzhen, built a couple of robots, and won a thing with a [robot mini fridge](/projects/fridge-tank). The point is, I got busy with other commitments, and that was right around when Sesame Drone was starting to work. I kind of gave up on it. So, months later, I was back in the workshop working on it once again.
+The hole adds plastic whenever the second is bigger. With two 0.45 mm perimeters ($$w = 0.9$$ mm) and 15% infill, that's true for any hole under about 21 mm across. Try it on one layer of a printed bar:
 
-## Version two: every system working
+<div class="widget" data-widget="infill-holes"></div>
 
-The next step was getting every system working, not just the motors and not just the Sesame part. That meant extracting the wiring harness from an existing Sesame, so its electronics could go into the new one. Sorry, little guy.
+The walls are also where the stiffness is. Bending stiffness goes with the second moment of area, $$I = \int y^2\, dA$$, so material far from the neutral axis does most of the work. That's why an I-beam is shaped like an I. The rule I ended up with: low infill on the thick parts, and save the hex holes for the thin shells, where the part is all wall anyway and a hole only removes plastic. On Sesame Drone the body shell is exactly that kind of part.
 
-![Taking the harness out of a red Sesame](./harness.mp4)
+### PPA-CF
 
-If you're already familiar with the Sesame project, you might be wondering why I'm not using the Sesame Distro Board here. Quick update: the distro board has been a push and pull between me and myself. V2 wasn't working. V3 didn't work. V3.1 was catastrophically not working. V3.2 is in production now, so if you're waiting on a pre-order, don't worry, you'll still get it. It's just taking a little longer. Come ask about it on [Discord](https://discord.gg/XDXkhQd8bC).
+Everything is printed in PPA-CF: a high temperature nylon full of chopped carbon fiber. The spool calls for a 300 to 320 °C nozzle, and the fiber is abrasive enough to chew through brass, so it needs a hardened nozzle. In exchange it's extremely stiff, much closer to a metal part than to PLA in the hand. The trade-off is brittleness: it would rather crack than bend. You usually only get that stiffness from something like PEEK, and PPA-CF gets surprisingly close on a regular printer. It took a couple of rounds of reprints, mostly because the first motor mounts were simply the wrong size and had to be redesigned.
 
-### Two brains
+![A folded leg: SG90, end stop, motor and prop, all on PPA-CF parts](./leg-motor.jpg)
 
-The walking side of the robot runs separately from the flying side. A Lolin S2 Mini, which is basically a standard ESP32, runs the legs and the face, and the all-in-one controller flies. Keeping the two brains completely separate was really important: if one fails, the other doesn't. If it falls out of the air, maybe it can still walk after it lands. If it stops walking, maybe it can still fly out of the situation.
+## The carbon fiber plate
 
-![Two brains: the ESP32 walks, the flight controller flies](./two-brains.mp4)
+The structure everything bolts to is a carbon fiber plate, cut from sheet with hex pockets to take the weight out. A printed plate would flex, and a flexy frame means more vibration reaching the IMU and a twitchier flight.
 
-Fun fact: I did try running the ESCs from the ESP32 at first. It ran out of hardware timers, and the Wi-Fi controller just died.
+> [!SPONSOR] makera
+> This build was sponsored by Makera. Their desktop CNC, the Makera Z1, cut the carbon fiber plate. It's fully enclosed, measures the stock and levels itself, has quick tool changes, and Makera Studio handles both the toolpaths and the machine control, so I went straight from the Fusion model to cutting. Carving carbon fiber gives parts that are stiffer and cleaner than anything I can print, which is exactly what a drone frame wants.
+>
+> ![Makera](./makera-logo.png)
 
-### 264 grams
+![The CNC cut carbon fiber plate with its hex pockets](./cf-plate.jpg)
 
-Finally putting it on the scale: 264 grams. That's 14 grams over budget, which makes that already thin margin a little thinner. But you know what? Good enough. I can just send it full throttle. Surely that'll work perfectly fine and nothing bad will happen. (Remember the thrust widget? The "+14 g over budget" button does exactly this.)
+## Firmware changes for flight
 
-![The weigh-in](./weigh-in.mp4)
+The walking side runs a fork of the Sesame firmware. Most of it is unchanged; the changes are about not destroying the robot.
 
-I also updated the controller app. Drone mode folds the legs out flat and blocks every input, so a stray thumb can't unfold a leg mid-flight, which would end in catastrophe. And any emote that swings a leg up past the stops got removed from the firmware, just in case I accidentally hit the worm emote and things got a little gnarly.
+**Culled emotes.** Several of Sesame's emotes swing a foot up past its midpoint, which in drone mode means straight through a prop or into the frame. Those are gone:
 
-![Drone mode in the app: legs locked, flight interlock on](./drone-mode-lock.mp4)
+```cpp
+// Note: Emotes that moved R4, R3, L3, or L4 above midpoint (>90 deg for L3/R4,
+// <90 deg for R3/L4) have been culled for Sesame Drone flight clearance:
+// wave, dance, point, cute, freaky, worm, shrug.
+```
 
-## Flight testing
+**A smoother trot.** The walk is a trot: diagonal pairs (R1 with L2, L1 with R2) swing forward while the other pair pushes, four keyframes at 100 ms each, with a slightly longer stride on the front legs:
 
-With the V2 prototype finally together, it was time to actually test it. First stop: the garage. Soft rubber floor, lots of room, and nothing too expensive to crash into.
+```cpp
+// movement-sequences.h, runWalkPose()
+while (currentCommand == "forward") {
+  // A swings forward while grounded B pushes the body forward
+  setServoAngle(R1, 170); setServoAngle(L2, 106);
+  setServoAngle(L1, 78);  setServoAngle(R2, 18);
+  if (!pressingCheck("forward", frameDelay)) return;
 
-![The garage tests went great](./garage-crash.mp4)
+  // A lands while B lifts
+  setServoAngle(R3, 171); setServoAngle(L4, 176);
+  setServoAngle(L3, 38);  setServoAngle(R4, 42);
+  if (!pressingCheck("forward", frameDelay)) return;
 
-It took a few tries, but it flew: a wobbly hop, then a low hover. As cool as that is, the real goal was always to walk, take off, land, and then walk again. That's what proves it's really multi-terrain. If Sesame Drone could do that without breaking itself, I'd call it a wild success.
+  // B swings forward while grounded A pushes, then B lands while A lifts
+  // ...
+}
+```
 
-## The real test
+**Staggered servo writes.** Eight servos starting at once is a big current spike on the 5 V rail. Every write waits `motorCurrentDelay` (20 ms by default, adjustable from the web settings) before the next one:
 
-So I headed out to the backyard. The plan: walk toward the camera, do an emote, switch to drone mode, take off, and no guarantees after that.
+```cpp
+void setServoAngle(uint8_t channel, int angle) {
+  if (channel < 8) {
+    int adjustedAngle = constrain(angle + servoSubtrim[channel], 0, 180);
+    servos[channel].write(adjustedAngle);
+    delayWithFace(motorCurrentDelay);
+  }
+}
+```
 
-It walked, folded, spun up and took off. Then I landed pretty hard and broke one of the legs, and it unfolded anyway and walked again, limping. Technically, that's the whole checklist.
+**A flight interlock in the controller page.** Drone mode puts the robot in the drone pose and covers the whole controller with a lock screen. Every input is blocked until you slide to unlock, so a stray thumb can't unfold a leg mid-flight:
 
-![After a hard landing and a broken leg: it unfolds and walks again](./walk-again.mp4)
+```js
+function canSendCommand() {
+  return !isDroneMode && commandQueue < MAX_COMMANDS;
+}
 
-I kept flying it. It crashed under the patio furniture, it rocketed into the bushes, and every time I picked it up it was barely broken. The carbon fiber frame held up through all of it.
+function enterDroneMode() {
+  if (isDroneMode) return;
+  isDroneMode = true;
+  fetch('/cmd?pose=drone');
+  document.getElementById('droneLockOverlay').style.display = 'flex';
+}
+```
+
+![The controller's flight interlock](./app-interlock.jpg)
+
+One honest caveat: that lock lives in the controller page. The ESP32 itself will still accept a command from anything that sends one. Moving the interlock into the firmware is the first thing on my list below.
+
+## How the 3D model on this page works
+
+The model comes from a Fusion 360 export: 97 parts and 74 joints as OBJ files, 467 MB in total. A small converter script on this site drops the screws, removes the duplicate bodies the export flattens into the root component, simplifies every part, and writes a 273 KB compressed glTF with progressive detail levels.
+
+The export's joint data turned out to be unusable (the joint origins come out in mixed coordinate frames), so the pivots are derived from the servos instead. Every SG90 in the assembly is the same vendor part, and in that part's own frame the output shaft sits at $$(-5.18, y, 0)$$ mm and points along $$+y$$. Running that through each servo's world transform from the export gives the real shaft positions:
+
+```ts
+// shaft = M · (-5.18 mm, 0, 0), axis = M · (0, 1, 0), M = the servo's world transform
+{ id: 'FL', hip: mm(1.49, 16.82, -23.02), knee: mm(-30.07, 15.42, -43.47),
+  kneeAxis: new THREE.Vector3(D, 0, -D), motor: mm(-52.26, 27.92, -60.93) },
+```
+
+The hip axes come out vertical and the knee axes come out level at exactly 45 degrees, which is a good sign the method is right. In the widget, each foot group turns about its knee axis, the props spin about the motor axes, the robot stands on the lowest point of whatever pose it's in, and the thrust arrows measure their tilt against the body's own up vector. The same rig runs this project's square on the home page.
+
+## Test results
+
+| Test | What happened |
+|---|---|
+| Prototype one | Flew briefly, then crashed. Enough to prove the concept. |
+| Version two, garage | A few crashes on the rubber floor, then a low, wobbly hover. |
+| Version two, backyard | Walked, switched to drone mode, took off, landed hard and broke a leg, then unfolded and walked away. |
+| Later backyard flights | Hovered with the legs no longer symmetric, survived crashes under furniture and into bushes, and the last flight landed at my feet. |
 
 ![A low hover just off the ground](./hover.mp4)
 
-![The last flight of the day](./final-liftoff.mp4)
+![After a hard landing broke a leg: unfold and walk again](./walk-again.mp4)
 
-The most interesting thing I noticed: after the crashes the legs weren't symmetric anymore, and you'd think that would stop it from flying. It still hovered just fine. On the last flight of the day it flew low across the patio and landed right at my feet.
+The goal was walk, take off, land, walk again, and it did that. It's a fully flying quadruped: you can go from flying to walking just by landing somewhere.
 
-That's a fully flying quadruped robot. You can go from flying to walking just by landing somewhere. I'd call that a success.
+## What I'd change next
+
+- **Interlock in firmware.** The ESP32 should refuse leg moves in drone mode, not just the controller page.
+- **Let the brains talk, a little.** One signal from the flight controller saying "armed" would let the walking side lock the legs automatically. Keeping it to one wire keeps most of the fault isolation.
+- **More thrust margin.** Everything about the flight comes back to being only a little above one to one. More thrust per gram, or less mass, would make it fly like a drone instead of hovering like a hopeful one.
+- **A proper board.** This build uses the hand-wired harness from a regular Sesame. The Sesame Distro Board V3.2 is in production, and a version laid out for the drone would clean up the inside a lot.
 
 ## Build your own Sesame
 
-Sesame is 100% open source: the CAD, the STLs, the firmware and the build guides are all on [GitHub](https://github.com/dorianborian/sesame-robot), and the [Sesame page](/sesame) has everything you need to build the walking version. If you'd rather skip sourcing parts, [build kits](/sesame/kit) come back when a production round opens. There's an email list on that page that'll let you know when I restock. Eventually. Hopefully. Someday, I swear.
-
-If you build one, or try to make yours fly, come show it off on [Discord](https://discord.gg/XDXkhQd8bC).
+Sesame is 100% open source: the CAD, STLs, firmware and build guides are on [GitHub](https://github.com/dorianborian/sesame-robot), and the [Sesame page](/sesame) covers building the walking version. [Build kits](/sesame/kit) come back when a production round opens. If you try to make yours fly, come show it off on [Discord](https://discord.gg/XDXkhQd8bC).

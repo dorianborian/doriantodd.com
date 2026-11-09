@@ -668,6 +668,10 @@ cad-viewer { display: block; position: relative; aspect-ratio: 4 / 3; min-height
 .fb-legend span::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--c); margin-right: 5px; }
 .fb-hint { position: absolute; right: 14px; bottom: 12px; font: 10.5px var(--mono); color: var(--text-3); }
 
+/* math: $$...$$ in Markdown, rendered at build time to native MathML */
+.prose math { font-size: 1.08em; }
+.prose math[display="block"] { margin: 1.3em 0; padding: 0.4em 0; overflow-x: auto; overflow-y: hidden; font-size: 1.2em; }
+
 /* Sesame Drone header: the posable rig */
 .sheet-view .widget-hero.sd-hero { background: radial-gradient(ellipse at 55% 40%, #1c2331 0%, #121318 72%); }
 .sd-stage { position: absolute; inset: 0; }
