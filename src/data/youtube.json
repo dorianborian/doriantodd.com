@@ -1,9 +1,9 @@
 {
  "channel": {
   "url": "https://www.youtube.com/@DorianToddYT",
-  "subscribers": "25.3K",
-  "videos": "46",
-  "checked": "2026-10-24"
+  "subscribers": "25.8K",
+  "videos": "47",
+  "checked": "2026-11-09"
  },
  "videos": {
   "WrQNBdtGT8g": {
@@ -139,6 +139,15 @@
    "uploadDate": "2026-03-24T20:14:14-07:00",
    "seconds": 985,
    "views": 13124,
+   "channel": "Dorian Todd"
+  },
+  "9K6GmO5QFN4": {
+   "id": "9K6GmO5QFN4",
+   "title": "I Built a Drone That Can Transform into a Walking Robot",
+   "description": "What if my tiny walking robot could transform into a fully functioning drone? Well, I tried just that, and I converted Sesame into a fully functional quadcopter drone. In this video, I walk you through the build process, the design challenges I faced, and the engineering principles that made this miniature flight possible.\n\nThis video is sponsored by MAKERA. \nCarvera $4,799 | Air $1,999 | Z1 $1,249 | Z1 Pro $1,649\nDirect Drop +  10% off accessories + Free-order draw + Early shipping!\nClick my link here to get the best deal: https://makerainc.sjv.io/k4J6vn\n\nInterested in Sesame? Learn more on m",
+   "uploadDate": "2026-11-08T16:15:04-08:00",
+   "seconds": 881,
+   "views": 697,
    "channel": "Dorian Todd"
   }
  }

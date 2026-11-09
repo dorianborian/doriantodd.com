@@ -27,11 +27,11 @@ faq:
     a: "Yes. Every hole gets its own wall, and in a part filled with 15 percent infill and 0.9 mm walls, a round hole has to be more than about 21 mm across before the infill it removes outweighs the new wall. Hex holes save weight in thin shells that are all wall, not in chunky infilled parts."
 ---
 
-Sesame Drone walks somewhere on its legs, folds them out flat into propeller arms, takes off, lands, and walks away again. It's built on [Sesame](/sesame), my open source quadruped. There's a video about the build that tells the story; this page is the engineering side of it: the numbers, the mechanism, the firmware, and what I'd change.
+Sesame Drone walks somewhere on its legs, folds them out flat into propeller arms, takes off, lands, and walks away again. It's built on [Sesame](/sesame), my open source quadruped. The video tells the story of the build; this page is the engineering side of it: the numbers, the mechanism, the firmware, and what I'd change.
 
-![Walk, drone mode, take off](./walk-fold-fly.mp4)
+https://youtu.be/9K6GmO5QFN4
 
-The model at the top of the page is the real Fusion 360 assembly, rigged on the actual servo shafts. You can drive it through the same sequence or pose it by hand, and its thrust arrows show the one idea this whole design hangs on. The last section explains how it was built.
+The model at the top of the page is the real Fusion 360 assembly, rigged on the actual servo shafts. You can drive it through the same sequence or pose it by hand, and its thrust arrows show the one idea this whole design hangs on. [How the 3D model works](#how-the-3d-model-on-this-page-works) explains how it was built.
 
 ## Specs
 
@@ -309,11 +309,13 @@ The hip axes come out vertical and the knee axes come out level at exactly 45 de
 | Version two, backyard | Walked, switched to drone mode, took off, landed hard and broke a leg, then unfolded and walked away. |
 | Later backyard flights | Hovered with the legs no longer symmetric, survived crashes under furniture and into bushes, and the last flight landed at my feet. |
 
+![Walk, drone mode, take off](./walk-fold-fly.mp4)
+
+The goal was walk, take off, land, walk again, and it did that. It's a fully flying quadruped: you can go from flying to walking just by landing somewhere.
+
 ![A low hover just off the ground](./hover.mp4)
 
 ![After a hard landing broke a leg: unfold and walk again](./walk-again.mp4)
-
-The goal was walk, take off, land, walk again, and it did that. It's a fully flying quadruped: you can go from flying to walking just by landing somewhere.
 
 ## What I'd change next
 
